@@ -497,7 +497,7 @@ async function main() {
                 category: detected.category,
                 tags: detected.tags,
                 team: detected.mainTeam,
-                pubDate: item.pubDate,
+                pubDate: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 url: `/artigos/${slug}.html`,
             };
