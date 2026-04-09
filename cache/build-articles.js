@@ -598,9 +598,15 @@ async function publishToWordPress(article) {
                 try {
                     const post = JSON.parse(data);
                     if (post.id) {
-                        // Add internal links after publish (need other post URLs)
+                        // Upload featured image if available
+                        if (article.image && article.image.startsWith('/artigos/img/')) {
+                            const imgPath = path.join(__dirname, '..', article.image);
+                            if (fs.existsSync(imgPath)) {
+                                uploadFeaturedImage(post.id, imgPath, article.slug + '.jpg', article.rewrittenTitle);
+                            }
+                        }
+                        // Add internal links
                         addInternalLinks(post.id, categoryId);
-                        // Set featured image alt text
                         resolve(post.link || `Post #${post.id}`);
                     } else {
                         console.log(`  [WP] Error: ${post.message || 'unknown'}`);
@@ -615,6 +621,73 @@ async function publishToWordPress(article) {
         req.write(postData);
         req.end();
     });
+}
+
+// Upload featured image to WordPress and set as post thumbnail
+function uploadFeaturedImage(postId, imagePath, filename, altText) {
+    const imageData = fs.readFileSync(imagePath);
+
+    const uploadReq = https.request({
+        hostname: 'admin.papodebola.com.br',
+        path: '/wp-json/wp/v2/media',
+        method: 'POST',
+        headers: {
+            'Authorization': WP_AUTH,
+            'Content-Type': 'image/jpeg',
+            'Content-Disposition': `attachment; filename="${filename}"`,
+            'Content-Length': imageData.length,
+        },
+        rejectUnauthorized: false,
+    }, uploadRes => {
+        let d = '';
+        uploadRes.on('data', c => d += c);
+        uploadRes.on('end', () => {
+            try {
+                const media = JSON.parse(d);
+                if (media.id) {
+                    // Set as featured image
+                    const updateData = JSON.stringify({ featured_media: media.id });
+                    const setReq = https.request({
+                        hostname: 'admin.papodebola.com.br',
+                        path: `/wp-json/wp/v2/posts/${postId}`,
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': WP_AUTH,
+                            'Content-Type': 'application/json',
+                            'Content-Length': Buffer.byteLength(updateData),
+                        },
+                        rejectUnauthorized: false,
+                    }, () => {});
+                    setReq.on('error', () => {});
+                    setReq.write(updateData);
+                    setReq.end();
+
+                    // Set alt text
+                    const altData = JSON.stringify({ alt_text: altText + ' - Papo de Bola' });
+                    const altReq = https.request({
+                        hostname: 'admin.papodebola.com.br',
+                        path: `/wp-json/wp/v2/media/${media.id}`,
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': WP_AUTH,
+                            'Content-Type': 'application/json',
+                            'Content-Length': Buffer.byteLength(altData),
+                        },
+                        rejectUnauthorized: false,
+                    }, () => {});
+                    altReq.on('error', () => {});
+                    altReq.write(altData);
+                    altReq.end();
+
+                    console.log(`  [WP] Featured image #${media.id} set for post #${postId}`);
+                }
+            } catch {}
+        });
+    });
+    uploadReq.on('error', () => {});
+    uploadReq.setTimeout(60000, () => uploadReq.destroy());
+    uploadReq.write(imageData);
+    uploadReq.end();
 }
 
 // Add "Leia também" internal links section to a post
