@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Acompanhe jogos, tabela de classificação, resultados e artilharia do campeonato.">
+    <meta name="robots" content="index, follow">
+    <title>Campeonato - Papo de Bola</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .champ-hero {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-accent) 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 40px 0;
+        }
+        .champ-hero-content { display: flex; align-items: center; gap: 24px; }
+        .champ-logo {
+            width: 80px; height: 80px; background: var(--bg-accent); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 36px;
+            color: var(--accent-green); border: 2px solid var(--border-color); flex-shrink: 0;
+        }
+        .champ-info h1 { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+        .champ-info .champ-meta { font-size: 14px; color: var(--text-muted); }
+        .champ-tabs {
+            display: flex; gap: 0; background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color); overflow-x: auto;
+        }
+        .champ-tab {
+            padding: 16px 28px; font-size: 14px; font-weight: 600;
+            color: var(--text-muted); border-bottom: 2px solid transparent;
+            white-space: nowrap; transition: var(--transition);
+        }
+        .champ-tab:hover { color: var(--text-primary); }
+        .champ-tab.active { color: var(--accent-green); border-bottom-color: var(--accent-green); }
+        .champ-content { padding: 30px 0 60px; }
+        .champ-tab-panel { display: none; }
+        .champ-tab-panel.active { display: block; }
+
+        .standings-full {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); overflow: hidden;
+        }
+        .standings-full table { width: 100%; border-collapse: collapse; }
+        .standings-full th {
+            font-size: 11px; font-weight: 700; text-transform: uppercase;
+            color: var(--text-muted); padding: 12px 14px; text-align: center;
+            background: var(--bg-accent); border-bottom: 1px solid var(--border-color);
+        }
+        .standings-full th:first-child, .standings-full th:nth-child(2) { text-align: left; }
+        .standings-full td {
+            font-size: 13px; padding: 12px 14px; text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .standings-full td:first-child { text-align: center; font-weight: 700; width: 40px; }
+        .standings-full td:nth-child(2) { text-align: left; }
+        .standings-full tr:hover { background: var(--bg-card-hover); }
+        .standings-full .team-cell { display: flex; align-items: center; gap: 10px; }
+        .standings-full .team-cell img { width: 22px; height: 22px; object-fit: contain; }
+        .standings-full .pts-col { font-weight: 800; color: var(--accent-green); font-size: 14px; }
+        .pos-zone { width: 4px; height: 24px; border-radius: 2px; display: inline-block; margin-right: 8px; }
+        .zone-lib { background: var(--accent-green); }
+        .zone-sula { background: var(--accent-blue); }
+        .zone-reb { background: var(--accent-red); }
+
+        .standings-legend {
+            display: flex; gap: 24px; padding: 16px 20px;
+            border-top: 1px solid var(--border-color); flex-wrap: wrap;
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
+        .legend-color { width: 12px; height: 12px; border-radius: 3px; }
+
+        .round-header {
+            font-size: 14px; font-weight: 600; color: var(--text-secondary);
+            padding: 10px 16px; background: var(--bg-accent);
+            border: 1px solid var(--border-color); border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+            margin-top: 16px;
+        }
+        .round-matches {
+            border: 1px solid var(--border-color); border-top: none;
+            border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+        }
+        .champ-info-stats {
+            display: flex; gap: 24px; margin-top: 10px; flex-wrap: wrap;
+        }
+        .champ-stat { font-size: 13px; color: var(--text-secondary); }
+        .champ-stat strong { color: var(--accent-green); }
+
+        @media (max-width: 768px) {
+            .champ-hero-content { flex-direction: column; text-align: center; }
+            .champ-info h1 { font-size: 22px; }
+            .standings-full { overflow-x: auto; }
+            .standings-full table { min-width: 600px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-top">
+            <div class="container">
+                <div class="header-top-content">
+                    <div class="logo">
+                        <a href="../index.html">
+                            <i class="fas fa-futbol logo-icon"></i>
+                            <span class="logo-text">PAPO<span class="logo-accent">DE BOLA</span></span>
+                        </a>
+                    </div>
+                    <div class="header-actions">
+                        <a href="../index.html" style="color:var(--text-secondary);font-size:14px">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="champ-hero">
+        <div class="container">
+            <div class="champ-hero-content">
+                <div class="champ-logo" id="champLogo"><i class="fas fa-trophy"></i></div>
+                <div class="champ-info">
+                    <h1 id="champName">Carregando...</h1>
+                    <div class="champ-meta" id="champMeta"></div>
+                    <div class="champ-info-stats" id="champStats"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="champ-tabs">
+        <div class="container" style="display:flex;gap:0">
+            <button class="champ-tab active" data-tab="matches"><i class="fas fa-calendar"></i> Jogos</button>
+            <button class="champ-tab" data-tab="standings"><i class="fas fa-list-ol"></i> Classificação</button>
+            <button class="champ-tab" data-tab="scorers"><i class="fas fa-futbol"></i> Estatísticas</button>
+        </div>
+    </div>
+
+    <main class="champ-content">
+        <div class="container">
+            <div class="champ-tab-panel active" id="panel-matches">
+                <div id="matchesList">
+                    <div class="loading-state"><div class="spinner"></div><p>Carregando jogos...</p></div>
+                </div>
+            </div>
+            <div class="champ-tab-panel" id="panel-standings">
+                <div id="standingsContainer">
+                    <div class="loading-state"><div class="spinner"></div><p>Carregando classificação...</p></div>
+                </div>
+            </div>
+            <div class="champ-tab-panel" id="panel-scorers">
+                <div id="scorersContainer">
+                    <div class="loading-state"><div class="spinner"></div><p>Carregando estatísticas...</p></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom" style="border-top:none;padding-top:0">
+                <p>&copy; 2026 Papo de Bola. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        const ChampPage = {
+            tournamentId: null,
+            seasonId: null,
+            tournamentName: '',
+
+            async init() {
+                const params = new URLSearchParams(window.location.search);
+                this.tournamentId = parseInt(params.get('id'));
+                this.tournamentName = decodeURIComponent(params.get('name') || '');
+                const tab = params.get('tab');
+
+                // Find seasonId from config
+                const configTournament = CONFIG.TOURNAMENT_BY_ID[this.tournamentId];
+                this.seasonId = configTournament?.seasonId;
+
+                document.getElementById('champName').textContent = this.tournamentName || 'Campeonato';
+                document.title = `${this.tournamentName} - Papo de Bola`;
+
+                // If no seasonId, try to fetch it
+                if (!this.seasonId) {
+                    const seasons = await API.getTournamentSeasons(this.tournamentId);
+                    if (seasons.length > 0) {
+                        this.seasonId = seasons[0].id;
+                        document.getElementById('champMeta').textContent = seasons[0].name;
+                    }
+                } else if (configTournament) {
+                    document.getElementById('champMeta').textContent = `Temporada Atual`;
+                }
+
+                this.setupTabs();
+
+                if (tab) this.switchTab(tab);
+
+                // Load info + active tab
+                this.loadInfo();
+                this.loadActiveTabData();
+            },
+
+            setupTabs() {
+                document.querySelectorAll('.champ-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        this.switchTab(tab.dataset.tab);
+                        this.loadActiveTabData();
+                    });
+                });
+            },
+
+            switchTab(tabId) {
+                document.querySelectorAll('.champ-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.champ-tab-panel').forEach(p => p.classList.remove('active'));
+                const tab = document.querySelector(`.champ-tab[data-tab="${tabId}"]`);
+                if (tab) tab.classList.add('active');
+                const panel = document.getElementById(`panel-${tabId}`);
+                if (panel) panel.classList.add('active');
+            },
+
+            getActiveTab() {
+                return document.querySelector('.champ-tab.active')?.dataset.tab || 'matches';
+            },
+
+            loadActiveTabData() {
+                const tab = this.getActiveTab();
+                if (tab === 'matches') this.loadMatches();
+                else if (tab === 'standings') this.loadStandings();
+                else if (tab === 'scorers') this.loadScorers();
+            },
+
+            async loadInfo() {
+                if (!this.seasonId) return;
+                const info = await API.getTournamentInfo(this.tournamentId, this.seasonId);
+                if (info) {
+                    const statsEl = document.getElementById('champStats');
+                    const parts = [];
+                    if (info.goals) parts.push(`<span class="champ-stat"><strong>${info.goals}</strong> Gols</span>`);
+                    if (info.numberOfCompetitors) parts.push(`<span class="champ-stat"><strong>${info.numberOfCompetitors}</strong> Times</span>`);
+                    if (info.hostCountries) parts.push(`<span class="champ-stat">${info.hostCountries.map(c=>c.name).join(', ')}</span>`);
+                    statsEl.innerHTML = parts.join('');
+                }
+            },
+
+            async loadMatches() {
+                const container = document.getElementById('matchesList');
+                if (!this.seasonId) {
+                    container.innerHTML = '<div class="no-matches"><i class="fas fa-calendar-times"></i><p>Temporada não encontrada.</p></div>';
+                    return;
+                }
+
+                // Load last and next events
+                const [lastEvents, nextEvents] = await Promise.all([
+                    API.getTournamentLastEvents(this.tournamentId, this.seasonId, 0),
+                    API.getTournamentNextEvents(this.tournamentId, this.seasonId, 0),
+                ]);
+
+                const allEvents = [...lastEvents, ...nextEvents];
+
+                if (allEvents.length === 0) {
+                    container.innerHTML = '<div class="no-matches"><i class="fas fa-calendar-times"></i><p>Nenhum jogo encontrado.</p></div>';
+                    return;
+                }
+
+                // Group by round
+                const rounds = {};
+                allEvents.forEach(e => {
+                    const round = e.roundInfo?.round ? `Rodada ${e.roundInfo.round}` : (e.roundInfo?.name || 'Fase');
+                    if (!rounds[round]) rounds[round] = [];
+                    rounds[round].push(e);
+                });
+
+                let html = '';
+                // Sort rounds (newest first for results, then upcoming)
+                Object.entries(rounds).forEach(([round, events]) => {
+                    html += `<div class="round-header">${round}</div><div class="round-matches">`;
+                    events.forEach(e => {
+                        const normalized = API.normalizeEvent(e);
+                        html += this.renderMatchCard(normalized);
+                    });
+                    html += '</div>';
+                });
+
+                container.innerHTML = html;
+            },
+
+            renderMatchCard(game) {
+                const isLive = game.status === 'live' || game.status === 'halftime';
+                const isFinished = game.status === 'finished';
+
+                let statusHtml = '';
+                if (game.status === 'halftime') statusHtml = '<span class="match-status halftime">INT</span>';
+                else if (isLive) statusHtml = `<span class="match-status live"><span class="live-dot"></span> ${game.minute || 'AO VIVO'}</span>`;
+                else if (isFinished) statusHtml = `<span class="match-status finished">${game.statusText || 'FIM'}</span>`;
+
+                const homeLogo = game.homeLogo ? `<img class="match-team-logo" src="${game.homeLogo}" alt="" loading="lazy" onerror="this.style.display='none'">` : '<span class="match-team-logo-placeholder"><i class="fas fa-shield-alt"></i></span>';
+                const awayLogo = game.awayLogo ? `<img class="match-team-logo" src="${game.awayLogo}" alt="" loading="lazy" onerror="this.style.display='none'">` : '<span class="match-team-logo-placeholder"><i class="fas fa-shield-alt"></i></span>';
+
+                return `
+                    <div class="match-card ${isLive ? 'is-live' : ''}">
+                        <div class="match-team home">${homeLogo}<span>${game.homeTeam}</span></div>
+                        <div class="match-center">
+                            ${(isLive || isFinished)
+                                ? `<span class="match-score">${game.homeScore} - ${game.awayScore}</span>`
+                                : `<span class="match-time">${game.time}</span>`
+                            }
+                            ${statusHtml}
+                        </div>
+                        <div class="match-team away"><span>${game.awayTeam}</span>${awayLogo}</div>
+                        <div class="match-actions"></div>
+                    </div>
+                `;
+            },
+
+            async loadStandings() {
+                const container = document.getElementById('standingsContainer');
+                if (!this.seasonId) {
+                    container.innerHTML = '<div class="no-matches"><p>Classificação indisponível.</p></div>';
+                    return;
+                }
+
+                const standings = await API.getStandings(this.tournamentId, this.seasonId);
+
+                if (!standings || standings.length === 0) {
+                    container.innerHTML = '<div class="no-matches"><i class="fas fa-list"></i><p>Classificação não disponível para este campeonato.</p></div>';
+                    return;
+                }
+
+                const isBrasileirao = [325, 390].includes(this.tournamentId);
+
+                // Handle multiple groups
+                let html = '';
+                standings.forEach((group, gi) => {
+                    if (standings.length > 1) {
+                        const groupName = group.name || group.rows?.[0]?.group || `Grupo ${String.fromCharCode(65 + gi)}`;
+                        html += `<h3 style="margin:20px 0 12px;font-size:16px;color:var(--text-primary)">${groupName}</h3>`;
+                    }
+                    html += this.renderStandingsTable(group.rows || [], isBrasileirao);
+                });
+
+                container.innerHTML = html;
+            },
+
+            renderStandingsTable(rows, showZones) {
+                let html = `
+                    <div class="standings-full"><table>
+                        <thead><tr>
+                            <th>#</th><th>Time</th><th>P</th><th>J</th>
+                            <th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th><th>SG</th><th>%</th>
+                        </tr></thead><tbody>
+                `;
+
+                rows.forEach((r, i) => {
+                    const pos = i + 1;
+                    const played = r.matches || 0;
+                    const pts = r.points || 0;
+                    const pct = played > 0 ? ((pts / (played * 3)) * 100).toFixed(0) : 0;
+                    const gd = r.scoreDiffFormatted || (r.scoresFor - r.scoresAgainst) || 0;
+
+                    let zone = '';
+                    if (showZones) {
+                        if (pos <= 4) zone = 'zone-lib';
+                        else if (pos <= 6) zone = 'zone-sula';
+                        else if (pos >= 17 && rows.length >= 20) zone = 'zone-reb';
+                    }
+
+                    const teamImg = r.team?.id ? `<img src="https://api.sofascore.app/api/v1/team/${r.team.id}/image" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
+
+                    html += `
+                        <tr>
+                            <td>${zone ? `<span class="pos-zone ${zone}"></span>` : ''}${pos}</td>
+                            <td><div class="team-cell">${teamImg} ${r.team?.name || ''}</div></td>
+                            <td class="pts-col">${pts}</td>
+                            <td>${played}</td>
+                            <td>${r.wins || 0}</td>
+                            <td>${r.draws || 0}</td>
+                            <td>${r.losses || 0}</td>
+                            <td>${r.scoresFor || 0}</td>
+                            <td>${r.scoresAgainst || 0}</td>
+                            <td style="font-weight:600">${gd > 0 ? '+' : ''}${gd}</td>
+                            <td>${pct}%</td>
+                        </tr>
+                    `;
+                });
+
+                html += '</tbody></table>';
+
+                if (showZones) {
+                    html += `
+                        <div class="standings-legend">
+                            <div class="legend-item"><span class="legend-color" style="background:var(--accent-green)"></span>Libertadores</div>
+                            <div class="legend-item"><span class="legend-color" style="background:var(--accent-blue)"></span>Sul-Americana</div>
+                            <div class="legend-item"><span class="legend-color" style="background:var(--accent-red)"></span>Rebaixamento</div>
+                        </div>
+                    `;
+                }
+
+                html += '</div>';
+                return html;
+            },
+
+            async loadScorers() {
+                const container = document.getElementById('scorersContainer');
+                if (!this.seasonId) {
+                    container.innerHTML = '<div class="no-matches"><p>Estatísticas indisponíveis.</p></div>';
+                    return;
+                }
+
+                const stats = await API.getStatistics(this.tournamentId, this.seasonId);
+
+                if (!stats || stats.length === 0) {
+                    container.innerHTML = '<div class="no-matches"><i class="fas fa-futbol"></i><p>Estatísticas não disponíveis.</p></div>';
+                    return;
+                }
+
+                // Render all stat categories
+                let html = '';
+                stats.forEach(category => {
+                    const catName = category.name || 'Estatística';
+                    const players = category.players || [];
+                    if (players.length === 0) return;
+
+                    html += `<h3 style="margin:20px 0 12px;font-size:16px;color:var(--accent-green)">${catName}</h3>`;
+                    html += '<div class="standings-full"><table><thead><tr><th>#</th><th>Jogador</th><th>Time</th><th>Total</th></tr></thead><tbody>';
+
+                    players.slice(0, 20).forEach((item, i) => {
+                        const p = item.player || {};
+                        const t = item.team || {};
+                        const val = item.statistics?.goals || item.statistics?.assists || item.statistics?.rating?.toFixed(2) || item.statistics?.yellowCards || item.statistics?.cleanSheet || '?';
+                        const playerImg = p.id ? `<img src="https://api.sofascore.app/api/v1/player/${p.id}/image" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:cover" loading="lazy" onerror="this.style.display='none'">` : '';
+                        const teamImg = t.id ? `<img src="https://api.sofascore.app/api/v1/team/${t.id}/image" alt="" style="width:18px;height:18px" loading="lazy" onerror="this.style.display='none'">` : '';
+
+                        html += `
+                            <tr>
+                                <td style="font-weight:800;color:${i < 3 ? 'var(--accent-yellow)' : 'var(--text-muted)'}">${i + 1}</td>
+                                <td><div class="team-cell">${playerImg} ${p.name || p.shortName || '?'}</div></td>
+                                <td><div class="team-cell">${teamImg} ${t.name || t.shortName || ''}</div></td>
+                                <td class="pts-col">${val}</td>
+                            </tr>
+                        `;
+                    });
+
+                    html += '</tbody></table></div>';
+                });
+
+                container.innerHTML = html || '<div class="no-matches"><p>Sem dados estatísticos.</p></div>';
+            },
+        };
+
+        document.addEventListener('DOMContentLoaded', () => ChampPage.init());
+    </script>
+</body>
+</html>

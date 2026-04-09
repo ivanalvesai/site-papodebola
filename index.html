@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Papo de Bola - Assista jogos de futebol ao vivo, acompanhe placares em tempo real, tabelas e classificações do Brasileirão, Copa do Brasil, Libertadores, Champions League e mais.">
+    <meta name="keywords" content="futebol ao vivo, jogos ao vivo, brasileirão, copa do brasil, libertadores, champions league, placar ao vivo, tabela brasileirão, futebol online">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Papo de Bola">
+    <meta property="og:title" content="Papo de Bola - Futebol Ao Vivo, Placares e Tabelas">
+    <meta property="og:description" content="Assista jogos de futebol ao vivo com múltiplas opções de transmissão. Placares em tempo real, tabelas e classificações.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta name="twitter:card" content="summary_large_image">
+    <title>Papo de Bola - Futebol Ao Vivo | Placares | Tabelas | Classificações</title>
+    <link rel="canonical" href="https://papodebola.com/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Papo de Bola",
+        "url": "https://papodebola.com",
+        "description": "Futebol ao vivo, placares em tempo real, tabelas e classificações",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://papodebola.com/busca?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="header-top">
+            <div class="container">
+                <div class="header-top-content">
+                    <div class="logo">
+                        <a href="/">
+                            <i class="fas fa-futbol logo-icon"></i>
+                            <span class="logo-text">PAPO<span class="logo-accent">DE BOLA</span></span>
+                        </a>
+                    </div>
+                    <div class="header-actions">
+                        <div class="search-box">
+                            <input type="text" id="searchInput" placeholder="Buscar time ou campeonato..." aria-label="Buscar">
+                            <button class="search-btn" aria-label="Buscar"><i class="fas fa-search"></i></button>
+                        </div>
+                        <button class="admin-toggle" id="adminToggle" title="Painel Admin">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
+                            <span></span><span></span><span></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav class="main-nav" id="mainNav">
+            <div class="container">
+                <ul class="nav-list">
+                    <li class="nav-item active">
+                        <a href="/" class="nav-link"><i class="fas fa-home"></i> Início</a>
+                    </li>
+                    <li class="nav-item has-dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-flag"></i> Brasil <i class="fas fa-chevron-down"></i></a>
+                        <div class="dropdown-menu mega-menu">
+                            <div class="mega-col">
+                                <h4>Campeonatos Nacionais</h4>
+                                <ul>
+                                    <li><a href="pages/campeonato.html?id=325&name=Brasileirão Série A">Brasileirão Série A</a></li>
+                                    <li><a href="pages/campeonato.html?id=390&name=Brasileirão Série B">Brasileirão Série B</a></li>
+                                    <li><a href="pages/campeonato.html?id=1281&name=Brasileirão Série C">Brasileirão Série C</a></li>
+                                    <li><a href="pages/campeonato.html?id=10326&name=Brasileirão Série D">Brasileirão Série D</a></li>
+                                    <li><a href="pages/campeonato.html?id=373&name=Copa do Brasil">Copa do Brasil</a></li>
+                                    <li><a href="pages/campeonato.html?id=1596&name=Copa do Nordeste">Copa do Nordeste</a></li>
+                                </ul>
+                            </div>
+                            <div class="mega-col">
+                                <h4>Campeonatos Estaduais</h4>
+                                <ul>
+                                    <li><a href="pages/campeonato.html?id=372&name=Campeonato Paulista">Campeonato Paulista</a></li>
+                                    <li><a href="pages/campeonato.html?id=92&name=Campeonato Carioca">Campeonato Carioca</a></li>
+                                    <li><a href="pages/campeonato.html?id=379&name=Campeonato Mineiro">Campeonato Mineiro</a></li>
+                                    <li><a href="pages/campeonato.html?id=377&name=Campeonato Gaúcho">Campeonato Gaúcho</a></li>
+                                    <li><a href="pages/campeonato.html?id=382&name=Campeonato Paranaense">Campeonato Paranaense</a></li>
+                                    <li><a href="pages/campeonato.html?id=380&name=Campeonato Pernambucano">Campeonato Pernambucano</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item has-dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-globe-americas"></i> Sul-Americano <i class="fas fa-chevron-down"></i></a>
+                        <div class="dropdown-menu">
+                            <ul>
+                                <li><a href="pages/campeonato.html?id=384&name=Copa Libertadores">Copa Libertadores</a></li>
+                                <li><a href="pages/campeonato.html?id=480&name=Copa Sudamericana">Copa Sudamericana</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="nav-item has-dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-globe-europe"></i> Europa <i class="fas fa-chevron-down"></i></a>
+                        <div class="dropdown-menu mega-menu">
+                            <div class="mega-col">
+                                <h4>Competições UEFA</h4>
+                                <ul>
+                                    <li><a href="pages/campeonato.html?id=7&name=Champions League">Champions League</a></li>
+                                    <li><a href="pages/campeonato.html?id=679&name=Europa League">Europa League</a></li>
+                                </ul>
+                            </div>
+                            <div class="mega-col">
+                                <h4>Ligas Nacionais</h4>
+                                <ul>
+                                    <li><a href="pages/campeonato.html?id=17&name=Premier League">Premier League</a></li>
+                                    <li><a href="pages/campeonato.html?id=8&name=La Liga">La Liga</a></li>
+                                    <li><a href="pages/campeonato.html?id=23&name=Serie A Itália">Serie A (Itália)</a></li>
+                                    <li><a href="pages/campeonato.html?id=35&name=Bundesliga">Bundesliga</a></li>
+                                    <li><a href="pages/campeonato.html?id=34&name=Ligue 1">Ligue 1</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item has-dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-trophy"></i> Mundial <i class="fas fa-chevron-down"></i></a>
+                        <div class="dropdown-menu">
+                            <ul>
+                                <li><a href="pages/campeonato.html?id=1&name=Copa do Mundo">Copa do Mundo</a></li>
+                                <li><a href="pages/campeonato.html?id=15&name=Mundial de Clubes">Mundial de Clubes</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#ao-vivo" class="nav-link live-link"><span class="live-dot"></span> AO VIVO</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Live Ticker Bar -->
+    <div class="ticker-bar" id="tickerBar">
+        <div class="container">
+            <div class="ticker-label"><span class="live-dot"></span> AO VIVO</div>
+            <div class="ticker-wrapper">
+                <div class="ticker-track" id="tickerTrack">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Featured Match / Hero -->
+            <section class="featured-section" id="featuredSection" style="display:none;">
+                <h2 class="section-title"><i class="fas fa-star"></i> Jogo em Destaque</h2>
+                <div class="featured-match" id="featuredMatch">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <div class="content-grid">
+                <!-- Left Column - Matches -->
+                <div class="content-main">
+                    <!-- Live Matches -->
+                    <section class="matches-section" id="ao-vivo">
+                        <h2 class="section-title">
+                            <span class="live-dot"></span> Jogos Ao Vivo
+                        </h2>
+                        <div class="matches-container" id="liveMatches">
+                            <div class="loading-state">
+                                <div class="spinner"></div>
+                                <p>Carregando jogos ao vivo...</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Today's Matches -->
+                    <section class="matches-section">
+                        <h2 class="section-title">
+                            <i class="fas fa-calendar-day"></i> Jogos de Hoje
+                            <span class="date-display" id="todayDate"></span>
+                        </h2>
+                        <div class="matches-filter">
+                            <button class="filter-btn active" data-filter="all">Todos</button>
+                            <button class="filter-btn" data-filter="brasil">Brasil</button>
+                            <button class="filter-btn" data-filter="europa">Europa</button>
+                            <button class="filter-btn" data-filter="sulamericano">Sul-Americano</button>
+                        </div>
+                        <div class="matches-container" id="todayMatches">
+                            <div class="loading-state">
+                                <div class="spinner"></div>
+                                <p>Carregando jogos...</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Tomorrow's Matches -->
+                    <section class="matches-section">
+                        <h2 class="section-title">
+                            <i class="fas fa-calendar-alt"></i> Jogos de Amanhã
+                        </h2>
+                        <div class="matches-container" id="tomorrowMatches">
+                            <div class="loading-state">
+                                <div class="spinner"></div>
+                                <p>Carregando jogos...</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Right Sidebar -->
+                <aside class="content-sidebar">
+                    <!-- Brasileirão Standings Widget -->
+                    <div class="sidebar-widget">
+                        <h3 class="widget-title">
+                            <i class="fas fa-list-ol"></i> Classificação - Brasileirão
+                        </h3>
+                        <div class="standings-mini" id="standingsBrasileirao">
+                            <div class="loading-state">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                        <a href="pages/campeonato.html?id=325&name=Brasileirão Série A&tab=standings" class="widget-link">Ver tabela completa <i class="fas fa-arrow-right"></i></a>
+                    </div>
+
+                    <!-- Top Scorers -->
+                    <div class="sidebar-widget">
+                        <h3 class="widget-title">
+                            <i class="fas fa-futbol"></i> Artilheiros - Brasileirão
+                        </h3>
+                        <div class="scorers-list" id="topScorers">
+                            <div class="loading-state">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Results -->
+                    <div class="sidebar-widget">
+                        <h3 class="widget-title">
+                            <i class="fas fa-history"></i> Últimos Resultados
+                        </h3>
+                        <div class="recent-results" id="recentResults">
+                            <div class="loading-state">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <!-- Admin Panel (Hidden by default) -->
+    <div class="admin-overlay" id="adminOverlay">
+        <div class="admin-panel" id="adminPanel">
+            <div class="admin-header">
+                <h2><i class="fas fa-cog"></i> Painel de Administração</h2>
+                <button class="admin-close" id="adminClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="add-game">Adicionar Jogo</button>
+                <button class="admin-tab" data-tab="manage-games">Gerenciar Jogos</button>
+                <button class="admin-tab" data-tab="settings">Configurações</button>
+            </div>
+            <div class="admin-content">
+                <!-- Add Game Tab -->
+                <div class="admin-tab-content active" id="tab-add-game">
+                    <form id="addGameForm">
+                        <div class="form-group">
+                            <label>Campeonato</label>
+                            <select id="gameLeague" required>
+                                <optgroup label="Brasil">
+                                    <option value="Brasileirão Série A">Brasileirão Série A</option>
+                                    <option value="Brasileirão Série B">Brasileirão Série B</option>
+                                    <option value="Copa do Brasil">Copa do Brasil</option>
+                                </optgroup>
+                                <optgroup label="Sul-Americano">
+                                    <option value="Copa Libertadores">Copa Libertadores</option>
+                                    <option value="Copa Sudamericana">Copa Sudamericana</option>
+                                </optgroup>
+                                <optgroup label="Europa">
+                                    <option value="Champions League">Champions League</option>
+                                    <option value="Europa League">Europa League</option>
+                                    <option value="Premier League">Premier League</option>
+                                    <option value="La Liga">La Liga</option>
+                                    <option value="Serie A Itália">Serie A (Itália)</option>
+                                    <option value="Bundesliga">Bundesliga</option>
+                                    <option value="Ligue 1">Ligue 1</option>
+                                </optgroup>
+                                <optgroup label="Estaduais">
+                                    <option value="Campeonato Paulista">Campeonato Paulista</option>
+                                    <option value="Campeonato Carioca">Campeonato Carioca</option>
+                                    <option value="Campeonato Mineiro">Campeonato Mineiro</option>
+                                    <option value="Campeonato Gaúcho">Campeonato Gaúcho</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Time da Casa</label>
+                                <input type="text" id="homeTeam" placeholder="Ex: Flamengo" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Time Visitante</label>
+                                <input type="text" id="awayTeam" placeholder="Ex: Corinthians" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Data</label>
+                                <input type="date" id="gameDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Horário</label>
+                                <input type="time" id="gameTime" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="gameStatus">
+                                <option value="scheduled">Agendado</option>
+                                <option value="live">Ao Vivo</option>
+                                <option value="finished">Encerrado</option>
+                            </select>
+                        </div>
+                        <div class="form-row" id="scoreRow" style="display:none;">
+                            <div class="form-group">
+                                <label>Placar Casa</label>
+                                <input type="number" id="homeScore" value="0" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Placar Visitante</label>
+                                <input type="number" id="awayScore" value="0" min="0">
+                            </div>
+                        </div>
+
+                        <!-- Embed Players -->
+                        <div class="form-group">
+                            <label>Links de Transmissão (Embeds)</label>
+                            <div class="embed-list" id="embedList">
+                                <div class="embed-item">
+                                    <span class="embed-label">Opção 1</span>
+                                    <input type="text" class="embed-url" placeholder="URL do embed (iframe src)" >
+                                    <input type="text" class="embed-name" placeholder="Nome (ex: HD, Narração BR)" >
+                                    <button type="button" class="embed-remove" title="Remover"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-add-embed" id="addEmbedBtn">
+                                <i class="fas fa-plus"></i> Adicionar Opção
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Destacar na Página Inicial?</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="gameFeatured">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Sim, destacar este jogo</span>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn-primary btn-full">
+                            <i class="fas fa-plus-circle"></i> Adicionar Jogo
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Manage Games Tab -->
+                <div class="admin-tab-content" id="tab-manage-games">
+                    <div class="managed-games-list" id="managedGamesList">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div class="admin-tab-content" id="tab-settings">
+                    <div class="settings-section-title"><i class="fas fa-key"></i> API</div>
+                    <div class="form-group">
+                        <label>API Key (RapidAPI - SportAPI)</label>
+                        <input type="text" id="apiKey" placeholder="Sua chave RapidAPI (x-rapidapi-key)">
+                        <small>Obtenha em <strong>rapidapi.com</strong> > SportAPI</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Atualização Automática (segundos)</label>
+                        <input type="number" id="refreshInterval" value="300" min="60" max="600">
+                        <small>Recomendado: 300s (5 min) para economizar requisições</small>
+                    </div>
+
+                    <hr class="settings-divider">
+
+                    <div class="settings-section-title"><i class="fas fa-user-shield"></i> Credenciais de Acesso</div>
+                    <div class="form-group">
+                        <label>Novo Usuário</label>
+                        <input type="text" id="settingsUsername" placeholder="Novo nome de usuário" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Senha Atual (obrigatório para alterar)</label>
+                        <input type="password" id="settingsCurrentPass" placeholder="Digite a senha atual" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Nova Senha</label>
+                        <input type="password" id="settingsNewPass" placeholder="Nova senha (mín. 6 caracteres)" autocomplete="off">
+                        <small>Deixe em branco para manter a senha atual</small>
+                    </div>
+
+                    <button class="btn-primary btn-full" id="saveSettings">
+                        <i class="fas fa-save"></i> Salvar Configurações
+                    </button>
+
+                    <button class="admin-logout-btn" onclick="Admin.handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i> Sair do Painel Admin
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-logo">
+                        <i class="fas fa-futbol logo-icon"></i>
+                        <span class="logo-text">PAPO<span class="logo-accent">DE BOLA</span></span>
+                    </div>
+                    <p class="footer-desc">Seu portal completo de futebol. Jogos ao vivo, placares em tempo real, tabelas e classificações dos principais campeonatos do Brasil e do mundo.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Brasil</h4>
+                    <ul>
+                        <li><a href="pages/campeonato.html?id=325&name=Brasileirão Série A">Brasileirão Série A</a></li>
+                        <li><a href="pages/campeonato.html?id=390&name=Brasileirão Série B">Brasileirão Série B</a></li>
+                        <li><a href="pages/campeonato.html?id=373&name=Copa do Brasil">Copa do Brasil</a></li>
+                        <li><a href="pages/campeonato.html?id=384&name=Copa Libertadores">Copa Libertadores</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Europa</h4>
+                    <ul>
+                        <li><a href="pages/campeonato.html?id=7&name=Champions League">Champions League</a></li>
+                        <li><a href="pages/campeonato.html?id=17&name=Premier League">Premier League</a></li>
+                        <li><a href="pages/campeonato.html?id=8&name=La Liga">La Liga</a></li>
+                        <li><a href="pages/campeonato.html?id=23&name=Serie A Itália">Serie A (Itália)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Informações</h4>
+                    <ul>
+                        <li><a href="#">Sobre Nós</a></li>
+                        <li><a href="#">Contato</a></li>
+                        <li><a href="#">Política de Privacidade</a></li>
+                        <li><a href="#">Termos de Uso</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Papo de Bola. Todos os direitos reservados.</p>
+                <p class="footer-disclaimer">Este site não hospeda nenhum conteúdo de vídeo. Todos os streams são fornecidos por terceiros.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
