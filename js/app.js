@@ -401,51 +401,29 @@ const App = {
     // ==================== SIDEBAR: TOP SCORERS ====================
     async loadTopScorers() {
         const container = document.getElementById('topScorers');
-        const t = CONFIG.TOURNAMENTS.BRASILEIRAO_A;
 
-        const stats = await API.getStatistics(t.id, t.seasonId);
+        // Read from consolidated cache
+        const cached = await API.fetchCache('scorers_brasileirao.json');
 
-        if (!stats || stats.length === 0) {
+        if (!cached?.topScorers || cached.topScorers.length === 0) {
             container.innerHTML = '<div class="no-matches"><p>Artilharia indisponível</p></div>';
             return;
         }
 
-        // Find the "goals" category
-        const goalsCategory = stats.find(s =>
-            s.name === 'Goals' || s.name === 'goals' || s.type === 'goals'
-        );
-
-        if (!goalsCategory) {
-            // Use first result that has player data
-            const first = stats[0];
-            if (first?.player) {
-                container.innerHTML = this.renderScorers(stats.slice(0, 8));
-            } else {
-                container.innerHTML = '<div class="no-matches"><p>Artilharia indisponível</p></div>';
-            }
-            return;
-        }
-
-        container.innerHTML = this.renderScorers(
-            (goalsCategory.players || goalsCategory.results || [goalsCategory]).slice(0, 8)
-        );
-    },
-
-    renderScorers(scorers) {
-        return scorers.map((item, i) => {
-            const player = item.player || item;
-            const team = item.team || player.team || {};
-            const goals = item.statistics?.goals || item.goals || item.statistics?.overall || '?';
+        container.innerHTML = cached.topScorers.slice(0, 8).map((item, i) => {
+            const player = item.player || {};
+            const team = item.team || {};
+            const goals = item.goals || 0;
 
             return `
                 <div class="scorer-item">
                     <span class="scorer-rank ${i < 3 ? 'top-3' : ''}">${i + 1}</span>
                     <div class="scorer-photo" style="display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-muted)">
-                        ${player.id ? `<img src="https://api.sofascore.app/api/v1/player/${player.id}/image" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover" onerror="this.outerHTML='<i class=\\'fas fa-user\\'></i>'">` : '<i class="fas fa-user"></i>'}
+                        ${player.id ? `<img src="https://api.sofascore.app/api/v1/player/${player.id}/image" alt="${player.name}" style="width:36px;height:36px;border-radius:50%;object-fit:cover" onerror="this.outerHTML='<i class=\\'fas fa-user\\'></i>'">` : '<i class="fas fa-user"></i>'}
                     </div>
                     <div class="scorer-info">
                         <div class="scorer-name">${player.name || player.shortName || '?'}</div>
-                        <div class="scorer-team">${team.name || team.shortName || ''}</div>
+                        <div class="scorer-team">${team.name || ''}</div>
                     </div>
                     <span class="scorer-goals">${goals}</span>
                 </div>
