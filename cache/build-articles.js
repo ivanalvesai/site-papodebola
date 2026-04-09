@@ -421,6 +421,89 @@ function detectCategoryAndTags(text) {
     return { category, tags: [...new Set(tags)], mainTeam };
 }
 
+// WordPress REST API publishing
+const WP_BASE = 'https://admin.papodebola.com.br/wp-json/wp/v2';
+const WP_USER = 'ivanalves';
+const WP_APP_PASS = 'HeYF 49xY pg73 dhQi 5zZq 4B6K';
+const WP_AUTH = 'Basic ' + Buffer.from(`${WP_USER}:${WP_APP_PASS}`).toString('base64');
+
+// Cache WP categories
+let wpCategories = null;
+async function getWPCategoryId(name) {
+    if (!wpCategories) {
+        wpCategories = await new Promise((resolve) => {
+            https.get(`${WP_BASE}/categories?per_page=50`, {
+                headers: { 'Authorization': WP_AUTH },
+                rejectUnauthorized: false,
+            }, res => {
+                let d = '';
+                res.on('data', c => d += c);
+                res.on('end', () => { try { resolve(JSON.parse(d)); } catch { resolve([]); } });
+            }).on('error', () => resolve([]));
+        });
+    }
+    const cat = wpCategories.find(c => c.name.toLowerCase() === name.toLowerCase());
+    return cat?.id || 1; // 1 = Uncategorized
+}
+
+async function publishToWordPress(article) {
+    const categoryId = await getWPCategoryId(article.category || 'Futebol Brasileiro');
+
+    // Format content as HTML paragraphs
+    const htmlContent = (article.rewrittenText || '')
+        .split(/\n\n|\n/)
+        .filter(p => p.trim())
+        .map(p => {
+            let text = p.trim();
+            text = text.replace(/^([A-ZÁÉÍÓÚÂÊÔÃÕÇÜ][A-ZÁÉÍÓÚÂÊÔÃÕÇÜ\s,]{4,})\s*[-–—:]\s*/, '<strong>$1</strong> — ');
+            return `<p>${text}</p>`;
+        })
+        .join('\n');
+
+    const postData = JSON.stringify({
+        title: article.rewrittenTitle,
+        content: htmlContent,
+        status: 'publish',
+        categories: [categoryId],
+        excerpt: (article.rewrittenText || '').substring(0, 200),
+    });
+
+    return new Promise((resolve) => {
+        const options = {
+            hostname: 'admin.papodebola.com.br',
+            path: '/wp-json/wp/v2/posts',
+            method: 'POST',
+            headers: {
+                'Authorization': WP_AUTH,
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(postData),
+            },
+            rejectUnauthorized: false,
+        };
+
+        const req = https.request(options, res => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => {
+                try {
+                    const post = JSON.parse(data);
+                    if (post.id) {
+                        resolve(post.link || `Post #${post.id}`);
+                    } else {
+                        console.log(`  [WP] Error: ${post.message || 'unknown'}`);
+                        resolve(null);
+                    }
+                } catch { resolve(null); }
+            });
+        });
+
+        req.on('error', () => resolve(null));
+        req.setTimeout(30000, () => { req.destroy(); resolve(null); });
+        req.write(postData);
+        req.end();
+    });
+}
+
 async function main() {
     console.log('=== Building articles ===');
 
@@ -504,7 +587,13 @@ async function main() {
                 url: `/artigos/${slug}.html`,
             };
 
-            // Generate HTML page
+            // Publish to WordPress via REST API
+            const wpPublished = await publishToWordPress(article);
+            if (wpPublished) {
+                console.log(`  [WP] Published: ${wpPublished}`);
+            }
+
+            // Also generate static HTML page (for SEO/static fallback)
             const html = generateArticlePage(article);
             fs.writeFileSync(path.join(ARTICLES_DIR, `${slug}.html`), html);
             console.log(`  OK: ${slug}.html`);
