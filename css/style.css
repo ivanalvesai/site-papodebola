@@ -1,7 +1,7 @@
 /* =====================================================
    PAPO DE BOLA - Light Sports Editorial
    Inspired by ge.globo.com - clean, white, professional
-   Fonts: Oswald (display) + Open Sans (body)
+   Font: Open Sans 400
    ===================================================== */
 
 :root {
@@ -98,7 +98,7 @@ input:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rg
 .container { max-width: 1240px; margin: 0 auto; padding: 0 var(--sp-5); }
 
 h1, h2, h3, h4 {
-    font-family: 'Oswald', 'Arial Narrow', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.02em;
@@ -131,7 +131,7 @@ h1, h2, h3, h4 {
 }
 
 .logo-text {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 22px;
     font-weight: 700;
     text-transform: uppercase;
@@ -193,7 +193,7 @@ h1, h2, h3, h4 {
 .nav-link {
     display: flex; align-items: center; gap: 5px;
     padding: var(--sp-3) var(--sp-4);
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 13px; font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -271,7 +271,7 @@ h1, h2, h3, h4 {
 .mega-col:last-child { border-right: none; }
 
 .mega-col h4 {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 10px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.1em;
     color: var(--green);
@@ -289,7 +289,7 @@ h1, h2, h3, h4 {
 
 .ticker-label {
     display: flex; align-items: center; gap: 5px;
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 10px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.08em;
     color: var(--red); white-space: nowrap;
@@ -325,14 +325,14 @@ h1, h2, h3, h4 {
 .ticker-item:hover { background: var(--bg-body); }
 
 .ticker-item .ticker-league {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 9px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.04em;
     color: var(--green);
 }
 
 .ticker-item .ticker-score {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-weight: 600; font-size: 14px; color: var(--text-primary);
 }
 
@@ -350,7 +350,7 @@ h1, h2, h3, h4 {
 }
 
 .section-title {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 16px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.03em;
     color: var(--text-primary);
@@ -385,14 +385,14 @@ h1, h2, h3, h4 {
     display: inline-flex; align-items: center; gap: 4px;
     background: var(--green); color: var(--text-inverse);
     padding: 3px var(--sp-3); border-radius: var(--r-pill);
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 10px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.06em;
     margin-bottom: var(--sp-4);
 }
 
 .featured-league {
-    font-family: 'Oswald', sans-serif; font-size: 12px;
+    font-family: 'Open Sans', sans-serif; font-size: 12px;
     color: var(--green); font-weight: 500;
     text-transform: uppercase; letter-spacing: 0.08em;
     margin-bottom: var(--sp-5); text-align: center;
@@ -415,7 +415,7 @@ h1, h2, h3, h4 {
 }
 
 .featured-team-name {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 18px; font-weight: 600;
     text-transform: uppercase; text-align: center;
 }
@@ -423,13 +423,13 @@ h1, h2, h3, h4 {
 .featured-score { display: flex; align-items: center; gap: var(--sp-4); }
 
 .featured-score-num {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 52px; font-weight: 700;
     color: var(--text-primary); line-height: 1;
 }
 
 .featured-score-sep {
-    font-family: 'Oswald', sans-serif; font-size: 28px; color: var(--text-muted);
+    font-family: 'Open Sans', sans-serif; font-size: 28px; color: var(--text-muted);
 }
 
 .featured-status { text-align: center; margin-top: var(--sp-4); }
@@ -438,7 +438,7 @@ h1, h2, h3, h4 {
     display: inline-flex; align-items: center; gap: 6px;
     background: var(--red-light); color: var(--red);
     padding: 4px var(--sp-4); border-radius: var(--r-pill);
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 12px; font-weight: 600;
     text-transform: uppercase;
 }
@@ -449,7 +449,7 @@ h1, h2, h3, h4 {
     padding: var(--sp-3) var(--sp-8);
     background: var(--green); color: var(--text-inverse);
     border-radius: var(--r-pill);
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 14px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.04em;
     transition: all var(--duration) var(--ease);
@@ -465,7 +465,7 @@ h1, h2, h3, h4 {
 
 .filter-btn {
     padding: 5px var(--sp-4); border-radius: var(--r-pill);
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 11px; font-weight: 500;
     text-transform: uppercase; letter-spacing: 0.05em;
     color: var(--text-muted);
@@ -507,7 +507,7 @@ h1, h2, h3, h4 {
 }
 
 .league-header-name {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 11px; font-weight: 500;
     text-transform: uppercase; letter-spacing: 0.05em;
     color: var(--text-primary);
@@ -559,7 +559,7 @@ h1, h2, h3, h4 {
 }
 
 .match-score {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 17px; font-weight: 600;
     color: var(--text-primary); letter-spacing: 3px;
 }
@@ -567,12 +567,12 @@ h1, h2, h3, h4 {
 .match-card.is-live .match-score { color: var(--red); }
 
 .match-time {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 14px; font-weight: 500; color: var(--text-secondary);
 }
 
 .match-status {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 9px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.05em;
     padding: 1px 6px; border-radius: var(--r-pill);
@@ -590,7 +590,7 @@ h1, h2, h3, h4 {
     padding: 4px var(--sp-3);
     background: var(--green); color: var(--text-inverse);
     border-radius: var(--r-sm);
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 10px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.04em;
     transition: all var(--duration) var(--ease);
@@ -626,7 +626,7 @@ h1, h2, h3, h4 {
 }
 
 .widget-title {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 12px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.05em;
     padding: var(--sp-3) var(--sp-4);
@@ -640,7 +640,7 @@ h1, h2, h3, h4 {
 .widget-link {
     display: block; text-align: center;
     padding: var(--sp-3);
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 11px; font-weight: 500;
     text-transform: uppercase; letter-spacing: 0.04em;
     color: var(--green);
@@ -654,7 +654,7 @@ h1, h2, h3, h4 {
 .standings-mini table { width: 100%; border-collapse: collapse; }
 
 .standings-mini th {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 9px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.05em;
     color: var(--text-muted);
@@ -674,7 +674,7 @@ h1, h2, h3, h4 {
 .standings-mini tr:hover { background: var(--bg-body); }
 
 .standings-mini .pos {
-    font-family: 'Oswald', sans-serif; font-weight: 600;
+    font-family: 'Open Sans', sans-serif; font-weight: 600;
     width: 20px; display: inline-block; color: var(--text-muted); font-size: 11px;
 }
 
@@ -685,7 +685,7 @@ h1, h2, h3, h4 {
 .standings-mini .team-name img { width: 16px; height: 16px; object-fit: contain; }
 
 .standings-mini .pts {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-weight: 700; color: var(--green); font-size: 13px;
 }
 
@@ -704,7 +704,7 @@ h1, h2, h3, h4 {
 .scorer-item:hover { background: var(--bg-body); }
 
 .scorer-rank {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 13px; font-weight: 700; color: var(--text-muted);
     width: 20px; text-align: center;
 }
@@ -721,7 +721,7 @@ h1, h2, h3, h4 {
 .scorer-team { font-size: 10px; color: var(--text-muted); }
 
 .scorer-goals {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 16px; font-weight: 700; color: var(--green);
 }
 
@@ -737,7 +737,7 @@ h1, h2, h3, h4 {
 .result-teams { flex: 1; }
 
 .result-score {
-    font-family: 'Oswald', sans-serif; font-weight: 600;
+    font-family: 'Open Sans', sans-serif; font-weight: 600;
     font-size: 13px; min-width: 36px; text-align: center;
 }
 
@@ -769,16 +769,16 @@ h1, h2, h3, h4 {
 .watch-match-info { display: flex; align-items: center; gap: var(--sp-4); }
 
 .watch-match-info .watch-league {
-    font-family: 'Oswald', sans-serif; font-size: 10px;
+    font-family: 'Open Sans', sans-serif; font-size: 10px;
     text-transform: uppercase; letter-spacing: 0.05em; color: var(--green); font-weight: 500;
 }
 
 .watch-match-info .watch-teams {
-    font-family: 'Oswald', sans-serif; font-size: 16px; font-weight: 600; text-transform: uppercase;
+    font-family: 'Open Sans', sans-serif; font-size: 16px; font-weight: 600; text-transform: uppercase;
 }
 
 .watch-match-info .watch-score {
-    font-family: 'Oswald', sans-serif; font-size: 20px; font-weight: 700; color: var(--green);
+    font-family: 'Open Sans', sans-serif; font-size: 20px; font-weight: 700; color: var(--green);
 }
 
 .watch-close {
@@ -800,7 +800,7 @@ h1, h2, h3, h4 {
 
 .player-option-btn {
     padding: 6px var(--sp-5); border-radius: var(--r-sm);
-    font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: 500;
+    font-family: 'Open Sans', sans-serif; font-size: 12px; font-weight: 500;
     text-transform: uppercase; letter-spacing: 0.04em;
     color: var(--text-secondary); background: var(--bg-surface);
     border: 1px solid var(--border);
@@ -865,7 +865,7 @@ h1, h2, h3, h4 {
 
 .admin-tab {
     flex: 1; padding: var(--sp-3);
-    font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: 500;
+    font-family: 'Open Sans', sans-serif; font-size: 12px; font-weight: 500;
     text-transform: uppercase; letter-spacing: 0.04em;
     color: var(--text-muted); text-align: center;
     border-bottom: 2px solid transparent;
@@ -883,7 +883,7 @@ h1, h2, h3, h4 {
 .form-group { margin-bottom: var(--sp-4); }
 
 .form-group label {
-    display: block; font-family: 'Oswald', sans-serif;
+    display: block; font-family: 'Open Sans', sans-serif;
     font-size: 11px; font-weight: 500;
     text-transform: uppercase; letter-spacing: 0.04em;
     color: var(--text-secondary); margin-bottom: 4px;
@@ -898,7 +898,7 @@ h1, h2, h3, h4 {
 .embed-item { display: grid; grid-template-columns: 60px 1fr 120px 32px; gap: 6px; align-items: center; }
 
 .embed-label {
-    font-family: 'Oswald', sans-serif; font-size: 11px; font-weight: 600;
+    font-family: 'Open Sans', sans-serif; font-size: 11px; font-weight: 600;
     text-transform: uppercase; color: var(--green); text-align: center;
     background: var(--green-light); padding: var(--sp-3) 0;
     border-radius: var(--r-sm); border: 1px solid var(--border);
@@ -952,7 +952,7 @@ h1, h2, h3, h4 {
     padding: var(--sp-3) var(--sp-6);
     background: var(--green); color: var(--text-inverse); border: none;
     border-radius: var(--r-sm);
-    font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 600;
+    font-family: 'Open Sans', sans-serif; font-size: 13px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.04em;
     display: inline-flex; align-items: center; gap: 6px;
     transition: all var(--duration) var(--ease);
@@ -969,7 +969,7 @@ h1, h2, h3, h4 {
 }
 
 .managed-game-info .mg-league {
-    font-family: 'Oswald', sans-serif; font-size: 9px;
+    font-family: 'Open Sans', sans-serif; font-size: 9px;
     text-transform: uppercase; letter-spacing: 0.04em; color: var(--green); font-weight: 500;
 }
 
@@ -1057,7 +1057,7 @@ h1, h2, h3, h4 {
 .login-field { margin-bottom: var(--sp-5); }
 
 .login-field label {
-    display: block; font-family: 'Oswald', sans-serif;
+    display: block; font-family: 'Open Sans', sans-serif;
     font-size: 10px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.06em;
     color: var(--text-secondary); margin-bottom: 6px;
@@ -1087,7 +1087,7 @@ h1, h2, h3, h4 {
     width: 100%; padding: var(--sp-3);
     background: var(--green); color: white;
     border-radius: var(--r-sm);
-    font-family: 'Oswald', sans-serif; font-size: 14px; font-weight: 600;
+    font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.04em;
     display: flex; align-items: center; justify-content: center; gap: 6px;
     transition: all var(--duration) var(--ease);
@@ -1111,7 +1111,7 @@ h1, h2, h3, h4 {
     padding: var(--sp-3) var(--sp-5);
     background: var(--red-light); border: 1px solid rgba(232,49,42,0.2);
     border-radius: var(--r-sm); color: var(--red);
-    font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: 500;
+    font-family: 'Open Sans', sans-serif; font-size: 12px; font-weight: 500;
     text-transform: uppercase; letter-spacing: 0.04em;
     width: 100%; justify-content: center; margin-top: var(--sp-4);
     transition: all var(--duration) var(--ease);
@@ -1122,7 +1122,7 @@ h1, h2, h3, h4 {
 .settings-divider { border: none; border-top: 1px solid var(--border); margin: var(--sp-6) 0; }
 
 .settings-section-title {
-    font-family: 'Oswald', sans-serif; font-size: 11px; font-weight: 600;
+    font-family: 'Open Sans', sans-serif; font-size: 11px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.06em; color: var(--green);
     margin-bottom: var(--sp-4); display: flex; align-items: center; gap: 6px;
 }
@@ -1146,7 +1146,7 @@ h1, h2, h3, h4 {
 .footer-desc { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.6; }
 
 .footer-col h4 {
-    font-family: 'Oswald', sans-serif; font-size: 11px; font-weight: 600;
+    font-family: 'Open Sans', sans-serif; font-size: 11px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.06em; color: white;
     margin-bottom: var(--sp-4);
 }
@@ -1270,7 +1270,7 @@ h1, h2, h3, h4 {
 .top-match-card.is-live { border-color: var(--red); background: var(--red-light); }
 
 .top-match-league {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 8px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.06em;
     color: var(--green);
@@ -1284,12 +1284,12 @@ h1, h2, h3, h4 {
 .top-match-teams img { width: 18px; height: 18px; object-fit: contain; }
 
 .top-match-score {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 15px; font-weight: 700; color: var(--text-primary);
 }
 
 .top-match-time {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 11px; color: var(--text-muted);
 }
 
@@ -1368,7 +1368,7 @@ h1, h2, h3, h4 {
 }
 
 .highlight-team {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 9px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.06em;
     color: var(--green);
@@ -1376,7 +1376,7 @@ h1, h2, h3, h4 {
 }
 
 .highlight-title {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 15px; font-weight: 600;
     text-transform: uppercase;
     line-height: 1.3;
@@ -1439,7 +1439,7 @@ h1, h2, h3, h4 {
 .news-body { padding: var(--sp-4); }
 
 .news-source {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 9px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.06em;
     color: var(--red); margin-bottom: 6px;
@@ -1519,7 +1519,7 @@ h1, h2, h3, h4 {
 }
 
 .transfer-fee {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 13px; font-weight: 600; color: var(--green);
 }
 
@@ -1552,7 +1552,7 @@ h1, h2, h3, h4 {
     color: var(--green);
     border: 2px solid var(--green);
     border-radius: var(--r-pill);
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 14px;
     font-weight: 600;
     text-transform: uppercase;
