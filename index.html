@@ -37,7 +37,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=17">
+    <link rel="stylesheet" href="css/style.css?v=18">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -166,6 +166,21 @@
             </div>
         </nav>
     </header>
+
+    <!-- Copa do Mundo 2026 Banner -->
+    <a href="pages/noticias.html?cat=Copa do Mundo" class="copa-banner" id="copaBanner">
+        <div class="copa-banner-inner">
+            <div class="copa-banner-flag">🇺🇸 🇲🇽 🇨🇦</div>
+            <div class="copa-banner-text">Copa do Mundo <span>2026</span></div>
+            <div class="copa-countdown" id="copaCountdown">
+                <div class="copa-countdown-item"><div class="copa-countdown-num" id="copaDays">--</div><div class="copa-countdown-label">Dias</div></div>
+                <div class="copa-countdown-item"><div class="copa-countdown-num" id="copaHours">--</div><div class="copa-countdown-label">Horas</div></div>
+                <div class="copa-countdown-item"><div class="copa-countdown-num" id="copaMins">--</div><div class="copa-countdown-label">Min</div></div>
+                <div class="copa-countdown-item"><div class="copa-countdown-num" id="copaSecs">--</div><div class="copa-countdown-label">Seg</div></div>
+            </div>
+            <div class="copa-banner-cta">Acompanhe →</div>
+        </div>
+    </a>
 
     <!-- Live Ticker Bar -->
     <div class="ticker-bar" id="tickerBar">
@@ -684,11 +699,29 @@
         <button class="cookie-accept" onclick="document.getElementById('cookieBanner').style.display='none';localStorage.setItem('pdb_cookies','1')">Aceitar</button>
     </div>
 
-    <script src="js/config.js?v=17"></script>
-    <script src="js/api.js?v=17"></script>
-    <script src="js/admin.js?v=17"></script>
-    <script src="js/app.js?v=17"></script>
+    <script src="js/config.js?v=18"></script>
+    <script src="js/api.js?v=18"></script>
+    <script src="js/admin.js?v=18"></script>
+    <script src="js/app.js?v=18"></script>
     <script>
+    // Copa do Mundo 2026 Countdown (June 11, 2026)
+    function updateCopaCountdown(){
+        const copa=new Date('2026-06-11T18:00:00Z').getTime();
+        const now=Date.now();
+        const diff=copa-now;
+        if(diff<=0){document.getElementById('copaBanner').style.display='none';return;}
+        const d=Math.floor(diff/86400000);
+        const h=Math.floor((diff%86400000)/3600000);
+        const m=Math.floor((diff%3600000)/60000);
+        const s=Math.floor((diff%60000)/1000);
+        document.getElementById('copaDays').textContent=d;
+        document.getElementById('copaHours').textContent=String(h).padStart(2,'0');
+        document.getElementById('copaMins').textContent=String(m).padStart(2,'0');
+        document.getElementById('copaSecs').textContent=String(s).padStart(2,'0');
+    }
+    updateCopaCountdown();
+    setInterval(updateCopaCountdown,1000);
+
     // Cookie banner
     if(!localStorage.getItem('pdb_cookies'))document.getElementById('cookieBanner').style.display='flex';
 

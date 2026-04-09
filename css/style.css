@@ -1747,4 +1747,87 @@ h1, h2, h3, h4 {
     .teams-panel { width: 300px; }
 }
 
+/* Copa do Mundo Banner */
+.copa-banner {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    padding: 0;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+.copa-banner:hover { opacity: 0.95; }
+.copa-banner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='28' fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='1'/%3E%3C/svg%3E") repeat;
+}
+.copa-banner-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 10px 20px;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+}
+.copa-banner-flag {
+    display: flex;
+    gap: 4px;
+    font-size: 18px;
+}
+.copa-banner-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.copa-banner-text span {
+    color: #FFD700;
+}
+.copa-countdown {
+    display: flex;
+    gap: 6px;
+}
+.copa-countdown-item {
+    background: rgba(255,255,255,0.15);
+    border-radius: 4px;
+    padding: 4px 8px;
+    text-align: center;
+    min-width: 40px;
+}
+.copa-countdown-num {
+    font-size: 16px;
+    font-weight: 700;
+    color: #FFD700;
+    line-height: 1;
+}
+.copa-countdown-label {
+    font-size: 8px;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.copa-banner-cta {
+    background: #FFD700;
+    color: #1a1a2e;
+    padding: 6px 16px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+@media (max-width: 768px) {
+    .copa-banner-inner { gap: 12px; padding: 8px 12px; }
+    .copa-banner-text { font-size: 12px; }
+    .copa-countdown-item { padding: 3px 6px; min-width: 34px; }
+    .copa-countdown-num { font-size: 13px; }
+    .copa-banner-cta { padding: 5px 12px; font-size: 10px; }
+}
+
 ::selection { background: var(--green); color: white; }
