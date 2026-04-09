@@ -86,8 +86,8 @@ async function rewriteWithClaude(title, text) {
                 role: 'user',
                 content: `Você é um jornalista esportivo brasileiro experiente, com estilo editorial de portal profissional como ge.globo.com. Sua tarefa é criar um ARTIGO COMPLETO E EXTENSO baseado na notícia abaixo.
 
-REGRAS OBRIGATÓRIAS:
-- MÍNIMO ABSOLUTO de 2000 palavras (artigos com menos de 2000 palavras são REJEITADOS e descartados)
+REGRAS:
+- Escreva um artigo LONGO e COMPLETO, idealmente com 2000+ palavras
 - Reescreva TUDO com suas próprias palavras, NUNCA copie frases do original
 - Mantenha informações factuais: nomes de jogadores, times, placares, datas
 - Use português do Brasil fluente e natural
@@ -463,13 +463,8 @@ async function main() {
             console.log(`  Rewriting: ${item.title.substring(0, 60)}...`);
 
             const rewritten = await rewriteWithClaude(item.title, item.fullText);
-
-            // Validate minimum word count
             const wordCount = (rewritten.text || '').split(/\s+/).filter(w => w.length > 0).length;
-            if (wordCount < 1500) {
-                console.log(`  [REJECTED] Only ${wordCount} words (min 1500). Skipping.`);
-                continue;
-            }
+            console.log(`  [WORDS] ${wordCount} palavras no artigo`);
 
             const slug = generateSlug(rewritten.title);
 
