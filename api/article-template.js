@@ -21,7 +21,13 @@ function generateArticleHTML(article) {
     const paragraphs = (article.rewrittenText || '')
         .split(/\n\n|\n/)
         .filter(p => p.trim())
-        .map(p => `<p>${p.trim()}</p>`)
+        .map(p => {
+            let text = p.trim();
+            // Bold subtitles: lines starting with ALL CAPS words followed by - or :
+            text = text.replace(/^([A-ZÁÉÍÓÚÂÊÔÃÕÇÜ][A-ZÁÉÍÓÚÂÊÔÃÕÇÜ\s,]{4,})\s*[-–—:]\s*/,
+                '<strong>$1</strong> — ');
+            return `<p>${text}</p>`;
+        })
         .join('\n                    ');
 
     const imageTag = article.image
@@ -34,6 +40,14 @@ function generateArticleHTML(article) {
 
     const shareUrl = encodeURIComponent(articleUrl);
     const shareTitle = encodeURIComponent(article.rewrittenTitle || '');
+
+    // Build tags HTML
+    const tags = article.tags || [];
+    const tagsHtml = tags.length > 0 ? `
+            <div class="article-tags">
+                ${tags.map(t => `<a href="../pages/noticias.html?cat=${encodeURIComponent(t)}" class="article-tag"><i class="fas fa-tag"></i> ${t.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</a>`).join('')}
+                <a href="../pages/noticias.html?cat=${encodeURIComponent(category)}" class="article-tag"><i class="fas fa-trophy"></i> ${category}</a>
+            </div>` : '';
 
     return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -60,7 +74,7 @@ function generateArticleHTML(article) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="../css/style.css?v=13">
+    <link rel="stylesheet" href="../css/style.css?v=14">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -97,6 +111,12 @@ function generateArticleHTML(article) {
             margin-bottom: 32px;
             text-align: left;
         }
+        .article-content p strong {
+            font-weight: 700;
+            color: #1A1D23;
+            font-size: 17px;
+            letter-spacing: 0.02em;
+        }
         .article-back { display: inline-flex; align-items: center; gap: 6px; color: #00965E; font-weight: 600; font-size: 14px; margin-bottom: 24px; }
         .article-back:hover { text-decoration: underline; }
         .share-bar { max-width: 680px; margin: 0 auto; padding: 32px 0 48px; border-top: 2px solid #E2E5E9; }
@@ -109,6 +129,10 @@ function generateArticleHTML(article) {
         .share-btn.facebook { background: #1877F2; }
         .share-btn.telegram { background: #0088cc; }
         .share-btn.copy { background: #4A5568; cursor: pointer; border: none; font-family: inherit; }
+        .article-tags { max-width: 680px; margin: 0 auto; padding: 0 0 24px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .article-tag { display: inline-flex; align-items: center; gap: 4px; padding: 6px 14px; background: #F2F3F5; border: 1px solid #E2E5E9; border-radius: 100px; font-size: 12px; font-weight: 600; color: #4A5568; text-decoration: none; transition: all 0.2s; }
+        .article-tag:hover { background: #00965E; color: white; border-color: #00965E; }
+        .article-tag i { font-size: 10px; }
         @media (max-width: 768px) {
             .article-title { font-size: 26px; }
             .article-content p { font-size: 17px; line-height: 1.9; margin-bottom: 28px; }
@@ -140,6 +164,7 @@ function generateArticleHTML(article) {
         </div></section>
         <div class="container">
             <article class="article-content">${paragraphs}</article>
+            ${tagsHtml}
             <div class="share-bar">
                 <h4>Compartilhar</h4>
                 <div class="share-buttons">

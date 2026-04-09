@@ -186,7 +186,13 @@
             let filtered = window._articles || [];
 
             if (currentCat !== 'all') {
-                filtered = filtered.filter(a => (a.category || '').includes(currentCat));
+                filtered = filtered.filter(a => {
+                    // Match category OR tags (for team filtering)
+                    const catMatch = (a.category || '').toLowerCase().includes(currentCat.toLowerCase());
+                    const tagMatch = (a.tags || []).some(t => t.toLowerCase().includes(currentCat.toLowerCase()));
+                    const teamMatch = (a.team || '').toLowerCase().includes(currentCat.toLowerCase());
+                    return catMatch || tagMatch || teamMatch;
+                });
             }
             if (search) {
                 filtered = filtered.filter(a =>
@@ -194,6 +200,15 @@
                     (a.rewrittenText || '').toLowerCase().includes(search)
                 );
             }
+
+            // Update page title if filtering by team/category
+            if (currentCat !== 'all') {
+                const label = currentCat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                document.getElementById('newsCount').textContent = `${filtered.length} artigos sobre ${label}`;
+            } else {
+                document.getElementById('newsCount').textContent = `${filtered.length} artigos publicados`;
+            }
+
             renderArticles(filtered);
         }
 

@@ -337,6 +337,88 @@ function generateSlug(title) {
 const { generateArticleHTML } = require(path.join(__dirname, '..', 'api', 'article-template.js'));
 function generateArticlePage(article) { return generateArticleHTML(article); }
 
+// Auto-detect category and team tags from article text
+const TEAMS_MAP = {
+    'palmeiras': { name: 'Palmeiras', slug: 'palmeiras' },
+    'flamengo': { name: 'Flamengo', slug: 'flamengo' },
+    'corinthians': { name: 'Corinthians', slug: 'corinthians' },
+    'são paulo': { name: 'São Paulo', slug: 'sao-paulo' },
+    'santos': { name: 'Santos', slug: 'santos' },
+    'fluminense': { name: 'Fluminense', slug: 'fluminense' },
+    'botafogo': { name: 'Botafogo', slug: 'botafogo' },
+    'vasco': { name: 'Vasco', slug: 'vasco' },
+    'grêmio': { name: 'Grêmio', slug: 'gremio' },
+    'internacional': { name: 'Internacional', slug: 'internacional' },
+    'atlético mineiro': { name: 'Atlético-MG', slug: 'atletico-mg' },
+    'atlético-mg': { name: 'Atlético-MG', slug: 'atletico-mg' },
+    'cruzeiro': { name: 'Cruzeiro', slug: 'cruzeiro' },
+    'bahia': { name: 'Bahia', slug: 'bahia' },
+    'fortaleza': { name: 'Fortaleza', slug: 'fortaleza' },
+    'athletico': { name: 'Athletico-PR', slug: 'athletico-pr' },
+    'coritiba': { name: 'Coritiba', slug: 'coritiba' },
+    'bragantino': { name: 'Bragantino', slug: 'bragantino' },
+    'real madrid': { name: 'Real Madrid', slug: 'real-madrid' },
+    'barcelona': { name: 'Barcelona', slug: 'barcelona' },
+    'liverpool': { name: 'Liverpool', slug: 'liverpool' },
+    'manchester city': { name: 'Manchester City', slug: 'manchester-city' },
+    'manchester united': { name: 'Manchester United', slug: 'manchester-united' },
+    'juventus': { name: 'Juventus', slug: 'juventus' },
+    'milan': { name: 'Milan', slug: 'milan' },
+    'psg': { name: 'PSG', slug: 'psg' },
+    'bayern': { name: 'Bayern', slug: 'bayern' },
+};
+
+const COMPETITIONS_MAP = {
+    'libertadores': 'Copa Libertadores',
+    'sudamericana': 'Copa Sudamericana',
+    'copa do brasil': 'Copa do Brasil',
+    'brasileirão': 'Brasileirão',
+    'série a': 'Brasileirão',
+    'série b': 'Brasileirão Série B',
+    'champions league': 'Champions League',
+    'premier league': 'Premier League',
+    'la liga': 'La Liga',
+    'serie a': 'Serie A',
+    'bundesliga': 'Bundesliga',
+    'ligue 1': 'Ligue 1',
+    'copa do mundo': 'Copa do Mundo',
+    'copa américa': 'Copa América',
+    'eliminatórias': 'Eliminatórias',
+    'seleção': 'Seleção Brasileira',
+    'neymar': 'Seleção Brasileira',
+};
+
+function detectCategoryAndTags(text) {
+    const lower = text.toLowerCase();
+    const tags = [];
+    let mainTeam = null;
+    let category = 'Futebol Brasileiro';
+
+    // Detect teams (first found = main team)
+    for (const [key, team] of Object.entries(TEAMS_MAP)) {
+        if (lower.includes(key)) {
+            tags.push(team.slug);
+            if (!mainTeam) mainTeam = team.slug;
+        }
+    }
+
+    // Detect competition
+    for (const [key, comp] of Object.entries(COMPETITIONS_MAP)) {
+        if (lower.includes(key)) {
+            category = comp;
+            break;
+        }
+    }
+
+    // If international team but no competition detected
+    const intlTeams = ['real-madrid','barcelona','liverpool','manchester-city','manchester-united','juventus','milan','psg','bayern'];
+    if (mainTeam && intlTeams.includes(mainTeam) && category === 'Futebol Brasileiro') {
+        category = 'Futebol Internacional';
+    }
+
+    return { category, tags: [...new Set(tags)], mainTeam };
+}
+
 async function main() {
     console.log('=== Building articles ===');
 
@@ -402,6 +484,9 @@ async function main() {
                 localImage = await fetchPexelsImage('football stadium aerial view', slug);
             }
 
+            // Auto-detect category and team tags
+            const detected = detectCategoryAndTags(rewritten.title + ' ' + rewritten.text);
+
             const article = {
                 originalTitle: item.title,
                 rewrittenTitle: rewritten.title,
@@ -409,6 +494,9 @@ async function main() {
                 slug,
                 source: feed.source,
                 image: localImage || '',
+                category: detected.category,
+                tags: detected.tags,
+                team: detected.mainTeam,
                 pubDate: item.pubDate,
                 createdAt: new Date().toISOString(),
                 url: `/artigos/${slug}.html`,
