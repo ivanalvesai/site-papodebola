@@ -16,31 +16,66 @@
 
 // Category detection from content
 function detect_category($title, $content) {
-    $text = mb_strtolower($title . ' ' . $content);
+    // Check TITLE FIRST (more reliable than content)
+    $title_lower = mb_strtolower($title);
 
-    // Priority order matters
-    $rules = array(
-        'copa do mundo' => array('copa do mundo', 'world cup', 'mundial 2026', 'fifa 2026'),
-        'seleção brasileira' => array('seleção brasileira', 'seleção do brasil', 'convocação', 'tite convoca'),
-        'eliminatórias' => array('eliminatórias', 'eliminatorias'),
-        'copa do brasil' => array('copa do brasil'),
-        'copa libertadores' => array('libertadores', 'conmebol libertadores'),
+    // 1. Check TITLE for specific competitions (most reliable)
+    $title_rules = array(
+        'futebol internacional' => array('europa league', 'liga europa', 'conference league'),
+        'champions league' => array('champions league', 'liga dos campeões', 'champions'),
+        'copa libertadores' => array('libertadores'),
         'copa sudamericana' => array('sudamericana', 'sul-americana'),
-        'champions league' => array('champions league', 'liga dos campeões', 'uefa champions'),
-        'premier league' => array('premier league', 'campeonato inglês', 'futebol inglês', 'liverpool', 'arsenal', 'manchester', 'chelsea', 'tottenham', 'spurs'),
-        'la liga' => array('la liga', 'liga espanhola', 'real madrid', 'barcelona', 'atlético de madrid'),
-        'futebol internacional' => array('europa league', 'bundesliga', 'ligue 1', 'serie a italia', 'juventus', 'milan', 'inter de milão', 'bayern', 'psg', 'dortmund', 'napoli', 'nottingham forest', 'porto', 'bologna', 'aston villa'),
-        'mercado da bola' => array('transferência', 'contratação', 'negociação', 'negocia', 'sondagem', 'sonda', 'mira reforço', 'naming rights', 'saf'),
-        'brasileirão' => array('brasileirão', 'campeonato brasileiro', 'série a', 'rodada do brasileiro', 'tabela do brasileiro'),
+        'copa do brasil' => array('copa do brasil'),
+        'copa do mundo' => array('copa do mundo', 'world cup', 'mundial'),
+        'brasileirão' => array('brasileirão', 'campeonato brasileiro', 'série a'),
     );
 
-    foreach ($rules as $category => $keywords) {
+    foreach ($title_rules as $category => $keywords) {
+        foreach ($keywords as $kw) {
+            if (mb_strpos($title_lower, $kw) !== false) {
+                return $category;
+            }
+        }
+    }
+
+    // 2. Check FULL TEXT for broader detection
+    $text = mb_strtolower($title . ' ' . wp_trim_words(strip_tags($content), 100));
+
+    $text_rules = array(
+        'futebol internacional' => array('europa league', 'liga europa', 'conference league', 'bundesliga', 'ligue 1', 'serie a italia', 'nottingham forest', 'bologna', 'aston villa'),
+        'premier league' => array('premier league', 'campeonato inglês'),
+        'la liga' => array('la liga', 'liga espanhola'),
+        'champions league' => array('champions league', 'liga dos campeões'),
+        'copa libertadores' => array('libertadores', 'conmebol libertadores'),
+        'copa sudamericana' => array('sudamericana', 'sul-americana'),
+        'copa do mundo' => array('copa do mundo', 'world cup', 'mundial 2026'),
+        'seleção brasileira' => array('seleção brasileira', 'seleção do brasil', 'convocação'),
+        'eliminatórias' => array('eliminatórias'),
+        'copa do brasil' => array('copa do brasil'),
+        'mercado da bola' => array('negocia', 'transferência', 'contratação', 'sondagem', 'naming rights', 'saf', 'rescisão'),
+        'brasileirão' => array('brasileirão', 'campeonato brasileiro', 'série a', 'rodada do'),
+    );
+
+    // Detect team context for category
+    $br_teams = array('palmeiras','flamengo','corinthians','são paulo','santos','fluminense','botafogo','vasco','grêmio','internacional','atlético mineiro','cruzeiro','bahia','fortaleza','athletico');
+    $intl_teams = array('liverpool','arsenal','manchester','chelsea','tottenham','real madrid','barcelona','juventus','milan','inter de milão','bayern','psg','dortmund','napoli');
+
+    foreach ($text_rules as $category => $keywords) {
         foreach ($keywords as $kw) {
             if (mb_strpos($text, $kw) !== false) {
                 return $category;
             }
         }
     }
+
+    // 3. Detect by team names
+    foreach ($intl_teams as $team) {
+        if (mb_strpos($title_lower, $team) !== false) return 'futebol internacional';
+    }
+    foreach ($br_teams as $team) {
+        if (mb_strpos($title_lower, $team) !== false) return 'brasileirão';
+    }
+
     return 'futebol brasileiro';
 }
 
