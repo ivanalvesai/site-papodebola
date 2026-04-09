@@ -4,10 +4,10 @@
    ===================================================== */
 
 const CONFIG = {
-    // SportAPI via RapidAPI
-    API_BASE: 'https://sportapi7.p.rapidapi.com/api/v1',
+    // FootApi via RapidAPI (50 req/day, resets daily)
+    API_BASE: 'https://footapi7.p.rapidapi.com/api',
     API_KEY: localStorage.getItem('pdb_api_key') || 'b46d00e4d2mshf5f1ff9d60f4a0dp17c20ajsnaf486faf891a',
-    API_HOST: 'sportapi7.p.rapidapi.com',
+    API_HOST: 'footapi7.p.rapidapi.com',
 
     // Refresh interval for live data (ms)
     REFRESH_INTERVAL: parseInt(localStorage.getItem('pdb_refresh_interval') || '300') * 1000,

@@ -85,10 +85,10 @@ const App = {
         // Manual games from localStorage
         const manualGames = GamesDB.getAll();
 
-        // Load API data in parallel
+        // Load API data in parallel (from cache or API)
         const [liveEvents, todayEvents] = await Promise.all([
             API.getLiveEvents(),
-            API.getEventsByDate(today),
+            API.getTodayEvents(),
         ]);
 
         // Normalize API events
@@ -142,7 +142,7 @@ const App = {
     },
 
     async loadTomorrowMatches(date, manualGames) {
-        const events = await API.getEventsByDate(date);
+        const events = await API.getTomorrowEvents();
         const normalized = events.map(e => API.normalizeEvent(e));
         const manualTomorrow = manualGames.filter(g => g.date === date);
         this.renderTomorrowMatches([...manualTomorrow, ...normalized]);
