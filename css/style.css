@@ -1,7 +1,7 @@
 /* =====================================================
    PAPO DE BOLA - Light Sports Editorial
    Inspired by ge.globo.com - clean, white, professional
-   Fonts: Oswald (display) + Inter (body)
+   Fonts: Oswald (display) + Open Sans (body)
    ===================================================== */
 
 :root {
@@ -70,7 +70,7 @@ html {
 }
 
 body {
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: 'Open Sans', -apple-system, sans-serif;
     font-size: 15px;
     font-weight: 400;
     line-height: 1.55;
@@ -249,7 +249,7 @@ h1, h2, h3, h4 {
 
 .dropdown-menu ul li a {
     display: block; padding: var(--sp-2) var(--sp-5);
-    font-size: 13px; font-family: 'Inter', sans-serif;
+    font-size: 13px; font-family: 'Open Sans', sans-serif;
     text-transform: none; letter-spacing: 0;
     color: var(--text-secondary);
     transition: all 150ms var(--ease);
@@ -363,7 +363,7 @@ h1, h2, h3, h4 {
 .section-title i { color: var(--green); font-size: 14px; }
 
 .date-display {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 12px; font-weight: 400;
     text-transform: none; letter-spacing: 0;
     color: var(--text-muted); margin-left: auto;
