@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Notícias, jogos, classificação e elenco do time.">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <meta name="robots" content="index, follow">
+    <title>Time - Papo de Bola</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css?v=15">
+    <style>
+        .team-hero { background: #fff; border-bottom: 1px solid #E2E5E9; padding: 32px 0; }
+        .team-hero-inner { display: flex; align-items: center; gap: 20px; }
+        .team-badge { width: 72px; height: 72px; object-fit: contain; }
+        .team-hero h1 { font-size: 28px; font-weight: 700; color: #1A1D23; }
+        .team-hero .team-sub { font-size: 13px; color: #8896A6; margin-top: 4px; }
+        .team-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; padding: 24px 0 60px; }
+        .team-news-card { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #EEF0F2; }
+        .team-news-card:last-child { border-bottom: none; }
+        .team-news-card img { width: 100px; height: 70px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+        .team-news-card .tn-title { font-size: 14px; font-weight: 600; line-height: 1.4; color: #1A1D23; }
+        .team-news-card .tn-date { font-size: 11px; color: #8896A6; margin-top: 4px; }
+        .team-news-card:hover .tn-title { color: #00965E; }
+        .team-next-match { background: #fff; border: 1px solid #E2E5E9; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 20px; }
+        .team-next-match .tnm-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #00965E; margin-bottom: 12px; }
+        .team-next-match .tnm-teams { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 8px; }
+        .team-next-match .tnm-team { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; }
+        .team-next-match .tnm-team img { width: 40px; height: 40px; object-fit: contain; }
+        .team-next-match .tnm-vs { font-size: 20px; font-weight: 700; color: #8896A6; }
+        .team-next-match .tnm-date { font-size: 13px; color: #8896A6; }
+        @media (max-width: 768px) { .team-grid { grid-template-columns: 1fr; } .team-hero-inner { flex-direction: column; text-align: center; } }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-top"><div class="container"><div class="header-top-content">
+            <div class="logo"><a href="../index.html"><i class="fas fa-futbol logo-icon"></i><span class="logo-text">PAPO <span class="logo-accent">DE BOLA</span></span></a></div>
+            <div class="header-actions"><a href="../index.html" style="color:#4A5568;font-size:14px"><i class="fas fa-arrow-left"></i> Início</a></div>
+        </div></div></div>
+        <nav class="main-nav"><div class="container"><ul class="nav-list">
+            <li class="nav-item"><a href="../index.html" class="nav-link">Início</a></li>
+            <li class="nav-item"><a href="noticias.html" class="nav-link">Notícias</a></li>
+            <li class="nav-item"><a href="ao-vivo.html" class="nav-link live-link"><span class="live-dot"></span> AO VIVO</a></li>
+        </ul></div></nav>
+    </header>
+
+    <section class="team-hero"><div class="container">
+        <div class="team-hero-inner">
+            <img class="team-badge" id="teamBadge" src="" alt="" onerror="this.style.display='none'">
+            <div>
+                <h1 id="teamName">Carregando...</h1>
+                <div class="team-sub" id="teamSub"></div>
+            </div>
+        </div>
+    </div></section>
+
+    <main><div class="container">
+        <div class="team-grid">
+            <div>
+                <h2 class="section-title"><i class="fas fa-newspaper" style="color:#00965E"></i> Notícias</h2>
+                <div id="teamNews"><div class="loading-state"><div class="spinner"></div></div></div>
+                <div style="text-align:center;margin-top:16px">
+                    <a href="" id="teamAllNews" class="btn-show-more" style="display:none"><i class="fas fa-plus-circle"></i> Ver todas as notícias</a>
+                </div>
+            </div>
+            <aside>
+                <div class="team-next-match" id="teamNextMatch" style="display:none"></div>
+                <div class="sidebar-widget" id="teamStandings" style="display:none"></div>
+            </aside>
+        </div>
+    </div></main>
+
+    <footer class="footer"><div class="container"><div class="footer-bottom" style="border-top:none;padding-top:0"><p>&copy; 2026 Papo de Bola.</p></div></div></footer>
+
+    <script>
+    const CACHE_BASE = window.location.origin + '/cache';
+    const TEAMS = {
+        'palmeiras':{name:'Palmeiras',id:1963},'flamengo':{name:'Flamengo',id:5981},
+        'corinthians':{name:'Corinthians',id:1957},'sao-paulo':{name:'São Paulo',id:1981},
+        'santos':{name:'Santos',id:1968},'fluminense':{name:'Fluminense',id:1961},
+        'botafogo':{name:'Botafogo',id:1958},'vasco':{name:'Vasco',id:1952},
+        'gremio':{name:'Grêmio',id:1954},'internacional':{name:'Internacional',id:1959},
+        'atletico-mg':{name:'Atlético-MG',id:1977},'cruzeiro':{name:'Cruzeiro',id:1982},
+        'bahia':{name:'Bahia',id:1955},'fortaleza':{name:'Fortaleza',id:1962},
+        'athletico-pr':{name:'Athletico-PR',id:1967},
+    };
+
+    async function init() {
+        const slug = new URLSearchParams(window.location.search).get('slug');
+        const team = TEAMS[slug];
+        if (!team) { document.getElementById('teamName').textContent = 'Time não encontrado'; return; }
+
+        document.getElementById('teamName').textContent = team.name;
+        document.getElementById('teamBadge').src = `/img/team/${team.id}/image`;
+        document.title = `${team.name} - Papo de Bola`;
+
+        // Load articles for this team
+        try {
+            const res = await fetch(`${CACHE_BASE}/articles.json?_=${Date.now()}`);
+            if (res.ok) {
+                const articles = await res.json();
+                const teamArticles = articles.filter(a =>
+                    (a.tags || []).includes(slug) || (a.team || '') === slug
+                );
+
+                const container = document.getElementById('teamNews');
+                if (teamArticles.length === 0) {
+                    container.innerHTML = '<div class="no-matches"><p>Nenhuma notícia encontrada para este time</p></div>';
+                } else {
+                    container.innerHTML = teamArticles.slice(0, 8).map(a => {
+                        const date = a.pubDate ? new Date(a.pubDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) : '';
+                        return `<a href="../artigos/${a.slug}.html" class="team-news-card">
+                            ${a.image ? `<img src="${a.image}" alt="" loading="lazy" onerror="this.style.display='none'">` : ''}
+                            <div><div class="tn-title">${a.rewrittenTitle || ''}</div><div class="tn-date">${date} | ${a.category || ''}</div></div>
+                        </a>`;
+                    }).join('');
+
+                    const allBtn = document.getElementById('teamAllNews');
+                    allBtn.href = `noticias.html?cat=${slug}`;
+                    allBtn.style.display = 'inline-flex';
+                }
+            }
+        } catch {}
+
+        // Load standings position
+        try {
+            const res = await fetch(`${CACHE_BASE}/champ_325.json?_=${Date.now()}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.standings?.[0]?.rows) {
+                    const row = data.standings[0].rows.find(r => r.teamId === team.id);
+                    if (row) {
+                        document.getElementById('teamSub').textContent = `${row.pos}º lugar | ${row.pts} pontos | ${row.matches} jogos`;
+
+                        const widget = document.getElementById('teamStandings');
+                        widget.style.display = 'block';
+                        widget.innerHTML = `<h3 class="widget-title"><i class="fas fa-list-ol" style="color:#00965E"></i> Brasileirão</h3>
+                            <div style="padding:12px 16px;font-size:13px">
+                                <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Posição</span><strong>${row.pos}º</strong></div>
+                                <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Pontos</span><strong style="color:#00965E">${row.pts}</strong></div>
+                                <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Vitórias</span><strong>${row.wins}</strong></div>
+                                <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Empates</span><strong>${row.draws}</strong></div>
+                                <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Derrotas</span><strong>${row.losses}</strong></div>
+                                <div style="display:flex;justify-content:space-between"><span>Saldo</span><strong>${row.gd}</strong></div>
+                            </div>
+                            <a href="campeonato.html?id=325&name=Brasileirão Série A&tab=standings" class="widget-link">Ver tabela completa <i class="fas fa-arrow-right"></i></a>`;
+                    }
+
+                    // Next match
+                    if (data.matchesByRound) {
+                        for (const r of Object.keys(data.matchesByRound).sort((a,b) => a-b)) {
+                            const m = data.matchesByRound[r].find(m => (m.homeId === team.id || m.awayId === team.id) && m.status === 'notstarted');
+                            if (m) {
+                                const dt = new Date(m.timestamp * 1000);
+                                const nmBox = document.getElementById('teamNextMatch');
+                                nmBox.style.display = 'block';
+                                nmBox.innerHTML = `<div class="tnm-label">Próximo Jogo - Rodada ${r}</div>
+                                    <div class="tnm-teams">
+                                        <div class="tnm-team">${m.homeId ? `<img src="/img/team/${m.homeId}/image" alt="">` : ''}<span>${m.home}</span></div>
+                                        <span class="tnm-vs">×</span>
+                                        <div class="tnm-team">${m.awayId ? `<img src="/img/team/${m.awayId}/image" alt="">` : ''}<span>${m.away}</span></div>
+                                    </div>
+                                    <div class="tnm-date">${dt.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'})} às ${dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div>`;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch {}
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

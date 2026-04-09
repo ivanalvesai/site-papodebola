@@ -27,6 +27,9 @@
     <meta property="og:description" content="Assista jogos de futebol ao vivo com múltiplas opções de transmissão. Placares em tempo real, tabelas e classificações.">
     <meta property="og:type" content="website">
     <meta property="og:locale" content="pt_BR">
+    <meta property="og:image" content="https://papodebola.com.br/favicon.svg">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
     <meta name="twitter:card" content="summary_large_image">
     <title>Papo de Bola - Futebol Ao Vivo | Placares | Tabelas | Classificações</title>
     <link rel="canonical" href="https://papodebola.com/">
@@ -34,7 +37,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=14">
+    <link rel="stylesheet" href="css/style.css?v=15">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -218,6 +221,9 @@
 
                 <!-- Right Sidebar -->
                 <aside class="content-sidebar">
+                    <!-- Next Match Widget -->
+                    <div class="next-match-widget" id="nextMatchWidget" style="display:none"></div>
+
                     <!-- Brasileirão Standings Widget -->
                     <div class="sidebar-widget">
                         <h3 class="widget-title"><i class="fas fa-list-ol"></i> Classificação - Brasileirão</h3>
@@ -544,9 +550,27 @@
         </div>
     </footer>
 
-    <script src="js/config.js?v=14"></script>
-    <script src="js/api.js?v=14"></script>
-    <script src="js/admin.js?v=14"></script>
-    <script src="js/app.js?v=14"></script>
+    <!-- Cookie Banner -->
+    <div class="cookie-banner" id="cookieBanner" style="display:none">
+        <span>Utilizamos cookies para melhorar sua experiência. Ao continuar navegando, você concorda com nossa <a href="pages/privacidade.html">Política de Privacidade</a>.</span>
+        <button class="cookie-accept" onclick="document.getElementById('cookieBanner').style.display='none';localStorage.setItem('pdb_cookies','1')">Aceitar</button>
+    </div>
+
+    <script src="js/config.js?v=15"></script>
+    <script src="js/api.js?v=15"></script>
+    <script src="js/admin.js?v=15"></script>
+    <script src="js/app.js?v=15"></script>
+    <script>
+    // Cookie banner
+    if(!localStorage.getItem('pdb_cookies'))document.getElementById('cookieBanner').style.display='flex';
+
+    // Fade-in on scroll
+    const observer=new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}});
+    },{threshold:0.1});
+    document.querySelectorAll('.home-section,.sidebar-widget,.top-matches-bar').forEach(el=>{
+        el.classList.add('fade-in');observer.observe(el);
+    });
+    </script>
 </body>
 </html>

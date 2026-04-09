@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <title>Página não encontrada - Papo de Bola</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css?v=14">
+    <style>
+        .error-page { text-align: center; padding: 80px 20px; max-width: 520px; margin: 0 auto; }
+        .error-code { font-size: 120px; font-weight: 700; color: #E2E5E9; line-height: 1; margin-bottom: 16px; }
+        .error-title { font-size: 24px; font-weight: 700; color: #1A1D23; margin-bottom: 8px; }
+        .error-desc { font-size: 15px; color: #8896A6; margin-bottom: 32px; line-height: 1.6; }
+        .error-links { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .error-link { padding: 10px 24px; border-radius: 6px; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+        .error-link.primary { background: #00965E; color: white; }
+        .error-link.primary:hover { background: #007A4D; }
+        .error-link.secondary { background: #F2F3F5; color: #4A5568; border: 1px solid #E2E5E9; }
+        .error-link.secondary:hover { border-color: #00965E; color: #00965E; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-top"><div class="container"><div class="header-top-content">
+            <div class="logo"><a href="/"><i class="fas fa-futbol logo-icon"></i><span class="logo-text">PAPO <span class="logo-accent">DE BOLA</span></span></a></div>
+        </div></div></div>
+        <nav class="main-nav"><div class="container"><ul class="nav-list">
+            <li class="nav-item"><a href="/" class="nav-link">Início</a></li>
+            <li class="nav-item"><a href="/pages/noticias.html" class="nav-link">Notícias</a></li>
+            <li class="nav-item"><a href="/pages/ao-vivo.html" class="nav-link live-link"><span class="live-dot"></span> AO VIVO</a></li>
+        </ul></div></nav>
+    </header>
+    <main>
+        <div class="error-page">
+            <div class="error-code">404</div>
+            <h1 class="error-title">Página não encontrada</h1>
+            <p class="error-desc">A página que você procura pode ter sido removida, renomeada ou está temporariamente indisponível.</p>
+            <div class="error-links">
+                <a href="/" class="error-link primary"><i class="fas fa-home"></i> Página Inicial</a>
+                <a href="/pages/noticias.html" class="error-link secondary"><i class="fas fa-newspaper"></i> Notícias</a>
+                <a href="/pages/ao-vivo.html" class="error-link secondary"><i class="fas fa-play"></i> Ao Vivo</a>
+            </div>
+        </div>
+    </main>
+    <footer class="footer"><div class="container"><div class="footer-bottom" style="border-top:none;padding-top:0"><p>&copy; 2026 Papo de Bola.</p></div></div></footer>
+</body>
+</html>

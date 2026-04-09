@@ -94,6 +94,7 @@ const App = {
             this.loadTopScorers();
             this.loadTickerFromCache();
             this.loadRecentResultsFromCache();
+            this.loadNextMatch();
         } else {
             // Ao Vivo page: load matches
             this.loadLivePage();
@@ -572,6 +573,61 @@ const App = {
                 </div>
             `;
         }).join('');
+    },
+
+    // ==================== SIDEBAR: NEXT MATCH ====================
+    async loadNextMatch() {
+        const widget = document.getElementById('nextMatchWidget');
+        if (!widget) return;
+
+        // Try to get next match from championship cache (Brasileirão)
+        const cached = await API.fetchCache('champ_325.json');
+        if (!cached?.matchesByRound) return;
+
+        // Find next scheduled match
+        const allRounds = Object.keys(cached.matchesByRound).map(Number).sort((a,b) => a - b);
+        let nextMatch = null;
+
+        for (const r of allRounds) {
+            const matches = cached.matchesByRound[r];
+            for (const m of matches) {
+                if (m.status === 'notstarted' && m.timestamp) {
+                    if (!nextMatch || m.timestamp < nextMatch.timestamp) {
+                        nextMatch = m;
+                    }
+                }
+            }
+            if (nextMatch) break;
+        }
+
+        if (!nextMatch) return;
+
+        const dt = new Date(nextMatch.timestamp * 1000);
+        const dateStr = dt.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
+        const timeStr = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const now = Date.now();
+        const diff = nextMatch.timestamp * 1000 - now;
+        const days = Math.floor(diff / 86400000);
+        const hours = Math.floor((diff % 86400000) / 3600000);
+        const countdown = days > 0 ? `Em ${days}d ${hours}h` : hours > 0 ? `Em ${hours}h` : 'Hoje';
+
+        widget.style.display = 'block';
+        widget.innerHTML = `
+            <div class="nm-league">Brasileirão Série A</div>
+            <div class="nm-teams">
+                <div class="nm-team">
+                    ${nextMatch.homeId ? `<img src="/img/team/${nextMatch.homeId}/image" alt="" onerror="this.style.display='none'">` : ''}
+                    <span>${nextMatch.home}</span>
+                </div>
+                <span class="nm-vs">×</span>
+                <div class="nm-team">
+                    ${nextMatch.awayId ? `<img src="/img/team/${nextMatch.awayId}/image" alt="" onerror="this.style.display='none'">` : ''}
+                    <span>${nextMatch.away}</span>
+                </div>
+            </div>
+            <div class="nm-date">${dateStr} às ${timeStr}</div>
+            <div class="nm-countdown">${countdown}</div>
+        `;
     },
 
     // ==================== SIDEBAR: RECENT RESULTS ====================

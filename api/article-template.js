@@ -7,6 +7,10 @@ function generateArticleHTML(article) {
         ? new Date(article.pubDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
         : new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
 
+    // Reading time estimate (200 words per minute)
+    const wordCount = (article.rewrittenText || '').split(/\s+/).filter(w => w.length > 0).length;
+    const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+
     const dateISO = article.pubDate
         ? new Date(article.pubDate).toISOString()
         : new Date().toISOString();
@@ -74,7 +78,7 @@ function generateArticleHTML(article) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="../css/style.css?v=14">
+    <link rel="stylesheet" href="../css/style.css?v=15">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -100,8 +104,23 @@ function generateArticleHTML(article) {
         .article-category { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #00965E; margin-bottom: 16px; }
         .article-category a { color: #00965E; }
         .article-category a:hover { text-decoration: underline; }
+        .article-breadcrumb { font-size: 12px; color: #8896A6; margin-bottom: 16px; }
+        .article-breadcrumb a { color: #8896A6; }
+        .article-breadcrumb a:hover { color: #00965E; }
+        .article-breadcrumb span { margin: 0 6px; }
         .article-title { font-size: 34px; font-weight: 700; line-height: 1.25; margin-bottom: 20px; color: #1A1D23; text-transform: none; }
         .article-meta { font-size: 14px; color: #8896A6; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; padding-top: 16px; border-top: 1px solid #EEF0F2; }
+        .reading-time { display: flex; align-items: center; gap: 4px; }
+        .related-articles { max-width: 680px; margin: 0 auto; padding: 32px 0; border-top: 2px solid #E2E5E9; }
+        .related-title { font-size: 16px; font-weight: 700; text-transform: uppercase; color: #1A1D23; margin-bottom: 20px; }
+        .related-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .related-card { background: #fff; border: 1px solid #E2E5E9; border-radius: 8px; overflow: hidden; transition: all 0.2s; }
+        .related-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-2px); }
+        .related-card img { width: 100%; height: 120px; object-fit: cover; }
+        .related-card .rc-body { padding: 12px; }
+        .related-card .rc-cat { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #00965E; margin-bottom: 4px; }
+        .related-card .rc-title { font-size: 14px; font-weight: 600; line-height: 1.3; color: #1A1D23; }
+        @media (max-width: 768px) { .related-grid { grid-template-columns: 1fr; } }
         .article-content { padding: 48px 0 40px; max-width: 680px; margin: 0 auto; }
         .article-content p {
             font-size: 18px;
@@ -146,20 +165,25 @@ function generateArticleHTML(article) {
             <div class="logo"><a href="../index.html"><i class="fas fa-futbol logo-icon"></i><span class="logo-text">PAPO <span class="logo-accent">DE BOLA</span></span></a></div>
         </div></div></div>
         <nav class="main-nav"><div class="container"><ul class="nav-list">
-            <li class="nav-item"><a href="../index.html" class="nav-link"><i class="fas fa-home"></i> Início</a></li>
-            <li class="nav-item"><a href="../pages/noticias.html" class="nav-link"><i class="fas fa-newspaper"></i> Notícias</a></li>
+            <li class="nav-item"><a href="../index.html" class="nav-link">Início</a></li>
+            <li class="nav-item"><a href="../pages/noticias.html" class="nav-link">Notícias</a></li>
             <li class="nav-item"><a href="../pages/ao-vivo.html" class="nav-link live-link"><span class="live-dot"></span> AO VIVO</a></li>
         </ul></div></nav>
     </header>
     <main>
         <section class="article-hero"><div class="container">
-            <a href="../pages/noticias.html" class="article-back"><i class="fas fa-arrow-left"></i> Notícias</a>
+            <div class="article-breadcrumb">
+                <a href="../index.html">Início</a><span>›</span>
+                <a href="../pages/noticias.html">Notícias</a><span>›</span>
+                <a href="../pages/noticias.html?cat=${encodeURIComponent(category)}">${category}</a>
+            </div>
             ${imageTag}
-            <div class="article-category"><i class="fas fa-futbol"></i> <a href="../pages/noticias.html?cat=${encodeURIComponent(category)}">${category}</a></div>
+            <div class="article-category"><a href="../pages/noticias.html?cat=${encodeURIComponent(category)}">${category}</a></div>
             <h1 class="article-title">${article.rewrittenTitle || ''}</h1>
             <div class="article-meta">
                 <span><i class="fas fa-clock"></i> ${dateFormatted}</span>
                 <span><i class="fas fa-pen"></i> ${author}</span>
+                <span class="reading-time"><i class="fas fa-book-open"></i> ${readingTime} min de leitura</span>
             </div>
         </div></section>
         <div class="container">
@@ -176,8 +200,32 @@ function generateArticleHTML(article) {
                 </div>
             </div>
         </div>
+            <div class="related-articles" id="relatedArticles"></div>
+        </div>
     </main>
     <footer class="footer"><div class="container"><div class="footer-bottom" style="border-top:none;padding-top:0"><p>&copy; 2026 Papo de Bola.</p></div></div></footer>
+    <script>
+    (async()=>{
+        try{
+            const r=await fetch('/cache/articles.json?_='+Date.now());
+            if(!r.ok)return;
+            const all=await r.json();
+            const slug='${slug}';
+            const tags=${JSON.stringify(article.tags||[])};
+            const cat='${category}';
+            const related=all.filter(a=>a.slug!==slug&&(
+                (a.tags||[]).some(t=>tags.includes(t))||(a.category||'')===cat
+            )).slice(0,4);
+            if(!related.length)return;
+            const box=document.getElementById('relatedArticles');
+            box.innerHTML='<div class="related-title">Leia Também</div><div class="related-grid">'+
+                related.map(a=>'<a href="/artigos/'+a.slug+'.html" class="related-card">'+
+                    (a.image?'<img src="'+a.image+'" alt="" loading="lazy" onerror="this.style.display=\\'none\\'">':'')+
+                    '<div class="rc-body"><div class="rc-cat">'+(a.category||'')+'</div><div class="rc-title">'+(a.rewrittenTitle||'')+'</div></div></a>'
+                ).join('')+'</div>';
+        }catch(e){}
+    })();
+    </script>
 </body>
 </html>`;
 }
