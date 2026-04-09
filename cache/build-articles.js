@@ -168,8 +168,19 @@ async function fetchRealTeamImage(teamId, teamName, slug) {
 
     console.log(`  [PHOTO] Fetching real match photos for ${teamName} (ID: ${teamId})...`);
 
-    // Get team media from API
-    const data = await fetchAPI(`team/${teamId}/media`);
+    // Get team media from AllSportsApi
+    const data = await new Promise((resolve) => {
+        https.get(`https://allsportsapi2.p.rapidapi.com/api/team/${teamId}/media`, {
+            headers: {
+                'x-rapidapi-key': 'cf85a77dbbmsh438760ef71d5715p13923fjsnc2f2878572d2',
+                'x-rapidapi-host': 'allsportsapi2.p.rapidapi.com',
+            },
+        }, res => {
+            let d = '';
+            res.on('data', c => d += c);
+            res.on('end', () => { try { resolve(JSON.parse(d)); } catch(e) { resolve(null); } });
+        }).on('error', () => resolve(null));
+    });
     if (!data?.media) {
         console.log(`  [PHOTO] No media found`);
         return null;
