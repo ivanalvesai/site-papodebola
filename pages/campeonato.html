@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Classificação, jogos, resultados e estatísticas do campeonato.">
+    <meta name="description" content="Classificação, jogos, resultados e artilharia do campeonato.">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="manifest" href="../manifest.json">
     <meta name="robots" content="index, follow">
@@ -14,72 +14,82 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css?v=10">
     <style>
-        .champ-hero { background: #fff; border-bottom: 1px solid #E2E5E9; padding: 32px 0; }
-        .champ-hero-content { display: flex; align-items: center; gap: 20px; }
-        .champ-logo { width: 64px; height: 64px; background: #F2F3F5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #00965E; border: 2px solid #E2E5E9; flex-shrink: 0; }
-        .champ-info h1 { font-family: 'Oswald', sans-serif; font-size: 26px; font-weight: 700; text-transform: uppercase; color: #1A1D23; margin-bottom: 2px; }
-        .champ-info .champ-meta { font-size: 13px; color: #8896A6; }
-        .champ-tabs { display: flex; background: #fff; border-bottom: 1px solid #E2E5E9; overflow-x: auto; }
-        .champ-tab { padding: 14px 24px; font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; color: #8896A6; border-bottom: 3px solid transparent; white-space: nowrap; cursor: pointer; transition: all 0.2s; }
-        .champ-tab:hover { color: #1A1D23; }
-        .champ-tab.active { color: #00965E; border-bottom-color: #00965E; }
-        .champ-content { padding: 24px 0 60px; }
-        .champ-panel { display: none; }
-        .champ-panel.active { display: block; }
+        .ch-hero { background: #fff; border-bottom: 1px solid #E2E5E9; padding: 24px 0; }
+        .ch-hero-inner { display: flex; align-items: center; gap: 16px; }
+        .ch-logo { width: 56px; height: 56px; background: #F2F3F5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #00965E; border: 2px solid #E2E5E9; flex-shrink: 0; }
+        .ch-hero h1 { font-family: 'Oswald', sans-serif; font-size: 24px; font-weight: 700; text-transform: uppercase; color: #1A1D23; }
+        .ch-hero .ch-sub { font-size: 13px; color: #8896A6; }
 
-        /* Round selector */
-        .round-selector { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-        .round-btn { padding: 6px 14px; border-radius: 100px; font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: 500; background: #fff; border: 1px solid #E2E5E9; color: #4A5568; cursor: pointer; transition: all 0.2s; }
-        .round-btn:hover { border-color: #00965E; color: #00965E; }
-        .round-btn.active { background: #00965E; color: #fff; border-color: #00965E; }
-        .round-btn.current { border-color: #00965E; font-weight: 700; }
-        .round-nav { display: flex; align-items: center; gap: 12px; margin-right: 12px; }
-        .round-nav button { width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 1px solid #E2E5E9; color: #4A5568; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; transition: all 0.2s; }
-        .round-nav button:hover { border-color: #00965E; color: #00965E; }
-        .round-nav span { font-family: 'Oswald', sans-serif; font-size: 14px; font-weight: 600; min-width: 100px; text-align: center; }
-
-        /* Match row */
-        .round-match { display: flex; align-items: center; padding: 12px 16px; background: #fff; border: 1px solid #E2E5E9; border-top: none; transition: background 0.15s; }
-        .round-match:first-child { border-top: 1px solid #E2E5E9; border-radius: 8px 8px 0 0; }
-        .round-match:last-child { border-radius: 0 0 8px 8px; }
-        .round-match:hover { background: #F8F9FA; }
-        .round-match.is-live { background: #FDECEB; border-left: 3px solid #E8312A; }
-        .rm-date { width: 90px; font-size: 12px; color: #8896A6; flex-shrink: 0; }
-        .rm-home { flex: 1; display: flex; align-items: center; gap: 8px; justify-content: flex-end; font-size: 14px; font-weight: 500; }
-        .rm-score { min-width: 60px; text-align: center; font-family: 'Oswald', sans-serif; font-size: 18px; font-weight: 700; color: #1A1D23; }
-        .rm-score.pending { font-size: 13px; font-weight: 500; color: #8896A6; }
-        .rm-away { flex: 1; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; }
-        .rm-team-logo { width: 22px; height: 22px; object-fit: contain; }
-        .rm-status { font-family: 'Oswald', sans-serif; font-size: 9px; font-weight: 600; text-transform: uppercase; color: #E8312A; text-align: center; }
-        .rm-status.finished { color: #8896A6; }
+        /* Layout: standings left, matches right */
+        .ch-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; padding: 24px 0; }
 
         /* Standings */
-        .standings-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #E2E5E9; border-radius: 8px; overflow: hidden; }
-        .standings-table th { font-family: 'Oswald', sans-serif; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: #8896A6; padding: 10px 12px; text-align: center; background: #F2F3F5; border-bottom: 1px solid #E2E5E9; }
-        .standings-table th:nth-child(1) { width: 36px; }
-        .standings-table th:nth-child(2) { text-align: left; }
-        .standings-table td { font-size: 13px; padding: 10px 12px; text-align: center; border-bottom: 1px solid #EEF0F2; }
-        .standings-table td:nth-child(2) { text-align: left; }
-        .standings-table tr:last-child td { border-bottom: none; }
-        .standings-table tr:hover { background: #F8F9FA; }
-        .standings-table .team-cell { display: flex; align-items: center; gap: 8px; }
-        .standings-table .team-cell img { width: 20px; height: 20px; object-fit: contain; }
-        .standings-table .pts { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 15px; color: #00965E; }
-        .zone-bar { width: 4px; height: 20px; border-radius: 2px; display: inline-block; margin-right: 6px; }
-        .zone-lib { background: #00965E; }
-        .zone-sula { background: #1A73E8; }
-        .zone-reb { background: #E8312A; }
-        .standings-legend { display: flex; gap: 20px; padding: 12px 16px; border-top: 1px solid #E2E5E9; background: #fff; flex-wrap: wrap; font-size: 12px; color: #8896A6; }
-        .legend-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 4px; }
+        .ch-standings { background: #fff; border: 1px solid #E2E5E9; border-radius: 8px; overflow: hidden; }
+        .ch-standings-title { font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; padding: 12px 16px; background: #F2F3F5; border-bottom: 1px solid #E2E5E9; display: flex; align-items: center; gap: 6px; color: #1A1D23; }
+        .ch-standings-title i { color: #00965E; }
+        .st-table { width: 100%; border-collapse: collapse; }
+        .st-table th { font-family: 'Oswald', sans-serif; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: #8896A6; padding: 8px 8px; text-align: center; }
+        .st-table th:nth-child(2) { text-align: left; }
+        .st-table td { font-size: 12px; padding: 7px 8px; text-align: center; border-bottom: 1px solid #EEF0F2; }
+        .st-table td:nth-child(2) { text-align: left; }
+        .st-table tr:last-child td { border-bottom: none; }
+        .st-table tr:hover { background: #F8F9FA; }
+        .st-team { display: flex; align-items: center; gap: 6px; font-weight: 500; }
+        .st-team img { width: 18px; height: 18px; object-fit: contain; }
+        .st-pts { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 14px; color: #00965E; }
+        .st-pos { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 11px; color: #8896A6; }
+        .st-zone { width: 3px; height: 18px; border-radius: 2px; display: inline-block; margin-right: 4px; vertical-align: middle; }
+        .zl { background: #00965E; } .zs { background: #1A73E8; } .zr { background: #E8312A; }
+        .st-legend { display: flex; gap: 16px; padding: 10px 16px; border-top: 1px solid #E2E5E9; font-size: 11px; color: #8896A6; flex-wrap: wrap; }
+        .st-legend span::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+        .st-legend .l-lib::before { background: #00965E; }
+        .st-legend .l-sul::before { background: #1A73E8; }
+        .st-legend .l-reb::before { background: #E8312A; }
 
+        /* Matches sidebar */
+        .ch-matches { background: #fff; border: 1px solid #E2E5E9; border-radius: 8px; overflow: hidden; height: fit-content; position: sticky; top: 100px; }
+        .ch-round-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #F2F3F5; border-bottom: 1px solid #E2E5E9; }
+        .ch-round-header span { font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 600; text-transform: uppercase; color: #1A1D23; }
+        .ch-round-nav { display: flex; gap: 6px; }
+        .ch-round-nav button { width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 1px solid #E2E5E9; color: #4A5568; display: flex; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; transition: all 0.15s; }
+        .ch-round-nav button:hover { border-color: #00965E; color: #00965E; }
+
+        .ch-match { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid #EEF0F2; transition: background 0.15s; }
+        .ch-match:last-child { border-bottom: none; }
+        .ch-match:hover { background: #F8F9FA; }
+        .ch-match.live { background: #FDECEB; border-left: 3px solid #E8312A; }
+        .ch-match-date { width: 44px; flex-shrink: 0; font-size: 10px; color: #8896A6; line-height: 1.3; }
+        .ch-match-teams { flex: 1; min-width: 0; }
+        .ch-match-row { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; line-height: 1.6; }
+        .ch-match-row img { width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; }
+        .ch-match-row .score { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 14px; margin-left: auto; min-width: 14px; text-align: right; }
+        .ch-match-row .score.win { color: #00965E; }
+        .ch-match-status { font-family: 'Oswald', sans-serif; font-size: 8px; font-weight: 600; text-transform: uppercase; color: #E8312A; margin-left: 6px; }
+        .ch-match-pending { font-size: 11px; color: #8896A6; margin-left: auto; font-weight: 500; }
+
+        /* Scorers */
+        .ch-scorers { background: #fff; border: 1px solid #E2E5E9; border-radius: 8px; overflow: hidden; margin-top: 24px; }
+        .ch-scorer-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-bottom: 1px solid #EEF0F2; }
+        .ch-scorer-item:last-child { border-bottom: none; }
+        .ch-scorer-item:hover { background: #F8F9FA; }
+        .ch-scorer-rank { font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 700; color: #8896A6; width: 20px; text-align: center; }
+        .ch-scorer-rank.top { color: #F59E0B; }
+        .ch-scorer-photo { width: 32px; height: 32px; border-radius: 50%; background: #F2F3F5; overflow: hidden; flex-shrink: 0; }
+        .ch-scorer-photo img { width: 100%; height: 100%; object-fit: cover; }
+        .ch-scorer-info { flex: 1; }
+        .ch-scorer-name { font-size: 13px; font-weight: 600; }
+        .ch-scorer-team { font-size: 10px; color: #8896A6; display: flex; align-items: center; gap: 4px; }
+        .ch-scorer-team img { width: 12px; height: 12px; }
+        .ch-scorer-goals { font-family: 'Oswald', sans-serif; font-size: 16px; font-weight: 700; color: #00965E; }
+
+        @media (max-width: 900px) {
+            .ch-grid { grid-template-columns: 1fr; }
+            .ch-matches { position: static; }
+        }
         @media (max-width: 768px) {
-            .champ-hero-content { flex-direction: column; text-align: center; }
-            .champ-info h1 { font-size: 22px; }
-            .rm-date { width: 70px; font-size: 11px; }
-            .rm-home, .rm-away { font-size: 12px; }
-            .rm-score { font-size: 15px; min-width: 50px; }
-            .standings-table { font-size: 12px; }
-            .standings-table th, .standings-table td { padding: 8px 6px; }
+            .ch-hero h1 { font-size: 20px; }
+            .st-table td, .st-table th { padding: 6px 5px; font-size: 11px; }
+            .ch-match-row { font-size: 12px; }
         }
     </style>
 </head>
@@ -96,30 +106,36 @@
         </ul></div></nav>
     </header>
 
-    <section class="champ-hero"><div class="container">
-        <div class="champ-hero-content">
-            <div class="champ-logo"><i class="fas fa-trophy"></i></div>
-            <div class="champ-info">
+    <section class="ch-hero"><div class="container">
+        <div class="ch-hero-inner">
+            <div class="ch-logo"><i class="fas fa-trophy"></i></div>
+            <div>
                 <h1 id="champName">Carregando...</h1>
-                <div class="champ-meta" id="champMeta"></div>
+                <div class="ch-sub" id="champMeta"></div>
             </div>
         </div>
     </div></section>
 
-    <div class="champ-tabs" id="champTabs">
-        <div class="container" style="display:flex">
-            <button class="champ-tab active" data-tab="matches"><i class="fas fa-calendar"></i> Jogos</button>
-            <button class="champ-tab" data-tab="standings"><i class="fas fa-list-ol"></i> Classificação</button>
-        </div>
-    </div>
+    <main><div class="container">
+        <div class="ch-grid">
+            <!-- LEFT: Standings -->
+            <div>
+                <div class="ch-standings" id="standingsBox">
+                    <div class="loading-state"><div class="spinner"></div></div>
+                </div>
+                <!-- Scorers below standings -->
+                <div class="ch-scorers" id="scorersBox" style="display:none">
+                    <div class="ch-standings-title"><i class="fas fa-futbol"></i> Artilharia</div>
+                    <div id="scorersList"></div>
+                </div>
+            </div>
 
-    <main class="champ-content"><div class="container">
-        <div class="champ-panel active" id="panel-matches">
-            <div id="roundSelector"></div>
-            <div id="roundMatches"><div class="loading-state"><div class="spinner"></div><p>Carregando jogos...</p></div></div>
-        </div>
-        <div class="champ-panel" id="panel-standings">
-            <div id="standingsContainer"><div class="loading-state"><div class="spinner"></div><p>Carregando classificação...</p></div></div>
+            <!-- RIGHT: Matches by round -->
+            <div>
+                <div class="ch-matches" id="matchesBox">
+                    <div class="loading-state"><div class="spinner"></div></div>
+                </div>
+            </div>
         </div>
     </div></main>
 
@@ -127,239 +143,157 @@
 
     <script>
     const CACHE_BASE = window.location.origin + '/cache';
-    const API_KEY = 'cf85a77dbbmsh438760ef71d5715p13923fjsnc2f2878572d2';
-    const API_HOST = 'allsportsapi2.p.rapidapi.com';
-
-    const Page = {
-        tournamentId: null,
-        tournamentName: '',
-        data: null,
-        currentViewRound: null,
+    const P = {
+        tid: null, name: '', data: null, round: null,
 
         async init() {
             const params = new URLSearchParams(window.location.search);
-            this.tournamentId = parseInt(params.get('id'));
-            this.tournamentName = decodeURIComponent(params.get('name') || '');
-            const tab = params.get('tab');
-
-            document.getElementById('champName').textContent = this.tournamentName;
-            document.title = `${this.tournamentName} - Papo de Bola`;
-
-            // Setup tabs
-            document.querySelectorAll('.champ-tab').forEach(t => {
-                t.addEventListener('click', () => {
-                    document.querySelectorAll('.champ-tab').forEach(x => x.classList.remove('active'));
-                    document.querySelectorAll('.champ-panel').forEach(x => x.classList.remove('active'));
-                    t.classList.add('active');
-                    document.getElementById('panel-' + t.dataset.tab).classList.add('active');
-                });
-            });
-
-            if (tab === 'standings') {
-                document.querySelectorAll('.champ-tab').forEach(x => x.classList.remove('active'));
-                document.querySelectorAll('.champ-panel').forEach(x => x.classList.remove('active'));
-                document.querySelector('[data-tab="standings"]').classList.add('active');
-                document.getElementById('panel-standings').classList.add('active');
-            }
-
-            await this.loadData();
-        },
-
-        async loadData() {
-            // Try cache first
-            try {
-                const res = await fetch(`${CACHE_BASE}/champ_${this.tournamentId}.json?_=${Date.now()}`);
-                if (res.ok) {
-                    this.data = await res.json();
-                    document.getElementById('champMeta').textContent = `Rodada atual: ${this.data.currentRound || '?'}`;
-                    this.renderMatches();
-                    this.renderStandings();
-                    return;
-                }
-            } catch {}
-
-            // Fallback: fetch from API directly
-            await this.loadFromAPI();
-        },
-
-        async loadFromAPI() {
-            document.getElementById('champMeta').textContent = 'Carregando dados da API...';
-            // Find season ID from config
-            const CONFIG_MAP = {325:87678,390:89840,373:89353,384:87760,480:87770,7:76953,679:76984,17:76986,8:77559,23:76457,35:77333,34:77356,372:86993,92:86674,379:87236,377:86736,382:86658,380:87395,1596:91324};
-            const seasonId = CONFIG_MAP[this.tournamentId];
-            if (!seasonId) {
-                document.getElementById('roundMatches').innerHTML = '<div class="no-matches"><p>Campeonato sem dados disponíveis no cache. Aguarde a próxima atualização.</p></div>';
-                return;
-            }
+            this.tid = parseInt(params.get('id'));
+            this.name = decodeURIComponent(params.get('name') || '');
+            document.getElementById('champName').textContent = this.name;
+            document.title = `${this.name} - Papo de Bola`;
 
             try {
-                const res = await fetch(`https://${API_HOST}/api/tournament/${this.tournamentId}/season/${seasonId}/standings/total`, {
-                    headers: { 'x-rapidapi-key': API_KEY, 'x-rapidapi-host': API_HOST }
-                });
-                if (res.ok) {
-                    const d = await res.json();
-                    this.data = { standings: d.standings?.map(g => ({ name: g.name || '', rows: (g.rows||[]).map(r => ({ pos: r.position, team: r.team?.name, teamId: r.team?.id, pts: r.points, matches: r.matches, wins: r.wins, draws: r.draws, losses: r.losses, gf: r.scoresFor, ga: r.scoresAgainst, gd: r.scoreDiffFormatted, promo: r.promotion?.text || '' })) })) };
-                    this.renderStandings();
-                }
+                const res = await fetch(`${CACHE_BASE}/champ_${this.tid}.json?_=${Date.now()}`);
+                if (res.ok) this.data = await res.json();
             } catch {}
-        },
 
-        renderMatches() {
-            if (!this.data?.matchesByRound) {
-                document.getElementById('roundMatches').innerHTML = '<div class="no-matches"><i class="fas fa-calendar-times"></i><p>Jogos não disponíveis</p></div>';
-                return;
+            if (this.data) {
+                document.getElementById('champMeta').textContent = this.data.currentRound ? `Rodada ${this.data.currentRound} de ${this.data.rounds?.length || '?'}` : '';
+                this.round = this.data.currentRound || 1;
+                this.renderStandings();
+                this.renderMatches();
+                this.renderScorers();
+            } else {
+                document.getElementById('standingsBox').innerHTML = '<div style="padding:24px;text-align:center;color:#8896A6">Dados não disponíveis no cache. Aguarde a próxima atualização.</div>';
+                document.getElementById('matchesBox').innerHTML = '<div style="padding:24px;text-align:center;color:#8896A6">Sem dados</div>';
             }
-
-            const rounds = Object.keys(this.data.matchesByRound).map(Number).sort((a,b) => a - b);
-            const current = this.data.currentRound || rounds[rounds.length - 1];
-            this.currentViewRound = current;
-
-            this.renderRoundSelector(rounds, current);
-            this.renderRoundMatches(current);
-        },
-
-        renderRoundSelector(rounds, activeRound) {
-            const container = document.getElementById('roundSelector');
-            container.innerHTML = `
-                <div class="round-nav">
-                    <button onclick="Page.prevRound()"><i class="fas fa-chevron-left"></i></button>
-                    <span id="roundLabel">Rodada ${activeRound}</span>
-                    <button onclick="Page.nextRound()"><i class="fas fa-chevron-right"></i></button>
-                </div>
-                <div style="display:flex;gap:4px;flex-wrap:wrap">
-                    ${(this.data.rounds || rounds).map(r => {
-                        const hasCached = this.data.matchesByRound[r];
-                        const isCurrent = r === this.data.currentRound;
-                        return `<button class="round-btn ${r === activeRound ? 'active' : ''} ${isCurrent ? 'current' : ''}" data-round="${r}" onclick="Page.goToRound(${r})" ${!hasCached ? 'style="opacity:0.4"' : ''}>${r}</button>`;
-                    }).join('')}
-                </div>
-            `;
-        },
-
-        renderRoundMatches(round) {
-            const container = document.getElementById('roundMatches');
-            const matches = this.data.matchesByRound[round];
-
-            document.getElementById('roundLabel').textContent = `Rodada ${round}`;
-            document.querySelectorAll('.round-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.round) === round));
-
-            if (!matches || matches.length === 0) {
-                container.innerHTML = '<div class="no-matches"><p>Sem jogos para esta rodada no cache</p></div>';
-                return;
-            }
-
-            container.innerHTML = matches.map(m => {
-                const dt = m.timestamp ? new Date(m.timestamp * 1000) : null;
-                const dateStr = dt ? dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '';
-                const timeStr = dt ? dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
-                const isFinished = m.status === 'finished';
-                const isLive = m.status === 'inprogress';
-                const hasScore = m.homeScore !== null;
-
-                return `
-                    <div class="round-match ${isLive ? 'is-live' : ''}">
-                        <div class="rm-date">
-                            <div>${dateStr}</div>
-                            <div>${timeStr}</div>
-                            ${isLive ? '<div class="rm-status"><span class="live-dot" style="width:5px;height:5px;margin-right:3px"></span>AO VIVO</div>' : ''}
-                            ${isFinished ? '<div class="rm-status finished">Encerrado</div>' : ''}
-                        </div>
-                        <div class="rm-home">
-                            <span>${m.home}</span>
-                            ${m.homeId ? `<img class="rm-team-logo" src="/img/team/${m.homeId}/image" alt="" onerror="this.style.display='none'">` : ''}
-                        </div>
-                        <div class="rm-score ${!hasScore ? 'pending' : ''}">
-                            ${hasScore ? `${m.homeScore} - ${m.awayScore}` : `${timeStr}`}
-                        </div>
-                        <div class="rm-away">
-                            ${m.awayId ? `<img class="rm-team-logo" src="/img/team/${m.awayId}/image" alt="" onerror="this.style.display='none'">` : ''}
-                            <span>${m.away}</span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        },
-
-        goToRound(round) {
-            if (this.data.matchesByRound[round]) {
-                this.currentViewRound = round;
-                this.renderRoundMatches(round);
-            }
-        },
-
-        prevRound() {
-            const rounds = Object.keys(this.data.matchesByRound).map(Number).sort((a,b) => a - b);
-            const idx = rounds.indexOf(this.currentViewRound);
-            if (idx > 0) this.goToRound(rounds[idx - 1]);
-        },
-
-        nextRound() {
-            const rounds = Object.keys(this.data.matchesByRound).map(Number).sort((a,b) => a - b);
-            const idx = rounds.indexOf(this.currentViewRound);
-            if (idx < rounds.length - 1) this.goToRound(rounds[idx + 1]);
         },
 
         renderStandings() {
-            const container = document.getElementById('standingsContainer');
-            if (!this.data?.standings || this.data.standings.length === 0) {
-                container.innerHTML = '<div class="no-matches"><i class="fas fa-list"></i><p>Classificação não disponível</p></div>';
-                return;
-            }
-
-            const isBR = [325, 390].includes(this.tournamentId);
-            let html = '';
+            const box = document.getElementById('standingsBox');
+            if (!this.data?.standings?.length) { box.innerHTML = '<div style="padding:20px;text-align:center;color:#8896A6">Classificação indisponível</div>'; return; }
+            const isBR = [325, 390].includes(this.tid);
+            let html = '<div class="ch-standings-title"><i class="fas fa-list-ol"></i> Classificação</div>';
 
             this.data.standings.forEach((group, gi) => {
-                if (this.data.standings.length > 1 && group.name) {
-                    html += `<h3 style="font-family:'Oswald',sans-serif;font-size:16px;text-transform:uppercase;margin:20px 0 10px">${group.name}</h3>`;
-                }
+                if (this.data.standings.length > 1 && group.name) html += `<div style="padding:10px 16px;font-family:'Oswald',sans-serif;font-size:12px;text-transform:uppercase;color:#00965E;background:#F2F3F5;border-bottom:1px solid #E2E5E9">${group.name}</div>`;
 
-                html += `<table class="standings-table"><thead><tr>
-                    <th>#</th><th>Time</th><th>P</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th><th>SG</th>
-                </tr></thead><tbody>`;
+                html += '<table class="st-table"><thead><tr><th>#</th><th>Time</th><th>P</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th><th>SG</th></tr></thead><tbody>';
 
                 group.rows.forEach((r, i) => {
                     const pos = r.pos || (i + 1);
-                    let zone = '';
+                    let z = '';
                     if (isBR) {
-                        if (r.promo?.includes('Libertadores')) zone = 'zone-lib';
-                        else if (r.promo?.includes('Sul-Americana') || r.promo?.includes('Sudamericana')) zone = 'zone-sula';
-                        else if (r.promo?.includes('Rebaixamento') || r.promo?.includes('Relegation')) zone = 'zone-reb';
-                        else if (pos <= 4) zone = 'zone-lib';
-                        else if (pos <= 6) zone = 'zone-sula';
-                        else if (pos >= 17 && group.rows.length >= 20) zone = 'zone-reb';
+                        if (r.promo?.includes('Libertadores') || (!r.promo && pos <= 4)) z = 'zl';
+                        else if (r.promo?.includes('Sul-Americana') || r.promo?.includes('Sudamericana') || (!r.promo && pos <= 6 && pos > 4)) z = 'zs';
+                        else if (r.promo?.includes('Rebaixamento') || r.promo?.includes('Relegation') || (!r.promo && pos >= 17 && group.rows.length >= 20)) z = 'zr';
                     }
-
                     html += `<tr>
-                        <td>${zone ? `<span class="zone-bar ${zone}"></span>` : ''}${pos}</td>
-                        <td><div class="team-cell">${r.teamId ? `<img src="/img/team/${r.teamId}/image" alt="" onerror="this.style.display='none'">` : ''} ${r.team}</div></td>
-                        <td class="pts">${r.pts}</td>
-                        <td>${r.matches}</td>
-                        <td>${r.wins}</td>
-                        <td>${r.draws}</td>
-                        <td>${r.losses}</td>
-                        <td>${r.gf || 0}</td>
-                        <td>${r.ga || 0}</td>
-                        <td style="font-weight:600">${r.gd}</td>
+                        <td><span class="st-pos">${z ? `<span class="st-zone ${z}"></span>` : ''}${pos}</span></td>
+                        <td><div class="st-team">${r.teamId ? `<img src="/img/team/${r.teamId}/image" alt="" onerror="this.style.display='none'">` : ''}${r.team}</div></td>
+                        <td class="st-pts">${r.pts}</td><td>${r.matches}</td><td>${r.wins}</td><td>${r.draws}</td><td>${r.losses}</td>
+                        <td>${r.gf||0}</td><td>${r.ga||0}</td><td style="font-weight:600">${r.gd}</td>
                     </tr>`;
                 });
-
                 html += '</tbody></table>';
-
-                if (isBR) {
-                    html += `<div class="standings-legend">
-                        <span><span class="legend-dot" style="background:#00965E"></span> Libertadores</span>
-                        <span><span class="legend-dot" style="background:#1A73E8"></span> Sul-Americana</span>
-                        <span><span class="legend-dot" style="background:#E8312A"></span> Rebaixamento</span>
-                    </div>`;
-                }
             });
 
-            container.innerHTML = html;
+            if (isBR) html += '<div class="st-legend"><span class="l-lib">Libertadores</span><span class="l-sul">Sul-Americana</span><span class="l-reb">Rebaixamento</span></div>';
+            box.innerHTML = html;
+        },
+
+        renderMatches() {
+            const box = document.getElementById('matchesBox');
+            if (!this.data?.matchesByRound || Object.keys(this.data.matchesByRound).length === 0) {
+                box.innerHTML = '<div style="padding:20px;text-align:center;color:#8896A6">Jogos indisponíveis</div>';
+                return;
+            }
+            this.showRound(this.round);
+        },
+
+        showRound(r) {
+            this.round = r;
+            const box = document.getElementById('matchesBox');
+            const matches = this.data.matchesByRound[r];
+            const allRounds = Object.keys(this.data.matchesByRound).map(Number).sort((a,b) => a-b);
+            const canPrev = allRounds.indexOf(r) > 0;
+            const canNext = allRounds.indexOf(r) < allRounds.length - 1;
+
+            let html = `<div class="ch-round-header">
+                <span>Rodada ${r}</span>
+                <div class="ch-round-nav">
+                    <button ${canPrev ? `onclick="P.prevRound()"` : 'disabled style="opacity:0.3"'}><i class="fas fa-chevron-left"></i></button>
+                    <button ${canNext ? `onclick="P.nextRound()"` : 'disabled style="opacity:0.3"'}><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>`;
+
+            if (!matches || matches.length === 0) {
+                html += '<div style="padding:20px;text-align:center;color:#8896A6;font-size:13px">Sem jogos nesta rodada</div>';
+            } else {
+                matches.forEach(m => {
+                    const dt = m.timestamp ? new Date(m.timestamp * 1000) : null;
+                    const day = dt ? dt.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' }) : '';
+                    const time = dt ? dt.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }) : '';
+                    const fin = m.status === 'finished';
+                    const live = m.status === 'inprogress';
+                    const has = m.homeScore !== null;
+
+                    const hWin = has && m.homeScore > m.awayScore;
+                    const aWin = has && m.awayScore > m.homeScore;
+
+                    html += `<div class="ch-match ${live ? 'live' : ''}">
+                        <div class="ch-match-date">${day}<br>${time}${live ? '<br><span class="ch-match-status"><span class="live-dot" style="width:5px;height:5px"></span> LIVE</span>' : ''}</div>
+                        <div class="ch-match-teams">
+                            <div class="ch-match-row">
+                                ${m.homeId ? `<img src="/img/team/${m.homeId}/image" alt="" onerror="this.style.display='none'">` : ''}
+                                <span>${m.home}</span>
+                                ${has ? `<span class="score ${hWin?'win':''}">${m.homeScore}</span>` : ''}
+                            </div>
+                            <div class="ch-match-row">
+                                ${m.awayId ? `<img src="/img/team/${m.awayId}/image" alt="" onerror="this.style.display='none'">` : ''}
+                                <span>${m.away}</span>
+                                ${has ? `<span class="score ${aWin?'win':''}">${m.awayScore}</span>` : ''}
+                                ${!has ? `<span class="ch-match-pending">${time}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>`;
+                });
+            }
+
+            box.innerHTML = html;
+        },
+
+        prevRound() {
+            const allRounds = Object.keys(this.data.matchesByRound).map(Number).sort((a,b) => a-b);
+            const idx = allRounds.indexOf(this.round);
+            if (idx > 0) this.showRound(allRounds[idx - 1]);
+        },
+
+        nextRound() {
+            const allRounds = Object.keys(this.data.matchesByRound).map(Number).sort((a,b) => a-b);
+            const idx = allRounds.indexOf(this.round);
+            if (idx < allRounds.length - 1) this.showRound(allRounds[idx + 1]);
+        },
+
+        renderScorers() {
+            if (!this.data?.topScorers?.length) return;
+            document.getElementById('scorersBox').style.display = 'block';
+            document.getElementById('scorersList').innerHTML = this.data.topScorers.map((s, i) => `
+                <div class="ch-scorer-item">
+                    <span class="ch-scorer-rank ${i < 3 ? 'top' : ''}">${i + 1}</span>
+                    <div class="ch-scorer-photo">${s.playerId ? `<img src="/img/player/${s.playerId}/image" alt="" onerror="this.outerHTML='<i class=\\'fas fa-user\\' style=\\'color:#8896A6;font-size:14px;display:flex;align-items:center;justify-content:center;width:100%;height:100%\\'></i>'">` : ''}</div>
+                    <div class="ch-scorer-info">
+                        <div class="ch-scorer-name">${s.name}</div>
+                        <div class="ch-scorer-team">${s.teamId ? `<img src="/img/team/${s.teamId}/image" alt="">` : ''}${s.team}</div>
+                    </div>
+                    <span class="ch-scorer-goals">${s.goals}</span>
+                </div>
+            `).join('');
         },
     };
 
-    document.addEventListener('DOMContentLoaded', () => Page.init());
+    document.addEventListener('DOMContentLoaded', () => P.init());
     </script>
 </body>
 </html>

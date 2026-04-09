@@ -51,11 +51,8 @@ async function main() {
             champData.rounds = roundsData.rounds.map(r => r.round);
             console.log(`  ${t.name}: ${champData.rounds.length} rounds, current: ${champData.currentRound}`);
 
-            // Fetch last 3 rounds + next 2 rounds of matches
-            const roundsToFetch = [];
-            for (let r = Math.max(1, champData.currentRound - 3); r <= Math.min(champData.rounds.length, champData.currentRound + 2); r++) {
-                roundsToFetch.push(r);
-            }
+            // Fetch ALL rounds
+            const roundsToFetch = champData.rounds.slice();
 
             champData.matchesByRound = {};
             for (const round of roundsToFetch) {
@@ -100,6 +97,33 @@ async function main() {
                 })),
             }));
             console.log(`    Standings: ${champData.standings[0]?.rows?.length || 0} teams`);
+        }
+
+        // Get top scorers from top teams
+        if (champData.standings?.[0]?.rows?.length) {
+            champData.topScorers = [];
+            const topTeams = champData.standings[0].rows.slice(0, 6);
+            for (const row of topTeams) {
+                const bp = await fetchAPI(`team/${row.teamId}/tournament/${t.id}/season/${t.seasonId}/best-players`);
+                if (bp?.topPlayers?.goals) {
+                    bp.topPlayers.goals.forEach(p => {
+                        champData.topScorers.push({
+                            name: p.player?.name || p.player?.shortName,
+                            playerId: p.player?.id,
+                            team: row.team,
+                            teamId: row.teamId,
+                            goals: p.statistics?.goals || 0,
+                        });
+                    });
+                }
+            }
+            // Dedupe, sort, top 10
+            const seen = new Set();
+            champData.topScorers = champData.topScorers
+                .filter(s => { if (seen.has(s.playerId)) return false; seen.add(s.playerId); return true; })
+                .sort((a, b) => b.goals - a.goals)
+                .slice(0, 10);
+            console.log(`    Top scorers: ${champData.topScorers.length}`);
         }
 
         fs.writeFileSync(cacheFile, JSON.stringify(champData));
