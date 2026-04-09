@@ -119,9 +119,23 @@ site-papodebola/
 - **Uso**: Fallback de imagens quando não há thumbnail de partida
 - **Key**: Compartilhada com projeto automacao-site
 
-### RSS Feeds
-- **Gazeta Esportiva**: `https://www.gazetaesportiva.com/feed/`
-- **Torcedores**: `https://www.torcedores.com/feed`
+### RSS Feeds (7 ativos)
+- **Torcedores**: `https://www.torcedores.com/feed` (20/dia, BR geral)
+- **Terra Esportes**: `https://www.terra.com.br/esportes/futebol/rss.xml` (10/dia, BR geral)
+- **Trivela**: `https://trivela.com.br/feed/` (2/dia, análises BR+Europa)
+- **Futebol Latino**: `https://futebolatino.com.br/feed/` (2/dia, Libertadores)
+- **BBC Sport**: `https://feeds.bbci.co.uk/sport/football/rss.xml` (28/dia, internacional EN)
+- **The Guardian**: `https://www.theguardian.com/football/rss` (16/dia, internacional EN)
+- **Meu Timão**: `https://www.meutimao.com.br/feed` (16/dia, Corinthians)
+
+### Fonte padrão
+- **Open Sans 400** em todo o site (sem Oswald)
+- Google Fonts: `family=Open+Sans:wght@400;500;600;700`
+
+### Skill Humanizer
+- Integrada no prompt de geração de artigos
+- Remove padrões de escrita de IA (palavras proibidas, estruturas genéricas)
+- Tom de conversa entre amigos que entendem de futebol
 
 ## Sistema de Cache (cron)
 
