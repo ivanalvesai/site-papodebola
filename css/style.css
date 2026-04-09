@@ -1676,4 +1676,75 @@ h1, h2, h3, h4 {
 .next-match-widget .nm-date { font-size: 12px; color: #8896A6; }
 .next-match-widget .nm-countdown { font-size: 11px; color: var(--green); font-weight: 600; margin-top: 4px; }
 
+/* Meu Time - Side Panel */
+.teams-panel-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 2000; display: none; backdrop-filter: blur(2px);
+}
+.teams-panel-overlay.active { display: block; }
+
+.teams-panel {
+    position: fixed; top: 0; left: -380px; width: 360px; height: 100vh;
+    background: #fff; z-index: 2001; overflow-y: auto;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.teams-panel.active { left: 0; }
+
+.teams-panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; background: var(--green); color: white;
+    position: sticky; top: 0; z-index: 1;
+}
+.teams-panel-header h3 { font-size: 16px; font-weight: 700; }
+.teams-panel-close {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,0.2); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; cursor: pointer; border: none;
+    transition: background 0.2s;
+}
+.teams-panel-close:hover { background: rgba(255,255,255,0.4); }
+
+.teams-search {
+    padding: 12px 20px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 52px; background: #fff; z-index: 1;
+}
+.teams-search input {
+    width: 100%; padding: 8px 12px; border: 1px solid var(--border);
+    border-radius: 100px; font-size: 13px; outline: none;
+    background: var(--bg-body);
+}
+.teams-search input:focus { border-color: var(--green); }
+
+.teams-section { padding: 0; }
+.teams-section-title {
+    padding: 10px 20px; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--green); background: var(--bg-body);
+    border-bottom: 1px solid var(--border-light);
+    cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+    user-select: none;
+}
+.teams-section-title i { font-size: 10px; transition: transform 0.2s; }
+.teams-section-title.collapsed i { transform: rotate(-90deg); }
+.teams-section-list { display: block; }
+.teams-section-title.collapsed + .teams-section-list { display: none; }
+
+.teams-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px; border-bottom: 1px solid var(--border-light);
+    cursor: pointer; transition: background 0.15s;
+    font-size: 14px; font-weight: 500; color: #1A1D23;
+    text-decoration: none;
+}
+.teams-item:hover { background: var(--bg-body); }
+.teams-item img {
+    width: 24px; height: 24px; object-fit: contain; flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+    .teams-panel { width: 300px; }
+}
+
 ::selection { background: var(--green); color: white; }

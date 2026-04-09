@@ -37,7 +37,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=15">
+    <link rel="stylesheet" href="css/style.css?v=16">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -83,6 +83,9 @@
         <nav class="main-nav" id="mainNav">
             <div class="container">
                 <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="toggleTeamsPanel();return false"><i class="fas fa-shield-alt" style="margin-right:3px"></i> Meu Time</a>
+                    </li>
                     <li class="nav-item active">
                         <a href="/" class="nav-link">Início</a>
                     </li>
@@ -550,19 +553,142 @@
         </div>
     </footer>
 
+    <!-- Teams Panel -->
+    <div class="teams-panel-overlay" id="teamsPanelOverlay" onclick="toggleTeamsPanel()"></div>
+    <div class="teams-panel" id="teamsPanel">
+        <div class="teams-panel-header">
+            <h3><i class="fas fa-shield-alt"></i> Meu Time</h3>
+            <button class="teams-panel-close" onclick="toggleTeamsPanel()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="teams-search">
+            <input type="text" id="teamsSearchInput" placeholder="Buscar time..." oninput="filterTeams(this.value)">
+        </div>
+        <div id="teamsListContainer">
+            <div class="teams-section">
+                <div class="teams-section-title" onclick="this.classList.toggle('collapsed')">Brasileirão Série A <i class="fas fa-chevron-down"></i></div>
+                <div class="teams-section-list" id="teamsSerieA">
+                    <a href="pages/time.html?slug=palmeiras" class="teams-item"><img src="/img/team/1963/image" alt="">Palmeiras</a>
+                    <a href="pages/time.html?slug=flamengo" class="teams-item"><img src="/img/team/5981/image" alt="">Flamengo</a>
+                    <a href="pages/time.html?slug=corinthians" class="teams-item"><img src="/img/team/1957/image" alt="">Corinthians</a>
+                    <a href="pages/time.html?slug=sao-paulo" class="teams-item"><img src="/img/team/1981/image" alt="">São Paulo</a>
+                    <a href="pages/time.html?slug=fluminense" class="teams-item"><img src="/img/team/1961/image" alt="">Fluminense</a>
+                    <a href="pages/time.html?slug=botafogo" class="teams-item"><img src="/img/team/1958/image" alt="">Botafogo</a>
+                    <a href="pages/time.html?slug=santos" class="teams-item"><img src="/img/team/1968/image" alt="">Santos</a>
+                    <a href="pages/time.html?slug=vasco" class="teams-item"><img src="/img/team/1952/image" alt="">Vasco</a>
+                    <a href="pages/time.html?slug=gremio" class="teams-item"><img src="/img/team/1954/image" alt="">Grêmio</a>
+                    <a href="pages/time.html?slug=internacional" class="teams-item"><img src="/img/team/1959/image" alt="">Internacional</a>
+                    <a href="pages/time.html?slug=atletico-mg" class="teams-item"><img src="/img/team/1977/image" alt="">Atlético-MG</a>
+                    <a href="pages/time.html?slug=cruzeiro" class="teams-item"><img src="/img/team/1982/image" alt="">Cruzeiro</a>
+                    <a href="pages/time.html?slug=bahia" class="teams-item"><img src="/img/team/1955/image" alt="">Bahia</a>
+                    <a href="pages/time.html?slug=fortaleza" class="teams-item"><img src="/img/team/1962/image" alt="">Fortaleza</a>
+                    <a href="pages/time.html?slug=athletico-pr" class="teams-item"><img src="/img/team/1967/image" alt="">Athletico-PR</a>
+                    <a href="pages/time.html?slug=bragantino" class="teams-item"><img src="/img/team/1998/image" alt="">Red Bull Bragantino</a>
+                    <a href="pages/time.html?slug=coritiba" class="teams-item"><img src="/img/team/1999/image" alt="">Coritiba</a>
+                    <a href="pages/time.html?slug=vitoria" class="teams-item"><img src="/img/team/1974/image" alt="">Vitória</a>
+                    <a href="pages/time.html?slug=juventude" class="teams-item"><img src="/img/team/1979/image" alt="">Juventude</a>
+                    <a href="pages/time.html?slug=cuiaba" class="teams-item"><img src="/img/team/7315/image" alt="">Cuiabá</a>
+                </div>
+            </div>
+            <div class="teams-section">
+                <div class="teams-section-title" onclick="this.classList.toggle('collapsed')">Brasileirão Série B <i class="fas fa-chevron-down"></i></div>
+                <div class="teams-section-list" id="teamsSerieB">
+                    <a href="pages/time.html?slug=sport" class="teams-item"><img src="/img/team/1970/image" alt="">Sport</a>
+                    <a href="pages/time.html?slug=ceara" class="teams-item"><img src="/img/team/1948/image" alt="">Ceará</a>
+                    <a href="pages/time.html?slug=goias" class="teams-item"><img src="/img/team/1960/image" alt="">Goiás</a>
+                    <a href="pages/time.html?slug=america-mg" class="teams-item"><img src="/img/team/1973/image" alt="">América-MG</a>
+                    <a href="pages/time.html?slug=chapecoense" class="teams-item"><img src="/img/team/7344/image" alt="">Chapecoense</a>
+                    <a href="pages/time.html?slug=criciuma" class="teams-item"><img src="/img/team/1975/image" alt="">Criciúma</a>
+                    <a href="pages/time.html?slug=avai" class="teams-item"><img src="/img/team/1946/image" alt="">Avaí</a>
+                    <a href="pages/time.html?slug=ponte-preta" class="teams-item"><img src="/img/team/1986/image" alt="">Ponte Preta</a>
+                    <a href="pages/time.html?slug=guarani" class="teams-item"><img src="/img/team/1965/image" alt="">Guarani</a>
+                    <a href="pages/time.html?slug=operario" class="teams-item"><img src="/img/team/36287/image" alt="">Operário-PR</a>
+                    <a href="pages/time.html?slug=novorizontino" class="teams-item"><img src="/img/team/36406/image" alt="">Novorizontino</a>
+                    <a href="pages/time.html?slug=mirassol" class="teams-item"><img src="/img/team/36409/image" alt="">Mirassol</a>
+                    <a href="pages/time.html?slug=ituano" class="teams-item"><img src="/img/team/36286/image" alt="">Ituano</a>
+                    <a href="pages/time.html?slug=vila-nova" class="teams-item"><img src="/img/team/1984/image" alt="">Vila Nova</a>
+                    <a href="pages/time.html?slug=csa" class="teams-item"><img src="/img/team/7292/image" alt="">CSA</a>
+                    <a href="pages/time.html?slug=sampaio-correa" class="teams-item"><img src="/img/team/7310/image" alt="">Sampaio Corrêa</a>
+                </div>
+            </div>
+            <div class="teams-section">
+                <div class="teams-section-title" onclick="this.classList.toggle('collapsed')">Premier League <i class="fas fa-chevron-down"></i></div>
+                <div class="teams-section-list">
+                    <a href="pages/time.html?slug=manchester-city" class="teams-item"><img src="/img/team/17/image" alt="">Manchester City</a>
+                    <a href="pages/time.html?slug=arsenal" class="teams-item"><img src="/img/team/42/image" alt="">Arsenal</a>
+                    <a href="pages/time.html?slug=liverpool" class="teams-item"><img src="/img/team/44/image" alt="">Liverpool</a>
+                    <a href="pages/time.html?slug=manchester-united" class="teams-item"><img src="/img/team/35/image" alt="">Manchester United</a>
+                    <a href="pages/time.html?slug=chelsea" class="teams-item"><img src="/img/team/38/image" alt="">Chelsea</a>
+                    <a href="pages/time.html?slug=tottenham" class="teams-item"><img src="/img/team/33/image" alt="">Tottenham</a>
+                </div>
+            </div>
+            <div class="teams-section">
+                <div class="teams-section-title" onclick="this.classList.toggle('collapsed')">La Liga <i class="fas fa-chevron-down"></i></div>
+                <div class="teams-section-list">
+                    <a href="pages/time.html?slug=real-madrid" class="teams-item"><img src="/img/team/2829/image" alt="">Real Madrid</a>
+                    <a href="pages/time.html?slug=barcelona" class="teams-item"><img src="/img/team/2817/image" alt="">Barcelona</a>
+                    <a href="pages/time.html?slug=atletico-madrid" class="teams-item"><img src="/img/team/2836/image" alt="">Atlético de Madrid</a>
+                </div>
+            </div>
+            <div class="teams-section">
+                <div class="teams-section-title" onclick="this.classList.toggle('collapsed')">Serie A (Itália) <i class="fas fa-chevron-down"></i></div>
+                <div class="teams-section-list">
+                    <a href="pages/time.html?slug=juventus" class="teams-item"><img src="/img/team/2687/image" alt="">Juventus</a>
+                    <a href="pages/time.html?slug=milan" class="teams-item"><img src="/img/team/2692/image" alt="">Milan</a>
+                    <a href="pages/time.html?slug=inter-milan" class="teams-item"><img src="/img/team/2697/image" alt="">Inter de Milão</a>
+                    <a href="pages/time.html?slug=napoli" class="teams-item"><img src="/img/team/2714/image" alt="">Napoli</a>
+                </div>
+            </div>
+            <div class="teams-section">
+                <div class="teams-section-title" onclick="this.classList.toggle('collapsed')">Bundesliga <i class="fas fa-chevron-down"></i></div>
+                <div class="teams-section-list">
+                    <a href="pages/time.html?slug=bayern" class="teams-item"><img src="/img/team/2672/image" alt="">Bayern de Munique</a>
+                    <a href="pages/time.html?slug=dortmund" class="teams-item"><img src="/img/team/2673/image" alt="">Borussia Dortmund</a>
+                    <a href="pages/time.html?slug=leverkusen" class="teams-item"><img src="/img/team/2681/image" alt="">Bayer Leverkusen</a>
+                </div>
+            </div>
+            <div class="teams-section">
+                <div class="teams-section-title" onclick="this.classList.toggle('collapsed')">Ligue 1 <i class="fas fa-chevron-down"></i></div>
+                <div class="teams-section-list">
+                    <a href="pages/time.html?slug=psg" class="teams-item"><img src="/img/team/1644/image" alt="">Paris Saint-Germain</a>
+                    <a href="pages/time.html?slug=marseille" class="teams-item"><img src="/img/team/1641/image" alt="">Olympique de Marseille</a>
+                    <a href="pages/time.html?slug=lyon" class="teams-item"><img src="/img/team/1649/image" alt="">Olympique Lyonnais</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Cookie Banner -->
     <div class="cookie-banner" id="cookieBanner" style="display:none">
         <span>Utilizamos cookies para melhorar sua experiência. Ao continuar navegando, você concorda com nossa <a href="pages/privacidade.html">Política de Privacidade</a>.</span>
         <button class="cookie-accept" onclick="document.getElementById('cookieBanner').style.display='none';localStorage.setItem('pdb_cookies','1')">Aceitar</button>
     </div>
 
-    <script src="js/config.js?v=15"></script>
-    <script src="js/api.js?v=15"></script>
-    <script src="js/admin.js?v=15"></script>
-    <script src="js/app.js?v=15"></script>
+    <script src="js/config.js?v=16"></script>
+    <script src="js/api.js?v=16"></script>
+    <script src="js/admin.js?v=16"></script>
+    <script src="js/app.js?v=16"></script>
     <script>
     // Cookie banner
     if(!localStorage.getItem('pdb_cookies'))document.getElementById('cookieBanner').style.display='flex';
+
+    // Teams panel
+    function toggleTeamsPanel(){
+        document.getElementById('teamsPanel').classList.toggle('active');
+        document.getElementById('teamsPanelOverlay').classList.toggle('active');
+        document.body.style.overflow=document.getElementById('teamsPanel').classList.contains('active')?'hidden':'';
+    }
+    function filterTeams(q){
+        const lower=q.toLowerCase();
+        document.querySelectorAll('.teams-item').forEach(item=>{
+            item.style.display=item.textContent.toLowerCase().includes(lower)?'flex':'none';
+        });
+        // Show all sections when searching
+        if(q){
+            document.querySelectorAll('.teams-section-title').forEach(t=>t.classList.remove('collapsed'));
+        }
+    }
+    // Close panel on Escape
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('teamsPanel').classList.contains('active'))toggleTeamsPanel();});
 
     // Fade-in on scroll
     const observer=new IntersectionObserver((entries)=>{
