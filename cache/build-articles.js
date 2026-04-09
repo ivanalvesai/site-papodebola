@@ -84,21 +84,33 @@ async function rewriteWithClaude(title, text) {
             max_tokens: 8000,
             messages: [{
                 role: 'user',
-                content: `Você é um jornalista esportivo brasileiro experiente, com estilo editorial de portal profissional como ge.globo.com. Sua tarefa é criar um ARTIGO COMPLETO E EXTENSO baseado na notícia abaixo.
+                content: `Você é um jornalista esportivo brasileiro experiente e autêntico. Escreva como um ser humano real, com personalidade, opiniões e estilo próprio. Sua tarefa é criar um ARTIGO COMPLETO baseado na notícia abaixo.
 
-REGRAS:
+REGRAS DE CONTEÚDO:
 - Escreva um artigo LONGO e COMPLETO, idealmente com 2000+ palavras
 - Reescreva TUDO com suas próprias palavras, NUNCA copie frases do original
 - Mantenha informações factuais: nomes de jogadores, times, placares, datas
-- Use português do Brasil fluente e natural
-- Estruture em 8-12 parágrafos densos e bem desenvolvidos
-- Inclua: contexto histórico, análise tática, opinião editorial, projeções futuras
-- Cada parágrafo deve ter 4-6 frases completas
-- Crie subtítulos internos usando texto em maiúsculas no início do parágrafo (ex: "O CONTEXTO DA PARTIDA -")
-- Inclua estatísticas, comparações com jogos anteriores e citações contextualizadas
-- Termine com um parágrafo de projeção/análise do que vem pela frente
+- Use português do Brasil fluente, coloquial mas profissional
+- Estruture em 8-12 parágrafos densos
+- Inclua: contexto, análise tática, opinião pessoal, projeções
+- Crie subtítulos internos em maiúsculas (ex: "O CONTEXTO DA PARTIDA -")
 
-TÍTULO: Crie um título impactante, direto e jornalístico (máximo 80 caracteres)
+REGRAS DE HUMANIZAÇÃO (CRÍTICO - siga à risca):
+- NUNCA use estas palavras/expressões de IA: "crucial", "pivotal", "landscape", "tapestry", "testament", "fostering", "showcasing", "delve", "underscores", "highlights the importance", "vibrant", "profound", "groundbreaking", "nestled", "in the heart of", "broader implications", "it is worth noting", "sets the stage", "indelible mark"
+- NUNCA use a estrutura "Não é apenas X, mas também Y"
+- NUNCA use 3 adjetivos seguidos (regra dos três)
+- NUNCA use travessão (—) mais de 1 vez no texto inteiro
+- NUNCA comece parágrafos consecutivos com a mesma estrutura
+- VARIE o tamanho das frases: misture frases curtas e diretas com frases mais longas
+- TENHA OPINIÃO: não seja neutro, reaja aos fatos. "Difícil engolir esse resultado" é melhor que "o resultado foi desfavorável"
+- USE PRIMEIRA PESSOA quando fizer sentido: "confesso que não esperava", "me parece que"
+- SEJA ESPECÍFICO: em vez de "os torcedores ficaram insatisfeitos", diga "a torcida vaiou por 5 minutos após o apito final"
+- NÃO USE voz passiva excessivamente. Prefira "o Palmeiras venceu" a "a vitória foi conquistada pelo Palmeiras"
+- EVITE começar frases com "Além disso", "Adicionalmente", "É importante ressaltar", "Vale destacar"
+- INCLUA detalhes sensoriais: barulho da torcida, clima do estádio, tensão nos acréscimos
+- ESCREVA como se estivesse contando para um amigo no bar que manja de futebol
+
+TÍTULO: Direto, sem floreios, máximo 80 caracteres. Nada de "a saga", "o destino", "a jornada".
 
 Título original: ${title}
 
