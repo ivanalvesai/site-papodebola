@@ -369,23 +369,25 @@ const TEAMS_MAP = {
 };
 
 const COMPETITIONS_MAP = {
+    // Priority order: most specific first
+    'copa do mundo': 'Copa do Mundo',
+    'world cup': 'Copa do Mundo',
+    'mundial 2026': 'Copa do Mundo',
+    'eliminatórias': 'Eliminatórias',
+    'copa américa': 'Copa América',
+    'seleção brasileira': 'Seleção Brasileira',
+    'seleção': 'Seleção Brasileira',
+    'copa do brasil': 'Copa do Brasil',
     'libertadores': 'Copa Libertadores',
     'sudamericana': 'Copa Sudamericana',
-    'copa do brasil': 'Copa do Brasil',
-    'brasileirão': 'Brasileirão',
-    'série a': 'Brasileirão',
-    'série b': 'Brasileirão Série B',
     'champions league': 'Champions League',
     'premier league': 'Premier League',
     'la liga': 'La Liga',
-    'serie a': 'Serie A',
     'bundesliga': 'Bundesliga',
     'ligue 1': 'Ligue 1',
-    'copa do mundo': 'Copa do Mundo',
-    'copa américa': 'Copa América',
-    'eliminatórias': 'Eliminatórias',
-    'seleção': 'Seleção Brasileira',
-    'neymar': 'Seleção Brasileira',
+    'brasileirão': 'Brasileirão',
+    'série a': 'Brasileirão',
+    'série b': 'Brasileirão Série B',
 };
 
 function detectCategoryAndTags(text) {
