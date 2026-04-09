@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Últimas notícias do futebol brasileiro - Brasileirão, Copa do Brasil, Libertadores e mais.">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-    <meta name="robots" content="noindex, nofollow">
+    <meta name="robots" content="index, follow">
     <title>Notícias - Papo de Bola</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -71,6 +71,15 @@
         <div class="container">
             <h1><i class="fas fa-newspaper" style="color:#00965E"></i> Últimas Notícias</h1>
             <p id="newsCount">Carregando...</p>
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center">
+                <input type="text" id="newsSearch" placeholder="Buscar artigo..." style="padding:7px 14px;border:1px solid #E2E5E9;border-radius:100px;font-size:13px;width:220px;background:#fff;outline:none" oninput="filterArticles()">
+                <button class="filter-btn active" data-cat="all" onclick="setCatFilter('all',this)">Todos</button>
+                <button class="filter-btn" data-cat="Futebol Brasileiro" onclick="setCatFilter('Futebol Brasileiro',this)">Brasil</button>
+                <button class="filter-btn" data-cat="Brasileirão" onclick="setCatFilter('Brasileirão',this)">Brasileirão</button>
+                <button class="filter-btn" data-cat="Libertadores" onclick="setCatFilter('Libertadores',this)">Libertadores</button>
+                <button class="filter-btn" data-cat="Mercado da Bola" onclick="setCatFilter('Mercado da Bola',this)">Mercado</button>
+                <button class="filter-btn" data-cat="Futebol Internacional" onclick="setCatFilter('Futebol Internacional',this)">Internacional</button>
+            </div>
         </div>
     </section>
 
@@ -149,9 +158,48 @@
             pagination.innerHTML = pHtml;
         }
 
+        let currentCat = 'all';
+
+        // Check URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlCat = urlParams.get('cat');
+        const urlSearch = urlParams.get('search');
+        if (urlSearch) {
+            document.getElementById('newsSearch').value = urlSearch;
+        }
+        if (urlCat) {
+            currentCat = urlCat;
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.cat === urlCat);
+            });
+        }
+
+        function setCatFilter(cat, btn) {
+            currentCat = cat;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterArticles();
+        }
+
+        function filterArticles() {
+            const search = (document.getElementById('newsSearch').value || '').toLowerCase();
+            let filtered = window._articles || [];
+
+            if (currentCat !== 'all') {
+                filtered = filtered.filter(a => (a.category || '').includes(currentCat));
+            }
+            if (search) {
+                filtered = filtered.filter(a =>
+                    (a.rewrittenTitle || '').toLowerCase().includes(search) ||
+                    (a.rewrittenText || '').toLowerCase().includes(search)
+                );
+            }
+            renderArticles(filtered);
+        }
+
         loadArticles().then(articles => {
             window._articles = articles;
-            renderArticles(articles);
+            filterArticles();
         });
     </script>
 </body>

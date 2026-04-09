@@ -1,0 +1,20 @@
+{
+    "name": "Papo de Bola",
+    "short_name": "PapoDeBola",
+    "description": "Futebol ao vivo, notícias, placares e classificações",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#F2F3F5",
+    "theme_color": "#00965E",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": ["sports", "news"],
+    "lang": "pt-BR"
+}

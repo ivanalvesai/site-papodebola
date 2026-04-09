@@ -1,2 +1,7 @@
 User-agent: *
-Disallow: /
+Allow: /
+Disallow: /cache/
+Disallow: /api/
+Disallow: /pdb-api/
+
+Sitemap: https://papodebola.com.br/sitemap.xml

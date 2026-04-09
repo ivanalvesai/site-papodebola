@@ -65,6 +65,12 @@ const App = {
                 clearTimeout(debounce);
                 debounce = setTimeout(() => this.handleSearch(searchInput.value.trim()), 300);
             });
+            // Enter key goes to noticias page with search
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && searchInput.value.trim()) {
+                    window.location.href = `pages/noticias.html?search=${encodeURIComponent(searchInput.value.trim())}`;
+                }
+            });
         }
     },
 

@@ -60,7 +60,8 @@ function authenticate(req) {
     return SESSIONS[token] || null;
 }
 
-function generateArticleHTML(article) {
+const { generateArticleHTML } = require('./article-template.js');
+function _unused(article) {
     const dateFormatted = article.pubDate
         ? new Date(article.pubDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
         : new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });

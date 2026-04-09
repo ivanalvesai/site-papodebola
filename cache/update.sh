@@ -96,6 +96,10 @@ if [ $((HOUR % 3)) -eq 0 ] || [ ! -f "$CACHE_DIR/articles.json" ]; then
     log "OK: articles ($(stat -c%s $CACHE_DIR/articles.json 2>/dev/null || echo 0) bytes)"
 fi
 
+# 8. Sitemap (after articles)
+log "Generating sitemap..."
+node "$CACHE_DIR/build-sitemap.js" >> "$LOG_FILE" 2>&1
+
 # Write timestamp
 echo "{\"updated\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > "$CACHE_DIR/meta.json"
 
