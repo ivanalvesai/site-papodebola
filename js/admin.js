@@ -55,7 +55,7 @@ const Auth = {
     },
 
     isLoggedIn() {
-        const session = JSON.parse(localStorage.getItem(this.SESSION_KEY) || '{}');
+        const session = JSON.parse(localStorage.getItem('pdb_admin_session') || '{}');
         if (!session.loggedIn) return false;
         if (Date.now() > session.expires) {
             this.logout();
@@ -232,27 +232,43 @@ const Admin = {
         // Focus username
         setTimeout(() => document.getElementById('loginUsername')?.focus(), 100);
 
-        // Handle form
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
+        // Handle form - login via API
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
 
-            if (Auth.login(username, password)) {
-                this.closeLoginModal();
-                this.updateAdminVisibility();
-                this.togglePanel();
-                showToast('Login realizado com sucesso!', 'success');
-            } else {
-                const errorEl = document.getElementById('loginError');
-                errorEl.style.display = 'flex';
-                document.getElementById('loginPassword').value = '';
-                document.getElementById('loginPassword').focus();
+            try {
+                const res = await fetch('/pdb-api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password }),
+                });
+                const data = await res.json();
 
-                // Shake animation
-                const modal = document.querySelector('.login-modal');
-                modal.classList.add('shake');
-                setTimeout(() => modal.classList.remove('shake'), 600);
+                if (res.ok && data.token) {
+                    // Save token and session
+                    localStorage.setItem('pdb_api_token', data.token);
+                    localStorage.setItem('pdb_admin_session', JSON.stringify({
+                        loggedIn: true, username: data.username, role: data.role,
+                        timestamp: Date.now(), expires: Date.now() + 14400000,
+                    }));
+                    this.apiToken = data.token;
+                    this.closeLoginModal();
+                    this.updateAdminVisibility();
+                    this.togglePanel();
+                    showToast(`Bem-vindo, ${data.username}!`, 'success');
+                } else {
+                    const errorEl = document.getElementById('loginError');
+                    errorEl.style.display = 'flex';
+                    document.getElementById('loginPassword').value = '';
+                    document.getElementById('loginPassword').focus();
+                    const modal = document.querySelector('.login-modal');
+                    modal.classList.add('shake');
+                    setTimeout(() => modal.classList.remove('shake'), 600);
+                }
+            } catch {
+                showToast('Erro de conexão com o servidor', 'error');
             }
         });
 
@@ -576,19 +592,10 @@ const Admin = {
 
     async getApiToken() {
         if (this.apiToken) return this.apiToken;
-        // Login to micro API using same credentials
-        const stored = JSON.parse(localStorage.getItem(Auth.CREDENTIALS_KEY) || '{}');
-        try {
-            const res = await fetch('/pdb-api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: stored.username, password: 'admin123' }),
-            });
-            if (!res.ok) return null;
-            const data = await res.json();
-            this.apiToken = data.token;
-            return this.apiToken;
-        } catch { return null; }
+        // Use stored API token from login
+        const stored = localStorage.getItem('pdb_api_token');
+        if (stored) { this.apiToken = stored; return stored; }
+        return null;
     },
 
     async apiCall(endpoint, method = 'GET', body = null) {
@@ -745,8 +752,51 @@ const Admin = {
                         <div class="user-role">${u.role}</div>
                     </div>
                 </div>
+                <div style="display:flex;gap:4px">
+                    <button class="mg-btn edit" onclick="Admin.editUser('${u.username}','${u.role}')" title="Editar"><i class="fas fa-edit"></i></button>
+                    <button class="mg-btn" onclick="Admin.resetUserPassword('${u.username}')" title="Resetar Senha"><i class="fas fa-key"></i></button>
+                    ${u.username !== 'admin' ? `<button class="mg-btn delete" onclick="Admin.deleteUser('${u.username}')" title="Excluir"><i class="fas fa-trash"></i></button>` : ''}
+                </div>
             </div>
         `).join('');
+    },
+
+    async editUser(username, currentRole) {
+        const newRole = currentRole === 'admin' ? 'editor' : 'admin';
+        if (!confirm(`Alterar ${username} de "${currentRole}" para "${newRole}"?`)) return;
+
+        const result = await this.apiCall(`users/${encodeURIComponent(username)}`, 'PUT', { role: newRole });
+        if (result?.message) {
+            showToast(`${username} agora é ${newRole}`, 'success');
+            this.loadUsersList();
+        } else {
+            showToast('Erro: ' + (result?.error || 'desconhecido'), 'error');
+        }
+    },
+
+    async resetUserPassword(username) {
+        const newPass = prompt(`Nova senha para "${username}" (mín. 6 caracteres):`);
+        if (!newPass) return;
+        if (newPass.length < 6) { showToast('Senha deve ter pelo menos 6 caracteres', 'error'); return; }
+
+        const result = await this.apiCall(`users/${encodeURIComponent(username)}`, 'PUT', { password: newPass });
+        if (result?.message) {
+            showToast(`Senha de ${username} alterada!`, 'success');
+        } else {
+            showToast('Erro: ' + (result?.error || 'desconhecido'), 'error');
+        }
+    },
+
+    async deleteUser(username) {
+        if (!confirm(`Excluir o usuário "${username}" permanentemente?`)) return;
+
+        const result = await this.apiCall(`users/${encodeURIComponent(username)}`, 'DELETE');
+        if (result?.message) {
+            showToast(`Usuário ${username} excluído`, 'success');
+            this.loadUsersList();
+        } else {
+            showToast('Erro: ' + (result?.error || 'desconhecido'), 'error');
+        }
     },
 
     async createUser() {
@@ -776,7 +826,8 @@ const Admin = {
 
     handleLogout() {
         this.apiToken = null;
-        Auth.logout();
+        localStorage.removeItem('pdb_api_token');
+        localStorage.removeItem('pdb_admin_session');
         this.closePanel();
         this.updateAdminVisibility();
         showToast('Logout realizado.', 'info');

@@ -344,6 +344,46 @@ const server = http.createServer(async (req, res) => {
         return sendJSON(res, 201, { message: 'User created' });
     }
 
+    const userMatch = pathname.match(/^\/api\/users\/(.+)$/);
+
+    // Edit user (change role or reset password)
+    if (userMatch && req.method === 'PUT') {
+        const user = authenticate(req);
+        if (user?.role !== 'admin') return sendJSON(res, 403, { error: 'Admin only' });
+
+        const targetUsername = decodeURIComponent(userMatch[1]);
+        const body = await parseBody(req);
+        const users = readUsers();
+        const target = users.find(u => u.username === targetUsername);
+        if (!target) return sendJSON(res, 404, { error: 'User not found' });
+
+        if (body.role) target.role = body.role;
+        if (body.password) target.password = hashPass(body.password);
+        if (body.username && body.username !== targetUsername) {
+            if (users.find(u => u.username === body.username)) return sendJSON(res, 409, { error: 'Username already taken' });
+            target.username = body.username;
+        }
+
+        fs.writeFileSync(USERS_FILE, JSON.stringify(users));
+        return sendJSON(res, 200, { message: 'User updated', user: { username: target.username, role: target.role } });
+    }
+
+    // Delete user
+    if (userMatch && req.method === 'DELETE') {
+        const user = authenticate(req);
+        if (user?.role !== 'admin') return sendJSON(res, 403, { error: 'Admin only' });
+
+        const targetUsername = decodeURIComponent(userMatch[1]);
+        if (targetUsername === 'admin') return sendJSON(res, 400, { error: 'Cannot delete main admin' });
+
+        const users = readUsers();
+        const filtered = users.filter(u => u.username !== targetUsername);
+        if (filtered.length === users.length) return sendJSON(res, 404, { error: 'User not found' });
+
+        fs.writeFileSync(USERS_FILE, JSON.stringify(filtered));
+        return sendJSON(res, 200, { message: 'User deleted' });
+    }
+
     sendJSON(res, 404, { error: 'Not found' });
 });
 
