@@ -650,12 +650,18 @@ async function addInternalLinks(postId, categoryId) {
     let content = post.content?.raw || post.content?.rendered || '';
     if (content.includes('Leia também')) return;
 
+    // Use PUBLIC site URLs, not WordPress admin URLs
     let links = '\n<h2>Leia também</h2>\n<ul>\n';
     related.forEach(r => {
-        links += `<li><a href="${r.link}">${r.title?.rendered || r.title}</a></li>\n`;
+        const publicUrl = `https://papodebola.com.br/artigos/${r.slug}.html`;
+        links += `<li><a href="${publicUrl}">${r.title?.rendered || r.title}</a></li>\n`;
     });
     links += '</ul>';
     content += links;
+
+    // Also fix any existing admin.papodebola URLs in content to public URLs
+    content = content.replace(/https:\/\/admin\.papodebola\.com\.br\/([a-z0-9-]+)\//g,
+        'https://papodebola.com.br/artigos/$1.html');
 
     // Update post
     const updateData = JSON.stringify({ content });
@@ -710,10 +716,10 @@ async function main() {
         const items = parseRSS(xml);
         console.log(`  Found ${items.length} articles`);
 
-        // Process only new articles (max 3 per feed per run - each article is 2000+ words)
+        // Process only new articles (max 1 per feed per run = ~5/day with 7 feeds)
         let processed = 0;
         for (const item of items) {
-            if (processed >= 3) break;
+            if (processed >= 1) break;
             if (existingTitles.has(item.title)) continue;
             if (!item.title || item.fullText.length < 100) continue;
 

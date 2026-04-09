@@ -43,13 +43,16 @@ foreach ($posts as $post) {
         if (!empty($related)) {
             $links = "\n<h2>Leia também</h2>\n<ul>\n";
             foreach ($related as $r) {
-                $url = get_permalink($r->ID);
-                $links .= '<li><a href="' . $url . '">' . $r->post_title . "</a></li>\n";
+                $public_url = 'https://papodebola.com.br/artigos/' . $r->post_name . '.html';
+                $links .= '<li><a href="' . $public_url . '">' . $r->post_title . "</a></li>\n";
             }
             $links .= "</ul>";
             $new_content .= $links;
             $changes[] = '+3 internal links';
         }
+
+        // Fix any admin.papodebola URLs to public
+        $new_content = preg_replace('#https://admin\.papodebola\.com\.br/([a-z0-9-]+)/#', 'https://papodebola.com.br/artigos/$1.html', $new_content);
     }
 
     // SAVE
