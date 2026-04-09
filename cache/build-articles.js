@@ -136,8 +136,43 @@ Responda APENAS no formato JSON:
     });
 }
 
+// Map Brazilian teams to their real jersey descriptions
+const TEAM_JERSEYS = {
+    'corinthians': 'wearing white jersey with black collar and black shorts, Corinthians style uniform',
+    'palmeiras': 'wearing green jersey with white details and white shorts, Palmeiras style uniform',
+    'flamengo': 'wearing red and black horizontal striped jersey and white shorts, Flamengo style uniform',
+    'são paulo': 'wearing white jersey with red and black horizontal stripe on chest, São Paulo style uniform',
+    'santos': 'wearing all white jersey and white shorts, Santos FC style uniform',
+    'vasco': 'wearing white jersey with black diagonal stripe and black shorts, Vasco style uniform',
+    'fluminense': 'wearing jersey with maroon green and white vertical stripes, Fluminense style uniform',
+    'botafogo': 'wearing black and white vertical striped jersey, Botafogo style uniform',
+    'grêmio': 'wearing blue jersey with black vertical stripes and white shorts, Grêmio style uniform',
+    'internacional': 'wearing red jersey and white shorts, Internacional style uniform',
+    'atlético': 'wearing black and white vertical striped jersey, Atlético Mineiro style uniform',
+    'cruzeiro': 'wearing blue jersey with white details, Cruzeiro style uniform',
+    'bahia': 'wearing white jersey with blue and red details, Bahia style uniform',
+    'fortaleza': 'wearing red blue and white striped jersey, Fortaleza style uniform',
+    'athletico': 'wearing red and black jersey, Athletico Paranaense style uniform',
+    'coritiba': 'wearing green and white jersey, Coritiba style uniform',
+    'neymar': 'Brazilian football star with blond mohawk hairstyle wearing Santos white jersey',
+    'militão': 'Brazilian defender wearing Real Madrid all white jersey',
+    'real madrid': 'wearing all white jersey and white shorts, Real Madrid style uniform',
+    'barcelona': 'wearing blue and red vertical striped jersey, Barcelona style uniform',
+    'cusco': 'wearing red jersey, Peruvian football team',
+};
+
+function detectTeamJersey(title) {
+    const lower = title.toLowerCase();
+    for (const [team, desc] of Object.entries(TEAM_JERSEYS)) {
+        if (lower.includes(team)) return desc;
+    }
+    return 'wearing generic football jersey';
+}
+
 async function generateImagePrompt(title) {
-    if (!ANTHROPIC_KEY) return `Sports photography, Brazilian football match, stadium atmosphere, ${title}, editorial photo, high quality`;
+    const jerseyDesc = detectTeamJersey(title);
+
+    if (!ANTHROPIC_KEY) return `Sports photography, Brazilian football player ${jerseyDesc}, stadium atmosphere, action shot, editorial photo, high quality, cinematic lighting`;
 
     return new Promise((resolve) => {
         const body = JSON.stringify({
@@ -145,11 +180,19 @@ async function generateImagePrompt(title) {
             max_tokens: 200,
             messages: [{
                 role: 'user',
-                content: `Create a short image generation prompt in English for a sports article cover photo. The image should look like real sports photography - action shots, stadiums, players. NO text, NO logos, NO team names in the image.
+                content: `Create a FLUX image generation prompt in English for a sports article cover photo.
 
+CRITICAL RULES:
+- The image must look like REAL sports photography (editorial, cinematic)
+- Players must wear the CORRECT team uniform described below
+- NO text, NO logos, NO words in the image
+- Include: dramatic lighting, stadium background, action or emotion
+- Be specific about the scene based on the article title
+
+Team uniform to use: ${jerseyDesc}
 Article title: ${title}
 
-Reply with ONLY the prompt, nothing else. Max 50 words.`
+Reply with ONLY the prompt, nothing else. Max 60 words.`
             }]
         });
 
@@ -284,7 +327,7 @@ function generateArticlePage(article) {
     <title>${article.rewrittenTitle} - Papo de Bola</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css?v=5">
     <style>
@@ -293,8 +336,8 @@ function generateArticlePage(article) {
         .article-category { font-family: 'Oswald', sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #00965E; margin-bottom: 12px; }
         .article-title { font-family: 'Oswald', sans-serif; font-size: 32px; font-weight: 700; line-height: 1.2; text-transform: uppercase; margin-bottom: 12px; color: #1A1D23; }
         .article-meta { font-size: 13px; color: #8896A6; display: flex; align-items: center; gap: 16px; }
-        .article-content { padding: 32px 0 60px; max-width: 720px; }
-        .article-content p { font-size: 17px; line-height: 1.75; color: #2D3748; margin-bottom: 20px; }
+        .article-content { padding: 32px 0 60px; max-width: 720px; margin: 0 auto; }
+        .article-content p { font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 400; line-height: 1.85; color: #2D3748; margin-bottom: 20px; text-align: justify; }
         .article-content p:first-child { font-size: 19px; font-weight: 500; color: #1A1D23; }
         .article-back { display: inline-flex; align-items: center; gap: 6px; color: #00965E; font-weight: 600; font-size: 14px; margin-bottom: 20px; }
         .article-back:hover { text-decoration: underline; }
