@@ -10,11 +10,18 @@ const path = require('path');
 
 const CACHE_DIR = path.dirname(__filename);
 const ARTICLES_DIR = path.join(CACHE_DIR, '..', 'artigos');
+const IMAGES_DIR = path.join(ARTICLES_DIR, 'img');
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || '';
+const HF_TOKENS = [
+    process.env.HUGGINGFACE_TOKEN || '',
+    process.env.HUGGINGFACE_TOKEN_2 || '',
+    process.env.HUGGINGFACE_TOKEN_3 || '',
+].filter(t => t);
 const ARTICLES_DB = path.join(CACHE_DIR, 'articles.json');
 
-// Ensure articles directory exists
+// Ensure directories exist
 if (!fs.existsSync(ARTICLES_DIR)) fs.mkdirSync(ARTICLES_DIR, { recursive: true });
+if (!fs.existsSync(IMAGES_DIR)) fs.mkdirSync(IMAGES_DIR, { recursive: true });
 
 function fetchURL(url) {
     return new Promise((resolve) => {
@@ -127,6 +134,120 @@ Responda APENAS no formato JSON:
         req.write(body);
         req.end();
     });
+}
+
+async function generateImagePrompt(title) {
+    if (!ANTHROPIC_KEY) return `Sports photography, Brazilian football match, stadium atmosphere, ${title}, editorial photo, high quality`;
+
+    return new Promise((resolve) => {
+        const body = JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 200,
+            messages: [{
+                role: 'user',
+                content: `Create a short image generation prompt in English for a sports article cover photo. The image should look like real sports photography - action shots, stadiums, players. NO text, NO logos, NO team names in the image.
+
+Article title: ${title}
+
+Reply with ONLY the prompt, nothing else. Max 50 words.`
+            }]
+        });
+
+        const options = {
+            hostname: 'api.anthropic.com',
+            path: '/v1/messages',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': ANTHROPIC_KEY,
+                'anthropic-version': '2023-06-01',
+                'Content-Length': Buffer.byteLength(body),
+            },
+        };
+
+        const req = https.request(options, res => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => {
+                try {
+                    const response = JSON.parse(data);
+                    const prompt = response.content?.[0]?.text?.trim() || '';
+                    resolve(prompt || `Brazilian football editorial photography, stadium, action, ${title}`);
+                } catch(e) {
+                    resolve(`Brazilian football editorial photography, stadium, action shot`);
+                }
+            });
+        });
+
+        req.on('error', () => resolve('Brazilian football editorial photography, stadium, action shot'));
+        req.setTimeout(15000, () => { req.destroy(); resolve('Brazilian football editorial photography, stadium'); });
+        req.write(body);
+        req.end();
+    });
+}
+
+async function generateFluxImage(prompt, slug) {
+    const imagePath = path.join(IMAGES_DIR, `${slug}.jpg`);
+
+    // Skip if image already exists
+    if (fs.existsSync(imagePath) && fs.statSync(imagePath).size > 5000) {
+        console.log(`  [CACHED] Image already exists: ${slug}.jpg`);
+        return `/artigos/img/${slug}.jpg`;
+    }
+
+    for (let i = 0; i < HF_TOKENS.length; i++) {
+        const token = HF_TOKENS[i];
+        try {
+            console.log(`  [FLUX] Generating with token ${i + 1}...`);
+
+            const result = await new Promise((resolve, reject) => {
+                const body = JSON.stringify({ inputs: prompt });
+                const options = {
+                    hostname: 'router.huggingface.co',
+                    path: '/hf-inference/models/black-forest-labs/FLUX.1-schnell',
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'Content-Length': Buffer.byteLength(body),
+                    },
+                };
+
+                const req = https.request(options, res => {
+                    const chunks = [];
+                    res.on('data', c => chunks.push(c));
+                    res.on('end', () => {
+                        const buffer = Buffer.concat(chunks);
+                        if (res.statusCode === 200 && buffer.length > 5000) {
+                            resolve(buffer);
+                        } else if (res.statusCode === 402) {
+                            console.log(`  [FLUX] Token ${i + 1} quota exhausted`);
+                            resolve(null);
+                        } else {
+                            console.log(`  [FLUX] Token ${i + 1} error: HTTP ${res.statusCode}`);
+                            resolve(null);
+                        }
+                    });
+                });
+
+                req.on('error', (e) => { console.log(`  [FLUX] Error: ${e.message}`); resolve(null); });
+                req.setTimeout(120000, () => { req.destroy(); resolve(null); });
+                req.write(body);
+                req.end();
+            });
+
+            if (result) {
+                fs.writeFileSync(imagePath, result);
+                console.log(`  [FLUX] OK: ${slug}.jpg (${result.length} bytes)`);
+                return `/artigos/img/${slug}.jpg`;
+            }
+        } catch(e) {
+            console.log(`  [FLUX] Error: ${e.message}`);
+        }
+    }
+
+    console.log('  [FLUX] All tokens failed, no image generated');
+    return null;
 }
 
 function generateSlug(title) {
@@ -281,13 +402,18 @@ async function main() {
             const rewritten = await rewriteWithClaude(item.title, item.fullText);
             const slug = generateSlug(rewritten.title);
 
+            // Generate image with FLUX
+            console.log(`  Generating image...`);
+            const imagePrompt = await generateImagePrompt(rewritten.title);
+            const localImage = await generateFluxImage(imagePrompt, slug);
+
             const article = {
                 originalTitle: item.title,
                 rewrittenTitle: rewritten.title,
                 rewrittenText: rewritten.text,
                 slug,
                 source: feed.source,
-                image: item.image,
+                image: localImage || '',
                 pubDate: item.pubDate,
                 createdAt: new Date().toISOString(),
                 url: `/artigos/${slug}.html`,

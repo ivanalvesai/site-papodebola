@@ -88,8 +88,10 @@ fi
 # 7. Articles - fetch, rewrite with Claude, generate pages (every 3 hours)
 if [ $((HOUR % 3)) -eq 0 ] || [ ! -f "$CACHE_DIR/articles.json" ]; then
     log "Building articles..."
-    ANTHROPIC_API_KEY=$(grep ANTHROPIC_API_KEY /home/ivan/automacao-site/.env 2>/dev/null | cut -d= -f2)
-    export ANTHROPIC_API_KEY
+    export ANTHROPIC_API_KEY=$(grep ANTHROPIC_API_KEY /home/ivan/automacao-site/.env 2>/dev/null | cut -d= -f2)
+    export HUGGINGFACE_TOKEN=$(grep "^HUGGINGFACE_TOKEN=" /home/ivan/automacao-site/.env 2>/dev/null | cut -d= -f2)
+    export HUGGINGFACE_TOKEN_2=$(grep "^HUGGINGFACE_TOKEN_2=" /home/ivan/automacao-site/.env 2>/dev/null | cut -d= -f2)
+    export HUGGINGFACE_TOKEN_3=$(grep "^HUGGINGFACE_TOKEN_3=" /home/ivan/automacao-site/.env 2>/dev/null | cut -d= -f2)
     node "$CACHE_DIR/build-articles.js" >> "$LOG_FILE" 2>&1
     log "OK: articles ($(stat -c%s $CACHE_DIR/articles.json 2>/dev/null || echo 0) bytes)"
 fi
