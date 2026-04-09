@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Jogos de futebol ao vivo - Placares em tempo real, acompanhe todas as partidas.">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Ao Vivo - Papo de Bola</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css?v=4">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-top">
+            <div class="container">
+                <div class="header-top-content">
+                    <div class="logo">
+                        <a href="../index.html">
+                            <i class="fas fa-futbol logo-icon"></i>
+                            <span class="logo-text">PAPO<span class="logo-accent">DE BOLA</span></span>
+                        </a>
+                    </div>
+                    <div class="header-actions">
+                        <a href="../index.html" style="color:var(--text-secondary);font-size:14px">
+                            <i class="fas fa-arrow-left"></i> Início
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav class="main-nav">
+            <div class="container">
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="../index.html" class="nav-link"><i class="fas fa-home"></i> Início</a></li>
+                    <li class="nav-item active"><a href="#" class="nav-link live-link"><span class="live-dot"></span> AO VIVO</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Ticker -->
+    <div class="ticker-bar" id="tickerBar" style="display:none">
+        <div class="container">
+            <div class="ticker-label"><span class="live-dot"></span> AO VIVO</div>
+            <div class="ticker-wrapper">
+                <div class="ticker-track" id="tickerTrack"></div>
+            </div>
+        </div>
+    </div>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="content-grid">
+                <div class="content-main">
+                    <!-- Live -->
+                    <section class="matches-section" id="ao-vivo">
+                        <h2 class="section-title"><span class="live-dot"></span> Jogos Ao Vivo</h2>
+                        <div class="matches-container" id="liveMatches">
+                            <div class="loading-state"><div class="spinner"></div><p>Carregando jogos ao vivo...</p></div>
+                        </div>
+                    </section>
+
+                    <!-- Today -->
+                    <section class="matches-section">
+                        <h2 class="section-title">
+                            <i class="fas fa-calendar-day"></i> Jogos de Hoje
+                            <span class="date-display" id="todayDate"></span>
+                        </h2>
+                        <div class="matches-filter">
+                            <button class="filter-btn active" data-filter="all">Todos</button>
+                            <button class="filter-btn" data-filter="brasil">Brasil</button>
+                            <button class="filter-btn" data-filter="europa">Europa</button>
+                            <button class="filter-btn" data-filter="sulamericano">Sul-Americano</button>
+                        </div>
+                        <div class="matches-container" id="todayMatches">
+                            <div class="loading-state"><div class="spinner"></div><p>Carregando jogos...</p></div>
+                        </div>
+                    </section>
+
+                    <!-- Tomorrow -->
+                    <section class="matches-section">
+                        <h2 class="section-title"><i class="fas fa-calendar-alt"></i> Jogos de Amanhã</h2>
+                        <div class="matches-container" id="tomorrowMatches">
+                            <div class="loading-state"><div class="spinner"></div><p>Carregando jogos...</p></div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Sidebar -->
+                <aside class="content-sidebar">
+                    <div class="sidebar-widget">
+                        <h3 class="widget-title"><i class="fas fa-list-ol"></i> Classificação - Brasileirão</h3>
+                        <div class="standings-mini" id="standingsBrasileirao">
+                            <div class="loading-state"><div class="spinner"></div></div>
+                        </div>
+                        <a href="campeonato.html?id=325&name=Brasileirão Série A&tab=standings" class="widget-link">Ver tabela completa <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom" style="border-top:none;padding-top:0">
+                <p>&copy; 2026 Papo de Bola. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/config.js?v=4"></script>
+    <script src="../js/api.js?v=4"></script>
+    <script src="../js/admin.js?v=4"></script>
+    <script src="../js/app.js?v=4"></script>
+    <script>
+        // The app.js already handles everything, just need to init
+        document.addEventListener('DOMContentLoaded', () => App.init());
+    </script>
+</body>
+</html>

@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=4">
+    <link rel="stylesheet" href="css/style.css?v=5">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -135,7 +135,7 @@
                         </div>
                     </li>
                     <li class="nav-item">
-                        <a href="#ao-vivo" class="nav-link live-link"><span class="live-dot"></span> AO VIVO</a>
+                        <a href="pages/ao-vivo.html" class="nav-link live-link"><span class="live-dot"></span> AO VIVO</a>
                     </li>
                 </ul>
             </div>
@@ -157,60 +157,37 @@
     <!-- Main Content -->
     <main class="main-content">
         <div class="container">
-            <!-- Featured Match / Hero -->
-            <section class="featured-section" id="featuredSection" style="display:none;">
-                <h2 class="section-title"><i class="fas fa-star"></i> Jogo em Destaque</h2>
-                <div class="featured-match" id="featuredMatch">
-                    <!-- Populated by JS -->
+            <!-- Top Matches Bar -->
+            <section class="top-matches-bar" id="topMatchesBar">
+                <div class="top-matches-scroll" id="topMatchesScroll">
+                    <div class="loading-state"><div class="spinner"></div></div>
                 </div>
             </section>
 
             <div class="content-grid">
-                <!-- Left Column - Matches -->
+                <!-- Left Column - News & Content -->
                 <div class="content-main">
-                    <!-- Live Matches -->
-                    <section class="matches-section" id="ao-vivo">
-                        <h2 class="section-title">
-                            <span class="live-dot"></span> Jogos Ao Vivo
-                        </h2>
-                        <div class="matches-container" id="liveMatches">
-                            <div class="loading-state">
-                                <div class="spinner"></div>
-                                <p>Carregando jogos ao vivo...</p>
-                            </div>
+                    <!-- Video Highlights -->
+                    <section class="home-section">
+                        <h2 class="section-title"><i class="fas fa-play-circle"></i> Destaques e Melhores Momentos</h2>
+                        <div class="highlights-grid" id="highlightsGrid">
+                            <div class="loading-state"><div class="spinner"></div><p>Carregando destaques...</p></div>
                         </div>
                     </section>
 
-                    <!-- Today's Matches -->
-                    <section class="matches-section">
-                        <h2 class="section-title">
-                            <i class="fas fa-calendar-day"></i> Jogos de Hoje
-                            <span class="date-display" id="todayDate"></span>
-                        </h2>
-                        <div class="matches-filter">
-                            <button class="filter-btn active" data-filter="all">Todos</button>
-                            <button class="filter-btn" data-filter="brasil">Brasil</button>
-                            <button class="filter-btn" data-filter="europa">Europa</button>
-                            <button class="filter-btn" data-filter="sulamericano">Sul-Americano</button>
-                        </div>
-                        <div class="matches-container" id="todayMatches">
-                            <div class="loading-state">
-                                <div class="spinner"></div>
-                                <p>Carregando jogos...</p>
-                            </div>
+                    <!-- News -->
+                    <section class="home-section">
+                        <h2 class="section-title"><i class="fas fa-newspaper"></i> Últimas Notícias</h2>
+                        <div class="news-grid" id="newsGrid">
+                            <div class="loading-state"><div class="spinner"></div><p>Carregando notícias...</p></div>
                         </div>
                     </section>
 
-                    <!-- Tomorrow's Matches -->
-                    <section class="matches-section">
-                        <h2 class="section-title">
-                            <i class="fas fa-calendar-alt"></i> Jogos de Amanhã
-                        </h2>
-                        <div class="matches-container" id="tomorrowMatches">
-                            <div class="loading-state">
-                                <div class="spinner"></div>
-                                <p>Carregando jogos...</p>
-                            </div>
+                    <!-- Transfers -->
+                    <section class="home-section">
+                        <h2 class="section-title"><i class="fas fa-exchange-alt"></i> Mercado da Bola</h2>
+                        <div class="transfers-list" id="transfersList">
+                            <div class="loading-state"><div class="spinner"></div><p>Carregando transferências...</p></div>
                         </div>
                     </section>
                 </div>
@@ -219,38 +196,26 @@
                 <aside class="content-sidebar">
                     <!-- Brasileirão Standings Widget -->
                     <div class="sidebar-widget">
-                        <h3 class="widget-title">
-                            <i class="fas fa-list-ol"></i> Classificação - Brasileirão
-                        </h3>
+                        <h3 class="widget-title"><i class="fas fa-list-ol"></i> Classificação - Brasileirão</h3>
                         <div class="standings-mini" id="standingsBrasileirao">
-                            <div class="loading-state">
-                                <div class="spinner"></div>
-                            </div>
+                            <div class="loading-state"><div class="spinner"></div></div>
                         </div>
                         <a href="pages/campeonato.html?id=325&name=Brasileirão Série A&tab=standings" class="widget-link">Ver tabela completa <i class="fas fa-arrow-right"></i></a>
                     </div>
 
                     <!-- Top Scorers -->
                     <div class="sidebar-widget">
-                        <h3 class="widget-title">
-                            <i class="fas fa-futbol"></i> Artilheiros - Brasileirão
-                        </h3>
+                        <h3 class="widget-title"><i class="fas fa-futbol"></i> Artilheiros - Brasileirão</h3>
                         <div class="scorers-list" id="topScorers">
-                            <div class="loading-state">
-                                <div class="spinner"></div>
-                            </div>
+                            <div class="loading-state"><div class="spinner"></div></div>
                         </div>
                     </div>
 
                     <!-- Recent Results -->
                     <div class="sidebar-widget">
-                        <h3 class="widget-title">
-                            <i class="fas fa-history"></i> Últimos Resultados
-                        </h3>
+                        <h3 class="widget-title"><i class="fas fa-history"></i> Últimos Resultados</h3>
                         <div class="recent-results" id="recentResults">
-                            <div class="loading-state">
-                                <div class="spinner"></div>
-                            </div>
+                            <div class="loading-state"><div class="spinner"></div></div>
                         </div>
                     </div>
                 </aside>
@@ -469,9 +434,9 @@
         </div>
     </footer>
 
-    <script src="js/config.js?v=4"></script>
-    <script src="js/api.js?v=4"></script>
-    <script src="js/admin.js?v=4"></script>
-    <script src="js/app.js?v=4"></script>
+    <script src="js/config.js?v=5"></script>
+    <script src="js/api.js?v=5"></script>
+    <script src="js/admin.js?v=5"></script>
+    <script src="js/app.js?v=5"></script>
 </body>
 </html>

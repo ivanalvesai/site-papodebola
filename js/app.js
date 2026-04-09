@@ -79,73 +79,208 @@ const App = {
 
     // ==================== LOAD ALL DATA ====================
     async loadAllData() {
+        const isHomePage = !window.location.pathname.includes('ao-vivo');
+
+        if (isHomePage) {
+            // Homepage: load news content
+            this.loadHomeContent();
+            this.loadStandings();
+            this.loadTopScorers();
+            this.loadTickerFromCache();
+            this.loadRecentResultsFromCache();
+        } else {
+            // Ao Vivo page: load matches
+            this.loadLivePage();
+        }
+    },
+
+    // ==================== HOMEPAGE CONTENT ====================
+    async loadHomeContent() {
+        const homeData = await API.fetchCache('home.json');
+
+        if (homeData) {
+            this.renderHighlights(homeData.highlights || []);
+            this.renderNews(homeData.news || []);
+            this.renderTransfers(homeData.transfers || []);
+            this.renderTopMatches(homeData.topMatches || []);
+        } else {
+            // Fallback: show loading messages
+            const containers = ['highlightsGrid', 'newsGrid', 'transfersList', 'topMatchesScroll'];
+            containers.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = '<div class="no-matches"><p>Conteúdo será carregado em breve</p></div>';
+            });
+        }
+    },
+
+    renderHighlights(highlights) {
+        const container = document.getElementById('highlightsGrid');
+        if (!container || highlights.length === 0) {
+            if (container) container.innerHTML = '<div class="no-matches"><i class="fas fa-video"></i><p>Nenhum destaque disponível</p></div>';
+            return;
+        }
+
+        container.innerHTML = highlights.slice(0, 7).map(h => `
+            <a href="${h.url}" target="_blank" rel="noopener" class="highlight-card">
+                <div class="highlight-thumb">
+                    ${h.thumbnail ? `<img src="${h.thumbnail}" alt="${h.title}" loading="lazy">` : ''}
+                    <div class="play-icon"><i class="fas fa-play-circle"></i></div>
+                </div>
+                <div class="highlight-body">
+                    <div class="highlight-team">${h.team}</div>
+                    <div class="highlight-title">${h.title}</div>
+                    ${h.subtitle ? `<div class="highlight-subtitle">${h.subtitle}</div>` : ''}
+                </div>
+            </a>
+        `).join('');
+    },
+
+    renderNews(news) {
+        const container = document.getElementById('newsGrid');
+        if (!container || news.length === 0) {
+            if (container) container.innerHTML = '<div class="no-matches"><i class="fas fa-newspaper"></i><p>Nenhuma notícia disponível</p></div>';
+            return;
+        }
+
+        container.innerHTML = news.slice(0, 7).map(n => {
+            const source = n.link?.includes('gazeta') ? 'Gazeta Esportiva' : n.link?.includes('torcedores') ? 'Torcedores' : 'Notícia';
+            const dateStr = n.pubDate ? new Date(n.pubDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+
+            return `
+                <a href="${n.link}" target="_blank" rel="noopener" class="news-card">
+                    <div class="news-thumb">
+                        ${n.image ? `<img src="${n.image}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-newspaper\\'></i>'">` : '<i class="fas fa-newspaper"></i>'}
+                    </div>
+                    <div class="news-body">
+                        <div class="news-source">${source}</div>
+                        <div class="news-title">${n.title}</div>
+                        <div class="news-desc">${n.description || ''}</div>
+                        ${dateStr ? `<div class="news-date">${dateStr}</div>` : ''}
+                    </div>
+                </a>
+            `;
+        }).join('');
+    },
+
+    renderTransfers(transfers) {
+        const container = document.getElementById('transfersList');
+        if (!container || transfers.length === 0) {
+            if (container) container.innerHTML = '<div class="no-matches"><i class="fas fa-exchange-alt"></i><p>Nenhuma transferência recente</p></div>';
+            return;
+        }
+
+        container.innerHTML = transfers.slice(0, 10).map(t => {
+            const feeDisplay = t.fee ? (typeof t.fee === 'number' ? `€${(t.fee / 1000000).toFixed(1)}M` : t.fee) : 'Sem custo';
+
+            return `
+                <div class="transfer-item">
+                    <div class="transfer-photo">
+                        ${t.playerId ? `<img src="/img/player/${t.playerId}/image" alt="${t.player}" onerror="this.outerHTML='<i class=\\'fas fa-user\\'></i>'">` : '<i class="fas fa-user"></i>'}
+                    </div>
+                    <div class="transfer-info">
+                        <div class="transfer-player">${t.player}</div>
+                        <div class="transfer-details">
+                            <span>${t.fromTeam || '?'}</span>
+                            <i class="fas fa-arrow-right transfer-arrow"></i>
+                            <span><strong>${t.toTeam}</strong></span>
+                        </div>
+                    </div>
+                    <div class="transfer-meta">
+                        <div class="transfer-fee">${feeDisplay}</div>
+                        <div class="transfer-type">${t.type}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    },
+
+    renderTopMatches(matches) {
+        const container = document.getElementById('topMatchesScroll');
+        if (!container || matches.length === 0) {
+            if (container) container.parentElement.style.display = 'none';
+            return;
+        }
+
+        container.innerHTML = matches.map(m => {
+            const isLive = m.status === 'inprogress';
+            const isFinished = m.status === 'finished';
+            const hasScore = m.homeScore !== null;
+
+            return `
+                <div class="top-match-card ${isLive ? 'is-live' : ''}">
+                    <div class="top-match-league">${m.league}</div>
+                    <div class="top-match-teams">
+                        ${m.homeId ? `<img src="/img/team/${m.homeId}/image" alt="" onerror="this.style.display='none'">` : ''}
+                        <span>${m.home}</span>
+                        ${hasScore
+                            ? `<span class="top-match-score">${m.homeScore} - ${m.awayScore}</span>`
+                            : `<span class="top-match-time">${m.time}</span>`
+                        }
+                        <span>${m.away}</span>
+                        ${m.awayId ? `<img src="/img/team/${m.awayId}/image" alt="" onerror="this.style.display='none'">` : ''}
+                    </div>
+                    ${isLive ? '<div class="top-match-status">AO VIVO</div>' : ''}
+                    ${isFinished ? '<div class="top-match-time">Encerrado</div>' : ''}
+                </div>
+            `;
+        }).join('');
+    },
+
+    async loadTickerFromCache() {
+        const cached = await API.fetchCache('live.json');
+        if (cached?.events) {
+            const liveGames = cached.events.slice(0, 20).map(e => API.normalizeEvent(e));
+            this.renderTicker(liveGames);
+        }
+    },
+
+    async loadRecentResultsFromCache() {
+        const cached = await API.fetchCache('today.json');
+        if (cached?.events) {
+            const todayGames = cached.events.map(e => API.normalizeEvent(e));
+            this.loadRecentResults(todayGames);
+        }
+    },
+
+    // ==================== AO VIVO PAGE ====================
+    async loadLivePage() {
         const today = new Date().toISOString().split('T')[0];
         const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-
-        // Manual games from localStorage
         const manualGames = GamesDB.getAll();
 
-        // Load API data in parallel (from cache or API)
         const [liveEvents, todayEvents] = await Promise.all([
             API.getLiveEvents(),
             API.getTodayEvents(),
         ]);
 
-        // Normalize API events
         const normalizedLive = liveEvents.map(e => API.normalizeEvent(e));
         const normalizedToday = todayEvents.map(e => API.normalizeEvent(e));
 
-        // Normalize manual games
         const manualNormalized = manualGames.map(g => ({
-            id: g.id,
-            league: g.league,
-            leagueId: g.leagueId || 0,
-            country: 'Manual',
-            homeTeam: g.homeTeam,
-            awayTeam: g.awayTeam,
-            homeScore: g.homeScore || 0,
-            awayScore: g.awayScore || 0,
-            homeLogo: null,
-            awayLogo: null,
-            time: g.time,
-            date: g.date,
-            status: g.status,
-            statusText: g.status === 'live' ? 'AO VIVO' : g.status === 'finished' ? 'Encerrado' : '',
-            minute: g.minute || '',
-            embeds: g.embeds || [],
-            isManual: true,
-            category: getLeagueCategory(g.leagueId || 0),
-            featured: g.featured,
+            id: g.id, league: g.league, leagueId: g.leagueId || 0, country: 'Manual',
+            homeTeam: g.homeTeam, awayTeam: g.awayTeam,
+            homeScore: g.homeScore || 0, awayScore: g.awayScore || 0,
+            homeLogo: null, awayLogo: null, time: g.time, date: g.date,
+            status: g.status, statusText: g.status === 'live' ? 'AO VIVO' : g.status === 'finished' ? 'Encerrado' : '',
+            minute: g.minute || '', embeds: g.embeds || [],
+            isManual: true, category: getLeagueCategory(g.leagueId || 0), featured: g.featured,
         }));
 
-        // Merge manual live games with API live
         const manualLive = manualNormalized.filter(g => g.status === 'live');
         const allLive = [...manualLive, ...normalizedLive];
-
-        // Merge manual today games with API today (avoid duplicating live)
         const manualToday = manualNormalized.filter(g => g.date === today);
         const allToday = [...manualToday, ...normalizedToday];
 
-        // Render sections
         this.renderLiveMatches(allLive);
         this.renderTodayMatches(allToday);
         this.renderTicker(allLive);
-        this.renderFeatured(manualNormalized);
 
-        // Sidebar
         this.loadStandings();
-        this.loadTopScorers();
-        this.loadRecentResults(allToday);
 
-        // Tomorrow (separate call to not waste quota)
-        this.loadTomorrowMatches(tomorrow, manualNormalized);
-    },
-
-    async loadTomorrowMatches(date, manualGames) {
-        const events = await API.getTomorrowEvents();
-        const normalized = events.map(e => API.normalizeEvent(e));
-        const manualTomorrow = manualGames.filter(g => g.date === date);
-        this.renderTomorrowMatches([...manualTomorrow, ...normalized]);
+        const tomorrowEvents = await API.getTomorrowEvents();
+        const normalizedTomorrow = tomorrowEvents.map(e => API.normalizeEvent(e));
+        const manualTomorrow = manualNormalized.filter(g => g.date === tomorrow);
+        this.renderTomorrowMatches([...manualTomorrow, ...normalizedTomorrow]);
     },
 
     // ==================== RENDER LIVE ====================

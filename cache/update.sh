@@ -67,13 +67,22 @@ fetch "matches/${TDAY}/${TMONTH}/${TYEAR}" "$CACHE_DIR/tomorrow.json"
 # 4. Brasileirão standings (always)
 fetch "tournament/325/season/87678/standings/total" "$CACHE_DIR/standings_brasileirao.json"
 
-# 5. Top scorers (via Node script, once every 6 hours to save quota)
+# 5. Top scorers (every 6 hours)
 SCORERS_FILE="$CACHE_DIR/scorers_brasileirao.json"
 SCORERS_SIZE=$(stat -c%s "$SCORERS_FILE" 2>/dev/null || echo "0")
 if [ "$SCORERS_SIZE" -lt 20 ] || [ $((HOUR % 6)) -eq 0 ]; then
-    log "Fetching top scorers via Node script..."
+    log "Fetching top scorers..."
     node "$CACHE_DIR/build-scorers.js" >> "$LOG_FILE" 2>&1
     log "OK: scorers ($(stat -c%s $SCORERS_FILE 2>/dev/null || echo 0) bytes)"
+fi
+
+# 6. Homepage content - highlights, transfers, news (every 3 hours)
+HOME_FILE="$CACHE_DIR/home.json"
+HOME_SIZE=$(stat -c%s "$HOME_FILE" 2>/dev/null || echo "0")
+if [ "$HOME_SIZE" -lt 20 ] || [ $((HOUR % 3)) -eq 0 ]; then
+    log "Building homepage content..."
+    node "$CACHE_DIR/build-home.js" >> "$LOG_FILE" 2>&1
+    log "OK: home ($(stat -c%s $HOME_FILE 2>/dev/null || echo 0) bytes)"
 fi
 
 # Write timestamp
