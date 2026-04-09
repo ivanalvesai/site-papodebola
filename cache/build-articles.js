@@ -264,10 +264,10 @@ async function fetchPexelsImage(query, slug) {
     const PEXELS_KEY = process.env.PEXELS_API_KEY || 'pA489YWSRdWCzthnsvcu9tOeHgoWtKku4JeyxUvMGhrRVfiqYDkRo0m9';
     const searchQuery = encodeURIComponent(`futebol ${query}`);
 
-    console.log(`  [PEXELS] Searching: futebol ${query}...`);
+    console.log(`  [PEXELS] Searching: ${query}...`);
 
     const data = await new Promise((resolve) => {
-        https.get(`https://api.pexels.com/v1/search?query=${searchQuery}&per_page=5&orientation=landscape`, {
+        https.get(`https://api.pexels.com/v1/search?query=${searchQuery}&per_page=10&orientation=landscape`, {
             headers: { 'Authorization': PEXELS_KEY },
         }, res => {
             let d = '';
@@ -478,10 +478,9 @@ async function main() {
                 localImage = await fetchRealTeamImage(team.id, team.name, slug);
             }
 
-            // 2nd: Fallback to Pexels free stock photo
+            // 2nd: Fallback to aerial stadium/football field photo
             if (!localImage) {
-                const searchTerm = team ? team.name : 'match stadium';
-                localImage = await fetchPexelsImage(searchTerm, slug);
+                localImage = await fetchPexelsImage('football stadium aerial view', slug);
             }
 
             const article = {
