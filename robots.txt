@@ -4,4 +4,5 @@ Disallow: /cache/
 Disallow: /api/
 Disallow: /pdb-api/
 
+Sitemap: https://admin.papodebola.com.br/sitemap_index.xml
 Sitemap: https://papodebola.com.br/sitemap.xml

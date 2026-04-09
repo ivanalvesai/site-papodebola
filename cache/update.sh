@@ -101,6 +101,9 @@ log "Syncing WordPress..."
 node "$CACHE_DIR/sync-wordpress.js" >> "$LOG_FILE" 2>&1
 log "OK: wordpress synced"
 
+# DISABLED - Sitemap now managed by Rank Math in WordPress
+# 8-old. Sitemap generation moved to WordPress/Rank Math
+
 # 8. Championship data (every 3 hours)
 CHAMP_FILE="$CACHE_DIR/champ_325.json"
 CHAMP_SIZE=$(stat -c%s "$CHAMP_FILE" 2>/dev/null || echo "0")
@@ -110,9 +113,8 @@ if [ "$CHAMP_SIZE" -lt 20 ] || [ $((HOUR % 3)) -eq 0 ]; then
     log "OK: championships cached"
 fi
 
-# 9. Sitemap (after articles)
-log "Generating sitemap..."
-node "$CACHE_DIR/build-sitemap.js" >> "$LOG_FILE" 2>&1
+# 9. Sitemap - now handled by Rank Math WordPress plugin
+# Sitemap URL: https://admin.papodebola.com.br/sitemap_index.xml
 
 # Write timestamp
 echo "{\"updated\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > "$CACHE_DIR/meta.json"
