@@ -600,7 +600,7 @@ const Admin = {
 
     async apiCall(endpoint, method = 'GET', body = null) {
         const token = await this.getApiToken();
-        if (!token) { showToast('Erro de autenticação na API', 'error'); return null; }
+        if (!token) { showToast('Faça login novamente', 'error'); this.handleLogout(); this.showLoginModal(); return null; }
 
         const options = {
             method,
@@ -610,6 +610,17 @@ const Admin = {
 
         try {
             const res = await fetch(`/pdb-api/${endpoint}`, options);
+
+            // If unauthorized, clear token and force re-login
+            if (res.status === 401) {
+                this.apiToken = null;
+                localStorage.removeItem('pdb_api_token');
+                showToast('Sessão expirada. Faça login novamente.', 'error');
+                this.handleLogout();
+                this.showLoginModal();
+                return null;
+            }
+
             return await res.json();
         } catch(e) {
             showToast('Erro de conexão com a API', 'error');
