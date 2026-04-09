@@ -112,7 +112,7 @@ function _unused(article) {
         <div class="header-top">
             <div class="container">
                 <div class="header-top-content">
-                    <div class="logo"><a href="../index.html"><i class="fas fa-futbol logo-icon"></i><span class="logo-text">PAPO<span class="logo-accent">DE BOLA</span></span></a></div>
+                    <div class="logo"><a href="../index.html"><i class="fas fa-futbol logo-icon"></i><span class="logo-text">PAPO <span class="logo-accent">DE BOLA</span></span></a></div>
                 </div>
             </div>
         </div>
