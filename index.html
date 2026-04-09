@@ -84,7 +84,7 @@
             <div class="container">
                 <ul class="nav-list">
                     <li class="nav-item">
-                        <a href="#" class="nav-link" onclick="toggleTeamsPanel();return false"><i class="fas fa-shield-alt" style="margin-right:3px"></i> Meu Time</a>
+                        <a href="#" class="nav-link" onclick="toggleTeamsPanel();return false"><i class="fas fa-bars" style="margin-right:3px"></i> Menu</a>
                     </li>
                     <li class="nav-item active">
                         <a href="/" class="nav-link">Início</a>
@@ -557,13 +557,32 @@
     <div class="teams-panel-overlay" id="teamsPanelOverlay" onclick="toggleTeamsPanel()"></div>
     <div class="teams-panel" id="teamsPanel">
         <div class="teams-panel-header">
-            <h3><i class="fas fa-shield-alt"></i> Meu Time</h3>
+            <h3><i class="fas fa-bars"></i> Menu</h3>
             <button class="teams-panel-close" onclick="toggleTeamsPanel()"><i class="fas fa-times"></i></button>
         </div>
+
+        <!-- Quick Links -->
+        <div class="teams-section">
+            <div class="teams-section-list" style="display:block">
+                <a href="/" class="teams-item" style="font-weight:600"><i class="fas fa-home" style="width:24px;text-align:center;color:#00965E"></i> Início</a>
+                <a href="pages/noticias.html" class="teams-item" style="font-weight:600"><i class="fas fa-newspaper" style="width:24px;text-align:center;color:#00965E"></i> Notícias</a>
+                <a href="pages/ao-vivo.html" class="teams-item" style="font-weight:600;color:#E8312A"><i class="fas fa-play-circle" style="width:24px;text-align:center"></i> Ao Vivo</a>
+                <a href="pages/campeonato.html?id=325&name=Brasileirão Série A" class="teams-item" style="font-weight:600"><i class="fas fa-trophy" style="width:24px;text-align:center;color:#00965E"></i> Brasileirão</a>
+                <a href="pages/campeonato.html?id=7&name=Champions League" class="teams-item" style="font-weight:600"><i class="fas fa-star" style="width:24px;text-align:center;color:#00965E"></i> Champions League</a>
+                <a href="pages/campeonato.html?id=384&name=Copa Libertadores" class="teams-item" style="font-weight:600"><i class="fas fa-globe-americas" style="width:24px;text-align:center;color:#00965E"></i> Libertadores</a>
+            </div>
+        </div>
+
+        <!-- Search Teams -->
         <div class="teams-search">
             <input type="text" id="teamsSearchInput" placeholder="Buscar time..." oninput="filterTeams(this.value)">
         </div>
+
+        <!-- Teams by League -->
         <div id="teamsListContainer">
+            <div class="teams-section" style="border-top:2px solid #E2E5E9">
+                <div style="padding:12px 20px;font-size:13px;font-weight:700;color:#1A1D23;background:#F2F3F5"><i class="fas fa-shield-alt" style="color:#00965E;margin-right:6px"></i> Meu Time</div>
+            </div>
             <div class="teams-section">
                 <div class="teams-section-title" onclick="this.classList.toggle('collapsed')">Brasileirão Série A <i class="fas fa-chevron-down"></i></div>
                 <div class="teams-section-list" id="teamsSerieA">
