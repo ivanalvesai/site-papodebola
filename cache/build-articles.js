@@ -128,12 +128,18 @@ Responda APENAS no formato JSON válido:
                 try {
                     const response = JSON.parse(data);
                     const content = response.content?.[0]?.text || '';
+                    const stopReason = response.stop_reason;
+                    console.log(`  [CLAUDE] Stop: ${stopReason}, Output tokens: ${response.usage?.output_tokens || '?'}`);
+
                     // Extract JSON from response
                     const jsonMatch = content.match(/\{[\s\S]*\}/);
                     if (jsonMatch) {
                         const parsed = JSON.parse(jsonMatch[0]);
+                        const wordCount = (parsed.text || '').split(/\s+/).length;
+                        console.log(`  [CLAUDE] Word count: ${wordCount}`);
                         resolve({ title: parsed.title || title, text: parsed.text || text });
                     } else {
+                        console.log('  [WARN] No JSON found in response');
                         resolve({ title, text });
                     }
                 } catch(e) {
@@ -143,8 +149,8 @@ Responda APENAS no formato JSON válido:
             });
         });
 
-        req.on('error', () => resolve({ title, text }));
-        req.setTimeout(30000, () => { req.destroy(); resolve({ title, text }); });
+        req.on('error', (e) => { console.log('  [WARN] Request error:', e.message); resolve({ title, text }); });
+        req.setTimeout(120000, () => { console.log('  [WARN] Request timeout 120s'); req.destroy(); resolve({ title, text }); });
         req.write(body);
         req.end();
     });
