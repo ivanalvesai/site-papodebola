@@ -86,9 +86,12 @@ async function rewriteWithClaude(title, text) {
                 role: 'user',
                 content: `Você é um jornalista esportivo brasileiro experiente e autêntico. Escreva como um ser humano real, com personalidade, opiniões e estilo próprio. Sua tarefa é criar um ARTIGO COMPLETO baseado na notícia abaixo.
 
+IMPORTANTE: O texto original pode estar em QUALQUER idioma (inglês, espanhol, etc). Você DEVE escrever o artigo INTEIRO em PORTUGUÊS DO BRASIL. Traduza e reescreva tudo. O título também DEVE ser em português.
+
 REGRAS DE CONTEÚDO:
 - Escreva um artigo LONGO e COMPLETO, idealmente com 2000+ palavras
-- Reescreva TUDO com suas próprias palavras, NUNCA copie frases do original
+- Reescreva e TRADUZA tudo para português do Brasil
+- NUNCA deixe palavras, frases ou títulos em inglês/espanhol
 - Mantenha informações factuais: nomes de jogadores, times, placares, datas
 - Use português do Brasil fluente, coloquial mas profissional
 - Estruture em 8-12 parágrafos densos
@@ -170,14 +173,34 @@ Responda APENAS no formato JSON válido:
 
 // Map team names to AllSportsApi team IDs
 const TEAM_IDS = {
+    // Brasil
     'corinthians': 1957, 'palmeiras': 1963, 'flamengo': 5981,
-    'são paulo': 1981, 'santos': 1968, 'vasco': 1952,
-    'fluminense': 1961, 'botafogo': 1958, 'grêmio': 1954,
-    'internacional': 1959, 'atlético mineiro': 1977, 'atlético-mg': 1977,
-    'cruzeiro': 1982, 'bahia': 1955, 'fortaleza': 1962,
-    'athletico': 1967, 'coritiba': 1999, 'bragantino': 1998,
-    'cuiabá': 7315, 'goiás': 1960, 'américa-mg': 1973,
-    'real madrid': 2829, 'barcelona': 2817, 'manchester': 17,
+    'são paulo': 1981, 'santos': 1968, 'vasco': 1974,
+    'fluminense': 1961, 'botafogo': 1958, 'grêmio': 5926,
+    'internacional': 1966, 'atlético mineiro': 1977, 'atlético-mg': 1977,
+    'cruzeiro': 1954, 'bahia': 1955, 'fortaleza': 2020,
+    'athletico': 1967, 'coritiba': 1982, 'bragantino': 1999,
+    'cuiabá': 49202, 'goiás': 1960, 'américa-mg': 1973,
+    // Premier League
+    'liverpool': 44, 'arsenal': 42, 'manchester city': 17,
+    'manchester united': 35, 'chelsea': 38, 'tottenham': 33,
+    'spurs': 33, 'newcastle': 39, 'aston villa': 40,
+    'nottingham forest': 174, 'west ham': 37, 'brighton': 30,
+    // La Liga
+    'real madrid': 2829, 'barcelona': 2817, 'atlético de madrid': 2836,
+    'atletico madrid': 2836,
+    // Serie A
+    'juventus': 2687, 'milan': 2692, 'inter de milão': 2697,
+    'inter milan': 2697, 'napoli': 2714, 'roma': 2702, 'lazio': 2699,
+    // Bundesliga
+    'bayern': 2672, 'dortmund': 2673, 'leverkusen': 2681,
+    'borussia dortmund': 2673, 'bayer leverkusen': 2681,
+    // Ligue 1
+    'psg': 1644, 'paris saint-germain': 1644, 'marseille': 1641, 'lyon': 1649,
+    // Portugal
+    'porto': 3002, 'benfica': 3004, 'sporting': 3005,
+    // Outros
+    'river plate': 3211, 'boca juniors': 3212,
 };
 
 function detectTeamId(title) {
@@ -808,7 +831,8 @@ async function main() {
 
             // Get real match image
             console.log(`  Finding image...`);
-            const team = detectTeamId(rewritten.title) || detectTeamId(item.title);
+            // Try detecting team from both original and rewritten titles
+            const team = detectTeamId(rewritten.title) || detectTeamId(item.title) || detectTeamId(rewritten.text?.substring(0, 300) || '');
             let localImage = null;
 
             // 1st: Try real match thumbnail from team media
@@ -816,7 +840,25 @@ async function main() {
                 localImage = await fetchRealTeamImage(team.id, team.name, slug);
             }
 
-            // 2nd: Fallback to aerial stadium/football field photo
+            // 2nd: Try searching Pexels with the team name + stadium
+            if (!localImage && team) {
+                localImage = await fetchPexelsImage(`${team.name} football stadium`, slug);
+            }
+
+            // 3rd: Try Pexels with keywords from title
+            if (!localImage) {
+                const titleWords = (rewritten.title || item.title || '')
+                    .replace(/[^a-záéíóúâêôãõçüA-Z\s]/gi, '')
+                    .split(/\s+/)
+                    .filter(w => w.length > 4)
+                    .slice(0, 3)
+                    .join(' ');
+                if (titleWords) {
+                    localImage = await fetchPexelsImage(`${titleWords} football`, slug);
+                }
+            }
+
+            // 4th: Final fallback - aerial stadium photo
             if (!localImage) {
                 localImage = await fetchPexelsImage('football stadium aerial view', slug);
             }
