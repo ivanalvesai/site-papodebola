@@ -67,66 +67,13 @@ fetch "matches/${TDAY}/${TMONTH}/${TYEAR}" "$CACHE_DIR/tomorrow.json"
 # 4. Brasileirão standings (always)
 fetch "tournament/325/season/87678/standings/total" "$CACHE_DIR/standings_brasileirao.json"
 
-# 5. Top scorers - fetch from top 10 teams (once every 6 hours to save quota)
-if [ ! -f "$CACHE_DIR/scorers_brasileirao.json" ] || [ $((HOUR % 6)) -eq 0 ]; then
-    log "Fetching top scorers from teams..."
-
-    # Get team IDs from standings
-    TEAM_IDS=$(cat "$CACHE_DIR/standings_brasileirao.json" 2>/dev/null | \
-        node -e "
-            const d=JSON.parse(require('fs').readFileSync(0,'utf8'));
-            const ids = d.standings[0].rows.slice(0,10).map(r => r.team.id);
-            console.log(ids.join(','));
-        " 2>/dev/null)
-
-    if [ -n "$TEAM_IDS" ]; then
-        ALL_SCORERS="[]"
-        IFS=',' read -ra IDS <<< "$TEAM_IDS"
-        for TEAM_ID in "${IDS[@]}"; do
-            RESULT=$(curl -s --max-time 15 \
-                "${BASE_URL}/team/${TEAM_ID}/tournament/325/season/87678/best-players" \
-                -H "x-rapidapi-key: ${API_KEY}" \
-                -H "x-rapidapi-host: ${API_HOST}" \
-                -H "Accept: application/json" 2>/dev/null)
-
-            if [ -n "$RESULT" ]; then
-                ALL_SCORERS=$(echo "$ALL_SCORERS" | node -e "
-                    const prev = JSON.parse(require('fs').readFileSync(0,'utf8'));
-                    const data = JSON.parse(process.argv[1]);
-                    const teamId = ${TEAM_ID};
-                    if (data.topPlayers?.goals) {
-                        data.topPlayers.goals.forEach(p => {
-                            prev.push({
-                                player: { id: p.player.id, name: p.player.name, shortName: p.player.shortName },
-                                team: { id: teamId, name: p.player.team?.name || '' },
-                                goals: p.statistics.goals,
-                                rating: p.statistics?.rating
-                            });
-                        });
-                    }
-                    console.log(JSON.stringify(prev));
-                " "$RESULT" 2>/dev/null)
-            fi
-            log "OK: team/${TEAM_ID}/best-players"
-        done
-
-        # Sort by goals and save top 15
-        echo "$ALL_SCORERS" | node -e "
-            const scorers = JSON.parse(require('fs').readFileSync(0,'utf8'));
-            scorers.sort((a,b) => (b.goals||0) - (a.goals||0));
-            const unique = [];
-            const seen = new Set();
-            scorers.forEach(s => {
-                if (!seen.has(s.player.id)) {
-                    seen.add(s.player.id);
-                    unique.push(s);
-                }
-            });
-            console.log(JSON.stringify({ topScorers: unique.slice(0, 15) }));
-        " > "$CACHE_DIR/scorers_brasileirao.json" 2>/dev/null
-
-        log "OK: scorers consolidated ($(cat $CACHE_DIR/scorers_brasileirao.json | wc -c) bytes)"
-    fi
+# 5. Top scorers (via Node script, once every 6 hours to save quota)
+SCORERS_FILE="$CACHE_DIR/scorers_brasileirao.json"
+SCORERS_SIZE=$(stat -c%s "$SCORERS_FILE" 2>/dev/null || echo "0")
+if [ "$SCORERS_SIZE" -lt 20 ] || [ $((HOUR % 6)) -eq 0 ]; then
+    log "Fetching top scorers via Node script..."
+    node "$CACHE_DIR/build-scorers.js" >> "$LOG_FILE" 2>&1
+    log "OK: scorers ($(stat -c%s $SCORERS_FILE 2>/dev/null || echo 0) bytes)"
 fi
 
 # Write timestamp
