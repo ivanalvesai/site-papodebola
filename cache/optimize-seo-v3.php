@@ -57,16 +57,15 @@ function pdb_get_cat_id($name) {
 
 // Generate optimized focus keyword from title
 function generate_focus_keyword($title) {
-    // Remove special chars and stop words
-    $stop = array('para','com','que','por','mais','após','como','sobre','entre','pela','este','esse','esta','essa','seus','suas','não','uma','dos','das','nos','nas','por','mas','será','pode','tem','são','está','são','quer','vai','sem','seu','sua','seu','faz','diz','pede','fala','onde','qual','quem','todo','toda','isso','ele','ela','foi');
+    $stop = array('para','com','que','por','mais','como','sobre','entre','pela','este','esse','esta','essa','seus','suas','uma','dos','das','nos','nas','mas','pode','tem','quer','vai','sem','seu','sua','faz','diz','pede','fala','onde','qual','quem','todo','toda','isso','ele','ela','foi','ainda');
 
-    $clean = mb_strtolower($title);
-    $clean = preg_replace('/[^\w\s-áéíóúâêôãõçü]/u', '', $clean);
+    $clean = mb_strtolower(trim($title));
+    // Remove punctuation but keep letters and spaces
+    $clean = preg_replace('/[^a-z0-9\x{00C0}-\x{024F}\s]/u', '', $clean);
     $words = array_filter(explode(' ', $clean), function($w) use ($stop) {
         return mb_strlen($w) > 2 && !in_array($w, $stop);
     });
 
-    // Take first 3-5 meaningful words as focus keyword
     $kw_words = array_slice(array_values($words), 0, 4);
     return implode(' ', $kw_words);
 }
