@@ -85,8 +85,9 @@ if [ "$HOME_SIZE" -lt 20 ] || [ $((HOUR % 3)) -eq 0 ]; then
     log "OK: home ($(stat -c%s $HOME_FILE 2>/dev/null || echo 0) bytes)"
 fi
 
-# 7. Articles - fetch, rewrite with Claude, publish to WordPress (every 3 hours)
-if [ $((HOUR % 3)) -eq 0 ] || [ ! -f "$CACHE_DIR/articles.json" ]; then
+# 7. Articles - fetch, rewrite with Claude, publish to WordPress
+# Runs at 8h and 15h (2x/day) = ~5 articles/day (1 per feed, 7 feeds, alternating)
+if [ "$HOUR" -eq 8 ] || [ "$HOUR" -eq 15 ] || [ ! -f "$CACHE_DIR/articles.json" ]; then
     log "Building articles..."
     export ANTHROPIC_API_KEY=$(grep ANTHROPIC_API_KEY /home/ivan/automacao-site/.env 2>/dev/null | cut -d= -f2)
     export HUGGINGFACE_TOKEN=$(grep "^HUGGINGFACE_TOKEN=" /home/ivan/automacao-site/.env 2>/dev/null | cut -d= -f2)

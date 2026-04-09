@@ -704,6 +704,7 @@ async function main() {
     ];
 
     const newArticles = [];
+    let totalProcessed = 0;
 
     for (const feed of feeds) {
         console.log(`\nFetching: ${feed.source}...`);
@@ -716,10 +717,11 @@ async function main() {
         const items = parseRSS(xml);
         console.log(`  Found ${items.length} articles`);
 
-        // Process only new articles (max 1 per feed per run = ~5/day with 7 feeds)
+        // Process only new articles (max 1 per feed per run, runs 2x/day = ~5 articles/day)
         let processed = 0;
         for (const item of items) {
             if (processed >= 1) break;
+            if (totalProcessed >= 5) break; // Max 5 total per run
             if (existingTitles.has(item.title)) continue;
             if (!item.title || item.fullText.length < 100) continue;
 
@@ -776,6 +778,7 @@ async function main() {
             console.log(`  OK: ${slug}.html`);
 
             newArticles.push(article);
+            totalProcessed++;
             existingTitles.add(item.title);
             processed++;
         }
