@@ -372,7 +372,7 @@
                         else if (pos >= 17 && rows.length >= 20) zone = 'zone-reb';
                     }
 
-                    const teamImg = r.team?.id ? `<img src="https://api.sofascore.app/api/v1/team/${r.team.id}/image" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
+                    const teamImg = r.team?.id ? `<img src="/img/team/${r.team.id}/image" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
 
                     html += `
                         <tr>
@@ -435,8 +435,8 @@
                         const p = item.player || {};
                         const t = item.team || {};
                         const val = item.statistics?.goals || item.statistics?.assists || item.statistics?.rating?.toFixed(2) || item.statistics?.yellowCards || item.statistics?.cleanSheet || '?';
-                        const playerImg = p.id ? `<img src="https://api.sofascore.app/api/v1/player/${p.id}/image" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:cover" loading="lazy" onerror="this.style.display='none'">` : '';
-                        const teamImg = t.id ? `<img src="https://api.sofascore.app/api/v1/team/${t.id}/image" alt="" style="width:18px;height:18px" loading="lazy" onerror="this.style.display='none'">` : '';
+                        const playerImg = p.id ? `<img src="/img/player/${p.id}/image" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:cover" loading="lazy" onerror="this.style.display='none'">` : '';
+                        const teamImg = t.id ? `<img src="/img/team/${t.id}/image" alt="" style="width:18px;height:18px" loading="lazy" onerror="this.style.display='none'">` : '';
 
                         html += `
                             <tr>

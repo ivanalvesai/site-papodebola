@@ -381,7 +381,7 @@ const App = {
             if (pos <= 4) rowClass = 'libertadores';
             else if (pos <= 6) rowClass = 'sulamericana';
 
-            const teamLogo = r.team?.id ? `<img src="https://api.sofascore.app/api/v1/team/${r.team.id}/image" alt="" loading="lazy" onerror="this.style.display='none'" style="width:18px;height:18px">` : '';
+            const teamLogo = r.team?.id ? `<img src="/img/team/${r.team.id}/image" alt="" loading="lazy" onerror="this.style.display='none'" style="width:18px;height:18px">` : '';
 
             html += `
                 <tr class="${rowClass}">
@@ -419,7 +419,7 @@ const App = {
                 <div class="scorer-item">
                     <span class="scorer-rank ${i < 3 ? 'top-3' : ''}">${i + 1}</span>
                     <div class="scorer-photo" style="display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-muted)">
-                        ${player.id ? `<img src="https://api.sofascore.app/api/v1/player/${player.id}/image" alt="${player.name}" style="width:36px;height:36px;border-radius:50%;object-fit:cover" onerror="this.outerHTML='<i class=\\'fas fa-user\\'></i>'">` : '<i class="fas fa-user"></i>'}
+                        ${player.id ? `<img src="/img/player/${player.id}/image" alt="${player.name}" style="width:36px;height:36px;border-radius:50%;object-fit:cover" onerror="this.outerHTML='<i class=\\'fas fa-user\\'></i>'">` : '<i class="fas fa-user"></i>'}
                     </div>
                     <div class="scorer-info">
                         <div class="scorer-name">${player.name || player.shortName || '?'}</div>
