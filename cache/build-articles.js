@@ -80,18 +80,32 @@ async function rewriteWithClaude(title, text) {
 
     return new Promise((resolve) => {
         const body = JSON.stringify({
-            model: 'claude-haiku-4-5-20251001',
-            max_tokens: 1500,
+            model: 'claude-sonnet-4-6',
+            max_tokens: 8000,
             messages: [{
                 role: 'user',
-                content: `Você é um jornalista esportivo brasileiro. Reescreva a notícia abaixo com suas próprias palavras, mantendo as informações factuais (nomes, placares, datas). Crie um título atrativo e um texto de 3-4 parágrafos em português do Brasil, com linguagem natural de portal esportivo. NÃO copie frases do original.
+                content: `Você é um jornalista esportivo brasileiro experiente, com estilo editorial de portal profissional como ge.globo.com. Sua tarefa é criar um ARTIGO COMPLETO E EXTENSO baseado na notícia abaixo.
+
+REGRAS OBRIGATÓRIAS:
+- Mínimo de 2000 palavras (isso é CRÍTICO - artigos curtos são rejeitados)
+- Reescreva TUDO com suas próprias palavras, NUNCA copie frases do original
+- Mantenha informações factuais: nomes de jogadores, times, placares, datas
+- Use português do Brasil fluente e natural
+- Estruture em 8-12 parágrafos densos e bem desenvolvidos
+- Inclua: contexto histórico, análise tática, opinião editorial, projeções futuras
+- Cada parágrafo deve ter 4-6 frases completas
+- Crie subtítulos internos usando texto em maiúsculas no início do parágrafo (ex: "O CONTEXTO DA PARTIDA -")
+- Inclua estatísticas, comparações com jogos anteriores e citações contextualizadas
+- Termine com um parágrafo de projeção/análise do que vem pela frente
+
+TÍTULO: Crie um título impactante, direto e jornalístico (máximo 80 caracteres)
 
 Título original: ${title}
 
-Texto original: ${text}
+Texto base: ${text}
 
-Responda APENAS no formato JSON:
-{"title": "novo título", "text": "texto reescrito com parágrafos separados por \\n\\n"}`
+Responda APENAS no formato JSON válido:
+{"title": "título aqui", "text": "texto completo com parágrafos separados por \\n\\n"}`
             }]
         });
 
@@ -433,10 +447,10 @@ async function main() {
         const items = parseRSS(xml);
         console.log(`  Found ${items.length} articles`);
 
-        // Process only new articles (max 5 per feed per run)
+        // Process only new articles (max 3 per feed per run - each article is 2000+ words)
         let processed = 0;
         for (const item of items) {
-            if (processed >= 5) break;
+            if (processed >= 3) break;
             if (existingTitles.has(item.title)) continue;
             if (!item.title || item.fullText.length < 100) continue;
 
