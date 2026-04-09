@@ -446,26 +446,136 @@ async function getWPCategoryId(name) {
     return cat?.id || 1; // 1 = Uncategorized
 }
 
+// Generate focus keyword from title (3 words, no stop words)
+function generateFocusKeyword(title) {
+    const stop = ['para','com','que','por','mais','como','sobre','entre','pela','uma','dos','das','nos','nas','mas','pode','tem','vai','sem','foi','ainda','após','não','são','está','seu','sua','ele','ela'];
+    const words = title.toLowerCase()
+        .replace(/[^\w\sáéíóúâêôãõçü-]/gi, '')
+        .split(/\s+/)
+        .filter(w => w.length > 2 && !stop.includes(w));
+    return words.slice(0, 3).join(' ');
+}
+
+// Generate SEO-optimized slug (< 55 chars)
+function generateSEOSlug(title) {
+    let slug = title.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+    if (slug.length > 55) {
+        slug = slug.substring(0, 55);
+        const last = slug.lastIndexOf('-');
+        if (last > 30) slug = slug.substring(0, last);
+    }
+    return slug;
+}
+
 async function publishToWordPress(article) {
     const categoryId = await getWPCategoryId(article.category || 'Futebol Brasileiro');
+    const focusKW = generateFocusKeyword(article.rewrittenTitle);
+    const slug = generateSEOSlug(article.rewrittenTitle);
+    const plainText = (article.rewrittenText || '').substring(0, 200);
 
-    // Format content as HTML paragraphs
-    const htmlContent = (article.rewrittenText || '')
+    // Format content as HTML with H2 headings, KW density, and internal links
+    let paragraphs = (article.rewrittenText || '')
         .split(/\n\n|\n/)
-        .filter(p => p.trim())
-        .map(p => {
-            let text = p.trim();
-            text = text.replace(/^([A-ZÁÉÍÓÚÂÊÔÃÕÇÜ][A-ZÁÉÍÓÚÂÊÔÃÕÇÜ\s,]{4,})\s*[-–—:]\s*/, '<strong>$1</strong> — ');
-            return `<p>${text}</p>`;
-        })
-        .join('\n');
+        .filter(p => p.trim());
+
+    // Convert bold subtitles to H2
+    let htmlParts = paragraphs.map(p => {
+        let text = p.trim();
+        const h2Match = text.match(/^([A-ZÁÉÍÓÚÂÊÔÃÕÇÜ][A-ZÁÉÍÓÚÂÊÔÃÕÇÜ\s,]{4,})\s*[-–—:]\s*(.*)/);
+        if (h2Match) {
+            return `<h2>${h2Match[1]}</h2>\n<p>${h2Match[2]}</p>`;
+        }
+        return `<p>${text}</p>`;
+    });
+
+    // Insert KW in first paragraph if missing
+    const firstParaLower = htmlParts[0]?.toLowerCase() || '';
+    if (!firstParaLower.includes(focusKW)) {
+        htmlParts[0] = htmlParts[0].replace('<p>', `<p>${focusKW.charAt(0).toUpperCase() + focusKW.slice(1)} — `);
+    }
+
+    // Boost KW density: add KW naturally every ~5 paragraphs
+    const targetOccurrences = Math.max(5, Math.ceil(paragraphs.length * 0.3));
+    let kwCount = htmlParts.join(' ').toLowerCase().split(focusKW).length - 1;
+    const variations = [
+        `Sobre ${focusKW}, vale acompanhar os próximos capítulos.`,
+        `O cenário envolvendo ${focusKW} segue em evolução.`,
+        `A situação de ${focusKW} merece atenção dos torcedores.`,
+    ];
+    for (let i = 3; i < htmlParts.length && kwCount < targetOccurrences; i += 4) {
+        if (htmlParts[i] && htmlParts[i].includes('<p>')) {
+            htmlParts[i] = htmlParts[i].replace('</p>', ` ${variations[kwCount % variations.length]}</p>`);
+            kwCount++;
+        }
+    }
+
+    // Add TOC if 3+ headings
+    const h2Count = htmlParts.filter(p => p.includes('<h2')).length;
+    if (h2Count >= 3) {
+        const tocItems = [];
+        let sectionIdx = 0;
+        htmlParts = htmlParts.map(p => {
+            const m = p.match(/<h2>(.*?)<\/h2>/);
+            if (m) {
+                const anchor = `section-${sectionIdx}`;
+                tocItems.push(`<li><a href="#${anchor}">${m[1]}</a></li>`);
+                p = p.replace('<h2>', `<h2 id="${anchor}">`);
+                sectionIdx++;
+            }
+            return p;
+        });
+        const toc = `<div style="background:#f8f9fa;border:1px solid #e2e5e9;border-radius:8px;padding:16px 20px;margin:20px 0"><strong>Neste artigo:</strong><ul style="margin:8px 0 0;padding-left:20px">${tocItems.join('')}</ul></div>`;
+        // Insert after first paragraph
+        htmlParts.splice(1, 0, toc);
+    }
+
+    // Add external link (authoritative source)
+    const extLinks = {
+        'Brasileirão': ['https://www.cbf.com.br/', 'CBF'],
+        'Copa Libertadores': ['https://www.conmebol.com/', 'CONMEBOL'],
+        'Champions League': ['https://www.uefa.com/', 'UEFA'],
+        'Premier League': ['https://www.premierleague.com/', 'Premier League'],
+        'Copa do Mundo': ['https://www.fifa.com/', 'FIFA'],
+        'Futebol Internacional': ['https://www.uefa.com/', 'UEFA'],
+        'Copa do Brasil': ['https://www.cbf.com.br/', 'CBF'],
+    };
+    const ext = extLinks[article.category] || ['https://www.cbf.com.br/', 'CBF'];
+    htmlParts.push(`<p><em>Fonte oficial: <a href="${ext[0]}" target="_blank" rel="noopener">${ext[1]}</a></em></p>`);
+
+    const htmlContent = htmlParts.join('\n');
+
+    // SEO meta
+    const seoTitle = article.rewrittenTitle.length > 50
+        ? article.rewrittenTitle.substring(0, 47) + '... | Papo de Bola'
+        : article.rewrittenTitle + ' | Papo de Bola';
+
+    const metaDesc = `${focusKW.charAt(0).toUpperCase() + focusKW.slice(1)}: ${plainText.substring(0, 120)}. Leia mais!`;
+
+    // Secondary keywords from tags
+    const secondaryKW = (article.tags || []).slice(0, 3).join(',');
+    const allKW = secondaryKW ? `${focusKW},${secondaryKW}` : focusKW;
 
     const postData = JSON.stringify({
         title: article.rewrittenTitle,
         content: htmlContent,
         status: 'publish',
+        slug: slug,
         categories: [categoryId],
-        excerpt: (article.rewrittenText || '').substring(0, 200),
+        excerpt: plainText,
+        meta: {
+            rank_math_focus_keyword: allKW,
+            rank_math_title: seoTitle,
+            rank_math_description: metaDesc,
+            rank_math_rich_snippet: 'article',
+            rank_math_snippet_article_type: 'NewsArticle',
+            rank_math_robots: ['index', 'follow', 'max-snippet:-1', 'max-image-preview:large'],
+            rank_math_facebook_title: seoTitle,
+            rank_math_facebook_description: metaDesc,
+            rank_math_twitter_use_facebook: 'on',
+        },
     });
 
     return new Promise((resolve) => {
@@ -488,6 +598,9 @@ async function publishToWordPress(article) {
                 try {
                     const post = JSON.parse(data);
                     if (post.id) {
+                        // Add internal links after publish (need other post URLs)
+                        addInternalLinks(post.id, categoryId);
+                        // Set featured image alt text
                         resolve(post.link || `Post #${post.id}`);
                     } else {
                         console.log(`  [WP] Error: ${post.message || 'unknown'}`);
@@ -502,6 +615,64 @@ async function publishToWordPress(article) {
         req.write(postData);
         req.end();
     });
+}
+
+// Add "Leia também" internal links section to a post
+async function addInternalLinks(postId, categoryId) {
+    // Get related posts from same category
+    const related = await new Promise((resolve) => {
+        https.get(`${WP_BASE}/posts?categories=${categoryId}&exclude=${postId}&per_page=3&orderby=date&order=desc`, {
+            headers: { 'Authorization': WP_AUTH },
+            rejectUnauthorized: false,
+        }, res => {
+            let d = '';
+            res.on('data', c => d += c);
+            res.on('end', () => { try { resolve(JSON.parse(d)); } catch { resolve([]); } });
+        }).on('error', () => resolve([]));
+    });
+
+    if (!related || related.length === 0) return;
+
+    // Get current content
+    const post = await new Promise((resolve) => {
+        https.get(`${WP_BASE}/posts/${postId}`, {
+            headers: { 'Authorization': WP_AUTH },
+            rejectUnauthorized: false,
+        }, res => {
+            let d = '';
+            res.on('data', c => d += c);
+            res.on('end', () => { try { resolve(JSON.parse(d)); } catch { resolve(null); } });
+        }).on('error', () => resolve(null));
+    });
+
+    if (!post) return;
+
+    let content = post.content?.raw || post.content?.rendered || '';
+    if (content.includes('Leia também')) return;
+
+    let links = '\n<h2>Leia também</h2>\n<ul>\n';
+    related.forEach(r => {
+        links += `<li><a href="${r.link}">${r.title?.rendered || r.title}</a></li>\n`;
+    });
+    links += '</ul>';
+    content += links;
+
+    // Update post
+    const updateData = JSON.stringify({ content });
+    const req = https.request({
+        hostname: 'admin.papodebola.com.br',
+        path: `/wp-json/wp/v2/posts/${postId}`,
+        method: 'PUT',
+        headers: {
+            'Authorization': WP_AUTH,
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(updateData),
+        },
+        rejectUnauthorized: false,
+    }, () => {});
+    req.on('error', () => {});
+    req.write(updateData);
+    req.end();
 }
 
 async function main() {
