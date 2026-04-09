@@ -241,7 +241,7 @@ async function fetchPexelsImage(query, slug) {
     const imagePath = path.join(IMAGES_DIR, `${slug}.jpg`);
     if (fs.existsSync(imagePath) && fs.statSync(imagePath).size > 5000) return `/artigos/img/${slug}.jpg`;
 
-    const PEXELS_KEY = '563492ad6f917000010000011c680b22ebcb49d6a75feab9a2eb0c17';
+    const PEXELS_KEY = process.env.PEXELS_API_KEY || 'pA489YWSRdWCzthnsvcu9tOeHgoWtKku4JeyxUvMGhrRVfiqYDkRo0m9';
     const searchQuery = encodeURIComponent(`futebol ${query}`);
 
     console.log(`  [PEXELS] Searching: futebol ${query}...`);
