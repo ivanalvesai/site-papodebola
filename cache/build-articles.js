@@ -136,160 +136,148 @@ Responda APENAS no formato JSON:
     });
 }
 
-// Map Brazilian teams to their real jersey descriptions
-const TEAM_JERSEYS = {
-    'corinthians': 'wearing white jersey with black collar and black shorts, Corinthians style uniform',
-    'palmeiras': 'wearing green jersey with white details and white shorts, Palmeiras style uniform',
-    'flamengo': 'wearing red and black horizontal striped jersey and white shorts, Flamengo style uniform',
-    'são paulo': 'wearing white jersey with red and black horizontal stripe on chest, São Paulo style uniform',
-    'santos': 'wearing all white jersey and white shorts, Santos FC style uniform',
-    'vasco': 'wearing white jersey with black diagonal stripe and black shorts, Vasco style uniform',
-    'fluminense': 'wearing jersey with maroon green and white vertical stripes, Fluminense style uniform',
-    'botafogo': 'wearing black and white vertical striped jersey, Botafogo style uniform',
-    'grêmio': 'wearing blue jersey with black vertical stripes and white shorts, Grêmio style uniform',
-    'internacional': 'wearing red jersey and white shorts, Internacional style uniform',
-    'atlético': 'wearing black and white vertical striped jersey, Atlético Mineiro style uniform',
-    'cruzeiro': 'wearing blue jersey with white details, Cruzeiro style uniform',
-    'bahia': 'wearing white jersey with blue and red details, Bahia style uniform',
-    'fortaleza': 'wearing red blue and white striped jersey, Fortaleza style uniform',
-    'athletico': 'wearing red and black jersey, Athletico Paranaense style uniform',
-    'coritiba': 'wearing green and white jersey, Coritiba style uniform',
-    'neymar': 'Brazilian football star with blond mohawk hairstyle wearing Santos white jersey',
-    'militão': 'Brazilian defender wearing Real Madrid all white jersey',
-    'real madrid': 'wearing all white jersey and white shorts, Real Madrid style uniform',
-    'barcelona': 'wearing blue and red vertical striped jersey, Barcelona style uniform',
-    'cusco': 'wearing red jersey, Peruvian football team',
+// Map team names to AllSportsApi team IDs
+const TEAM_IDS = {
+    'corinthians': 1957, 'palmeiras': 1963, 'flamengo': 5981,
+    'são paulo': 1981, 'santos': 1968, 'vasco': 1952,
+    'fluminense': 1961, 'botafogo': 1958, 'grêmio': 1954,
+    'internacional': 1959, 'atlético mineiro': 1977, 'atlético-mg': 1977,
+    'cruzeiro': 1982, 'bahia': 1955, 'fortaleza': 1962,
+    'athletico': 1967, 'coritiba': 1999, 'bragantino': 1998,
+    'cuiabá': 7315, 'goiás': 1960, 'américa-mg': 1973,
+    'real madrid': 2829, 'barcelona': 2817, 'manchester': 17,
 };
 
-function detectTeamJersey(title) {
+function detectTeamId(title) {
     const lower = title.toLowerCase();
-    for (const [team, desc] of Object.entries(TEAM_JERSEYS)) {
-        if (lower.includes(team)) return desc;
+    for (const [name, id] of Object.entries(TEAM_IDS)) {
+        if (lower.includes(name)) return { id, name };
     }
-    return 'wearing generic football jersey';
+    return null;
 }
 
-async function generateImagePrompt(title) {
-    const jerseyDesc = detectTeamJersey(title);
-
-    if (!ANTHROPIC_KEY) return `Sports photography, Brazilian football player ${jerseyDesc}, stadium atmosphere, action shot, editorial photo, high quality, cinematic lighting`;
-
-    return new Promise((resolve) => {
-        const body = JSON.stringify({
-            model: 'claude-haiku-4-5-20251001',
-            max_tokens: 200,
-            messages: [{
-                role: 'user',
-                content: `Create a FLUX image generation prompt in English for a sports article cover photo.
-
-CRITICAL RULES:
-- The image must look like REAL sports photography (editorial, cinematic)
-- Players must wear the CORRECT team uniform described below
-- NO text, NO logos, NO words in the image
-- Include: dramatic lighting, stadium background, action or emotion
-- Be specific about the scene based on the article title
-
-Team uniform to use: ${jerseyDesc}
-Article title: ${title}
-
-Reply with ONLY the prompt, nothing else. Max 60 words.`
-            }]
-        });
-
-        const options = {
-            hostname: 'api.anthropic.com',
-            path: '/v1/messages',
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': ANTHROPIC_KEY,
-                'anthropic-version': '2023-06-01',
-                'Content-Length': Buffer.byteLength(body),
-            },
-        };
-
-        const req = https.request(options, res => {
-            let data = '';
-            res.on('data', c => data += c);
-            res.on('end', () => {
-                try {
-                    const response = JSON.parse(data);
-                    const prompt = response.content?.[0]?.text?.trim() || '';
-                    resolve(prompt || `Brazilian football editorial photography, stadium, action, ${title}`);
-                } catch(e) {
-                    resolve(`Brazilian football editorial photography, stadium, action shot`);
-                }
-            });
-        });
-
-        req.on('error', () => resolve('Brazilian football editorial photography, stadium, action shot'));
-        req.setTimeout(15000, () => { req.destroy(); resolve('Brazilian football editorial photography, stadium'); });
-        req.write(body);
-        req.end();
-    });
-}
-
-async function generateFluxImage(prompt, slug) {
+// Download a real match thumbnail from the team's media
+async function fetchRealTeamImage(teamId, teamName, slug) {
     const imagePath = path.join(IMAGES_DIR, `${slug}.jpg`);
 
-    // Skip if image already exists
+    // Skip if already exists
     if (fs.existsSync(imagePath) && fs.statSync(imagePath).size > 5000) {
-        console.log(`  [CACHED] Image already exists: ${slug}.jpg`);
+        console.log(`  [CACHED] ${slug}.jpg`);
         return `/artigos/img/${slug}.jpg`;
     }
 
-    for (let i = 0; i < HF_TOKENS.length; i++) {
-        const token = HF_TOKENS[i];
-        try {
-            console.log(`  [FLUX] Generating with token ${i + 1}...`);
+    console.log(`  [PHOTO] Fetching real match photos for ${teamName} (ID: ${teamId})...`);
 
-            const result = await new Promise((resolve, reject) => {
-                const body = JSON.stringify({ inputs: prompt });
-                const options = {
-                    hostname: 'router.huggingface.co',
-                    path: '/hf-inference/models/black-forest-labs/FLUX.1-schnell',
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                        'Content-Length': Buffer.byteLength(body),
-                    },
-                };
-
-                const req = https.request(options, res => {
-                    const chunks = [];
-                    res.on('data', c => chunks.push(c));
-                    res.on('end', () => {
-                        const buffer = Buffer.concat(chunks);
-                        if (res.statusCode === 200 && buffer.length > 5000) {
-                            resolve(buffer);
-                        } else if (res.statusCode === 402) {
-                            console.log(`  [FLUX] Token ${i + 1} quota exhausted`);
-                            resolve(null);
-                        } else {
-                            console.log(`  [FLUX] Token ${i + 1} error: HTTP ${res.statusCode}`);
-                            resolve(null);
-                        }
-                    });
-                });
-
-                req.on('error', (e) => { console.log(`  [FLUX] Error: ${e.message}`); resolve(null); });
-                req.setTimeout(120000, () => { req.destroy(); resolve(null); });
-                req.write(body);
-                req.end();
-            });
-
-            if (result) {
-                fs.writeFileSync(imagePath, result);
-                console.log(`  [FLUX] OK: ${slug}.jpg (${result.length} bytes)`);
-                return `/artigos/img/${slug}.jpg`;
-            }
-        } catch(e) {
-            console.log(`  [FLUX] Error: ${e.message}`);
-        }
+    // Get team media from API
+    const data = await fetchAPI(`team/${teamId}/media`);
+    if (!data?.media) {
+        console.log(`  [PHOTO] No media found`);
+        return null;
     }
 
-    console.log('  [FLUX] All tokens failed, no image generated');
+    // Find video highlights with thumbnails (type 6 = video)
+    const videos = data.media.filter(m => m.mediaType === 6 && m.thumbnailUrl);
+    if (videos.length === 0) {
+        console.log(`  [PHOTO] No video thumbnails found`);
+        return null;
+    }
+
+    // Pick a random thumbnail to avoid all articles having the same image
+    const pick = videos[Math.floor(Math.random() * Math.min(videos.length, 5))];
+
+    // Use maxresdefault for higher quality
+    let thumbUrl = pick.thumbnailUrl;
+    if (thumbUrl.includes('hqdefault')) {
+        thumbUrl = thumbUrl.replace('hqdefault', 'maxresdefault');
+    }
+
+    console.log(`  [PHOTO] Downloading: ${thumbUrl.substring(0, 60)}...`);
+
+    // Download the thumbnail
+    const imageData = await new Promise((resolve) => {
+        const proto = thumbUrl.startsWith('https') ? https : http;
+        proto.get(thumbUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } }, res => {
+            // If maxresdefault fails (404), fallback to hqdefault
+            if (res.statusCode !== 200) {
+                const fallback = thumbUrl.replace('maxresdefault', 'hqdefault');
+                console.log(`  [PHOTO] Fallback to hqdefault...`);
+                proto.get(fallback, { headers: { 'User-Agent': 'Mozilla/5.0' } }, res2 => {
+                    const chunks = [];
+                    res2.on('data', c => chunks.push(c));
+                    res2.on('end', () => resolve(Buffer.concat(chunks)));
+                }).on('error', () => resolve(null));
+                res.resume(); // consume original response
+                return;
+            }
+            const chunks = [];
+            res.on('data', c => chunks.push(c));
+            res.on('end', () => resolve(Buffer.concat(chunks)));
+        }).on('error', () => resolve(null));
+    });
+
+    if (imageData && imageData.length > 3000) {
+        fs.writeFileSync(imagePath, imageData);
+        console.log(`  [PHOTO] OK: ${slug}.jpg (${imageData.length} bytes) - Real match photo!`);
+        return `/artigos/img/${slug}.jpg`;
+    }
+
+    console.log(`  [PHOTO] Download failed`);
+    return null;
+}
+
+// Fallback: fetch a generic football image from Pexels
+async function fetchPexelsImage(query, slug) {
+    const imagePath = path.join(IMAGES_DIR, `${slug}.jpg`);
+    if (fs.existsSync(imagePath) && fs.statSync(imagePath).size > 5000) return `/artigos/img/${slug}.jpg`;
+
+    const PEXELS_KEY = '563492ad6f917000010000011c680b22ebcb49d6a75feab9a2eb0c17';
+    const searchQuery = encodeURIComponent(`futebol ${query}`);
+
+    console.log(`  [PEXELS] Searching: futebol ${query}...`);
+
+    const data = await new Promise((resolve) => {
+        https.get(`https://api.pexels.com/v1/search?query=${searchQuery}&per_page=5&orientation=landscape`, {
+            headers: { 'Authorization': PEXELS_KEY },
+        }, res => {
+            let d = '';
+            res.on('data', c => d += c);
+            res.on('end', () => { try { resolve(JSON.parse(d)); } catch(e) { resolve(null); } });
+        }).on('error', () => resolve(null));
+    });
+
+    if (!data?.photos?.length) {
+        console.log(`  [PEXELS] No results`);
+        return null;
+    }
+
+    const photo = data.photos[Math.floor(Math.random() * data.photos.length)];
+    const photoUrl = photo.src?.large || photo.src?.medium;
+
+    if (!photoUrl) return null;
+
+    const imageData = await new Promise((resolve) => {
+        https.get(photoUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } }, res => {
+            if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                https.get(res.headers.location, res2 => {
+                    const chunks = [];
+                    res2.on('data', c => chunks.push(c));
+                    res2.on('end', () => resolve(Buffer.concat(chunks)));
+                }).on('error', () => resolve(null));
+                res.resume();
+                return;
+            }
+            const chunks = [];
+            res.on('data', c => chunks.push(c));
+            res.on('end', () => resolve(Buffer.concat(chunks)));
+        }).on('error', () => resolve(null));
+    });
+
+    if (imageData && imageData.length > 3000) {
+        fs.writeFileSync(imagePath, imageData);
+        console.log(`  [PEXELS] OK: ${slug}.jpg (${imageData.length} bytes)`);
+        return `/artigos/img/${slug}.jpg`;
+    }
+
     return null;
 }
 
@@ -445,10 +433,21 @@ async function main() {
             const rewritten = await rewriteWithClaude(item.title, item.fullText);
             const slug = generateSlug(rewritten.title);
 
-            // Generate image with FLUX
-            console.log(`  Generating image...`);
-            const imagePrompt = await generateImagePrompt(rewritten.title);
-            const localImage = await generateFluxImage(imagePrompt, slug);
+            // Get real match image
+            console.log(`  Finding image...`);
+            const team = detectTeamId(rewritten.title) || detectTeamId(item.title);
+            let localImage = null;
+
+            // 1st: Try real match thumbnail from team media
+            if (team) {
+                localImage = await fetchRealTeamImage(team.id, team.name, slug);
+            }
+
+            // 2nd: Fallback to Pexels free stock photo
+            if (!localImage) {
+                const searchTerm = team ? team.name : 'match stadium';
+                localImage = await fetchPexelsImage(searchTerm, slug);
+            }
 
             const article = {
                 originalTitle: item.title,
