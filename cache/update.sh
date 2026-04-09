@@ -102,6 +102,10 @@ log "Syncing WordPress..."
 node "$CACHE_DIR/sync-wordpress.js" >> "$LOG_FILE" 2>&1
 log "OK: wordpress synced"
 
+# 7c. Apply SEO to new posts without Rank Math meta (every 30 min)
+docker exec wordpress-papodebola-wordpress-1 wp eval-file /tmp/apply-seo-to-new.php --allow-root >> "$LOG_FILE" 2>&1
+log "OK: SEO applied to new posts"
+
 # DISABLED - Sitemap now managed by Rank Math in WordPress
 # 8-old. Sitemap generation moved to WordPress/Rank Math
 
