@@ -96,7 +96,16 @@ if [ $((HOUR % 3)) -eq 0 ] || [ ! -f "$CACHE_DIR/articles.json" ]; then
     log "OK: articles ($(stat -c%s $CACHE_DIR/articles.json 2>/dev/null || echo 0) bytes)"
 fi
 
-# 8. Sitemap (after articles)
+# 8. Championship data (every 3 hours)
+CHAMP_FILE="$CACHE_DIR/champ_325.json"
+CHAMP_SIZE=$(stat -c%s "$CHAMP_FILE" 2>/dev/null || echo "0")
+if [ "$CHAMP_SIZE" -lt 20 ] || [ $((HOUR % 3)) -eq 0 ]; then
+    log "Building championship cache..."
+    node "$CACHE_DIR/build-championship.js" >> "$LOG_FILE" 2>&1
+    log "OK: championships cached"
+fi
+
+# 9. Sitemap (after articles)
 log "Generating sitemap..."
 node "$CACHE_DIR/build-sitemap.js" >> "$LOG_FILE" 2>&1
 
