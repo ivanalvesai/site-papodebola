@@ -52,7 +52,7 @@ async function main() {
     console.log(`  Categories: ${Object.keys(catMap).length}, Tags: ${Object.keys(tagMap).length}`);
 
     // Fetch published posts
-    const posts = await wpFetch('posts?per_page=50&orderby=date&order=desc&_embed');
+    const posts = await wpFetch('posts?per_page=100&orderby=date&order=desc&_embed');
     if (!posts || !Array.isArray(posts)) {
         console.log('  No posts found or API error');
         return;
