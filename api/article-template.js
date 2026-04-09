@@ -60,7 +60,7 @@ function generateArticleHTML(article) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="../css/style.css?v=12">
+    <link rel="stylesheet" href="../css/style.css?v=13">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -81,29 +81,39 @@ function generateArticleHTML(article) {
     }
     </script>
     <style>
-        .article-hero { background: #fff; border-bottom: 1px solid #E2E5E9; padding: 32px 0; }
-        .article-hero img { width: 100%; max-height: 440px; object-fit: cover; border-radius: 8px; margin-bottom: 24px; }
-        .article-category { font-family: 'Open Sans', sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #00965E; margin-bottom: 12px; }
+        .article-hero { background: #fff; border-bottom: 1px solid #E2E5E9; padding: 40px 0 32px; }
+        .article-hero img { width: 100%; max-height: 480px; object-fit: cover; border-radius: 4px; margin-bottom: 28px; }
+        .article-category { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #00965E; margin-bottom: 16px; }
         .article-category a { color: #00965E; }
         .article-category a:hover { text-decoration: underline; }
-        .article-title { font-family: 'Open Sans', sans-serif; font-size: 32px; font-weight: 700; line-height: 1.2; text-transform: uppercase; margin-bottom: 12px; color: #1A1D23; }
-        .article-meta { font-size: 13px; color: #8896A6; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-        .article-content { padding: 32px 0 40px; max-width: 720px; margin: 0 auto; }
-        .article-content p { font-family: 'Open Sans', sans-serif; font-size: 17px; font-weight: 400; line-height: 1.85; color: #2D3748; margin-bottom: 20px; text-align: justify; }
-        .article-content p:first-child { font-size: 17px; font-weight: 400; color: #2D3748; }
-        .article-back { display: inline-flex; align-items: center; gap: 6px; color: #00965E; font-weight: 600; font-size: 14px; margin-bottom: 20px; }
+        .article-title { font-size: 34px; font-weight: 700; line-height: 1.25; margin-bottom: 20px; color: #1A1D23; text-transform: none; }
+        .article-meta { font-size: 14px; color: #8896A6; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; padding-top: 16px; border-top: 1px solid #EEF0F2; }
+        .article-content { padding: 48px 0 40px; max-width: 680px; margin: 0 auto; }
+        .article-content p {
+            font-size: 18px;
+            font-weight: 400;
+            line-height: 2;
+            color: #333;
+            margin-bottom: 32px;
+            text-align: left;
+        }
+        .article-back { display: inline-flex; align-items: center; gap: 6px; color: #00965E; font-weight: 600; font-size: 14px; margin-bottom: 24px; }
         .article-back:hover { text-decoration: underline; }
-        .share-bar { max-width: 720px; margin: 0 auto; padding: 20px 0 40px; border-top: 1px solid #E2E5E9; }
-        .share-bar h4 { font-family: 'Open Sans', sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: #8896A6; margin-bottom: 12px; }
-        .share-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
-        .share-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; color: white; text-decoration: none; transition: opacity 0.2s; }
-        .share-btn:hover { opacity: 0.85; }
+        .share-bar { max-width: 680px; margin: 0 auto; padding: 32px 0 48px; border-top: 2px solid #E2E5E9; }
+        .share-bar h4 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: #8896A6; margin-bottom: 16px; }
+        .share-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .share-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; color: white; text-decoration: none; transition: all 0.2s; }
+        .share-btn:hover { opacity: 0.85; transform: translateY(-1px); }
         .share-btn.whatsapp { background: #25D366; }
         .share-btn.twitter { background: #1DA1F2; }
         .share-btn.facebook { background: #1877F2; }
         .share-btn.telegram { background: #0088cc; }
         .share-btn.copy { background: #4A5568; cursor: pointer; border: none; font-family: inherit; }
-        @media (max-width: 768px) { .article-title { font-size: 24px; } .article-content p { font-size: 16px; } }
+        @media (max-width: 768px) {
+            .article-title { font-size: 26px; }
+            .article-content p { font-size: 17px; line-height: 1.9; margin-bottom: 28px; }
+            .article-content { padding: 32px 0 32px; }
+        }
     </style>
 </head>
 <body>

@@ -227,19 +227,23 @@
                 if (hasFuture && !firstFuture) firstFuture = r;
             }
 
-            // Prefer: current round with matches > last finished > first future > any
-            if (this.data.matchesByRound[this.round]?.length > 0) {
-                bestRound = this.round;
+            // Best round: first with future games, otherwise last with results
+            if (firstFuture) {
+                bestRound = firstFuture;
             } else if (lastFinished) {
                 bestRound = lastFinished;
-            } else if (firstFuture) {
-                bestRound = firstFuture;
             } else {
                 bestRound = allRounds[allRounds.length - 1] || this.round;
             }
 
             this.round = bestRound;
             this.showRound(bestRound);
+
+            // Show next matches info if no future rounds cached
+            if (!firstFuture && lastFinished) {
+                const box = document.getElementById('matchesBox');
+                box.innerHTML += '<div style="padding:14px 16px;text-align:center;color:#8896A6;font-size:12px;border-top:1px solid #EEF0F2;background:#F8F9FA"><i class="fas fa-calendar-alt" style="margin-right:4px"></i> Próximos jogos ainda não definidos</div>';
+            }
         },
 
         showRound(r) {
@@ -250,8 +254,13 @@
             const canPrev = allRounds.indexOf(r) > 0;
             const canNext = allRounds.indexOf(r) < allRounds.length - 1;
 
+            // Count finished/future
+            const finished = matches?.filter(m => m.status === 'finished').length || 0;
+            const future = matches?.filter(m => m.status === 'notstarted').length || 0;
+            const roundLabel = future > 0 && finished === 0 ? 'Próxima rodada' : `Rodada ${r}`;
+
             let html = `<div class="ch-round-header">
-                <span>Rodada ${r}</span>
+                <span>${roundLabel}</span>
                 <div class="ch-round-nav">
                     <button ${canPrev ? `onclick="P.prevRound()"` : 'disabled style="opacity:0.3"'}><i class="fas fa-chevron-left"></i></button>
                     <button ${canNext ? `onclick="P.nextRound()"` : 'disabled style="opacity:0.3"'}><i class="fas fa-chevron-right"></i></button>
