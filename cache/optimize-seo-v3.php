@@ -45,7 +45,7 @@ function detect_category($title, $content) {
 }
 
 // Get category ID by name
-function get_cat_id($name) {
+function pdb_get_cat_id($name) {
     $cat = get_term_by('name', $name, 'category');
     if (!$cat) {
         // Create it
@@ -138,7 +138,7 @@ foreach ($posts as $post) {
 
     // 1. FIX CATEGORY
     $correct_cat = detect_category($title, $content);
-    $cat_id = get_cat_id($correct_cat);
+    $cat_id = pdb_get_cat_id($correct_cat);
     wp_set_post_categories($post->ID, array($cat_id));
 
     // 2. FOCUS KEYWORD
