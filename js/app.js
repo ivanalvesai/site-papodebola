@@ -143,16 +143,18 @@ const App = {
         }
 
         container.innerHTML = news.slice(0, 7).map(n => {
-            const source = n.link?.includes('gazeta') ? 'Gazeta Esportiva' : n.link?.includes('torcedores') ? 'Torcedores' : 'Notícia';
+            const isLocal = n.local || n.link?.startsWith('/artigos');
+            const href = isLocal ? n.link : n.link;
+            const target = isLocal ? '' : 'target="_blank" rel="noopener"';
             const dateStr = n.pubDate ? new Date(n.pubDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
 
             return `
-                <a href="${n.link}" target="_blank" rel="noopener" class="news-card">
+                <a href="${href}" ${target} class="news-card">
                     <div class="news-thumb">
                         ${n.image ? `<img src="${n.image}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-newspaper\\'></i>'">` : '<i class="fas fa-newspaper"></i>'}
                     </div>
                     <div class="news-body">
-                        <div class="news-source">${source}</div>
+                        <div class="news-source">Papo de Bola</div>
                         <div class="news-title">${n.title}</div>
                         <div class="news-desc">${n.description || ''}</div>
                         ${dateStr ? `<div class="news-date">${dateStr}</div>` : ''}

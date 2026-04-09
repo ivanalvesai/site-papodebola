@@ -85,6 +85,15 @@ if [ "$HOME_SIZE" -lt 20 ] || [ $((HOUR % 3)) -eq 0 ]; then
     log "OK: home ($(stat -c%s $HOME_FILE 2>/dev/null || echo 0) bytes)"
 fi
 
+# 7. Articles - fetch, rewrite with Claude, generate pages (every 3 hours)
+if [ $((HOUR % 3)) -eq 0 ] || [ ! -f "$CACHE_DIR/articles.json" ]; then
+    log "Building articles..."
+    ANTHROPIC_API_KEY=$(grep ANTHROPIC_API_KEY /home/ivan/automacao-site/.env 2>/dev/null | cut -d= -f2)
+    export ANTHROPIC_API_KEY
+    node "$CACHE_DIR/build-articles.js" >> "$LOG_FILE" 2>&1
+    log "OK: articles ($(stat -c%s $CACHE_DIR/articles.json 2>/dev/null || echo 0) bytes)"
+fi
+
 # Write timestamp
 echo "{\"updated\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > "$CACHE_DIR/meta.json"
 
