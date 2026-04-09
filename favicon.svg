@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00965E"/>
+      <stop offset="100%" style="stop-color:#007A4D"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <g transform="translate(256,256) scale(0.7)">
+    <circle r="180" fill="none" stroke="white" stroke-width="14" opacity="0.95"/>
+    <polygon points="0,-72 68.5,-22.2 42.3,58.2 -42.3,58.2 -68.5,-22.2" fill="white"/>
+    <polygon points="0,-180 34,-138 -34,-138" fill="white"/>
+    <line x1="0" y1="-72" x2="0" y2="-138" stroke="white" stroke-width="9"/>
+    <polygon points="171,-55 140,-98 118,-52" fill="white"/>
+    <line x1="68.5" y1="-22.2" x2="118" y2="-52" stroke="white" stroke-width="9"/>
+    <polygon points="106,146 140,98 92,92" fill="white"/>
+    <line x1="42.3" y1="58.2" x2="92" y2="92" stroke="white" stroke-width="9"/>
+    <polygon points="-106,146 -140,98 -92,92" fill="white"/>
+    <line x1="-42.3" y1="58.2" x2="-92" y2="92" stroke="white" stroke-width="9"/>
+    <polygon points="-171,-55 -140,-98 -118,-52" fill="white"/>
+    <line x1="-68.5" y1="-22.2" x2="-118" y2="-52" stroke="white" stroke-width="9"/>
+  </g>
+</svg>

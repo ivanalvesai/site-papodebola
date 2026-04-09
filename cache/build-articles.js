@@ -318,6 +318,7 @@ function generateArticlePage(article) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="${article.rewrittenText.substring(0, 155).replace(/"/g, '&quot;')}">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <meta name="robots" content="noindex, nofollow">
     <meta property="og:title" content="${article.rewrittenTitle.replace(/"/g, '&quot;')}">
     <meta property="og:description" content="${article.rewrittenText.substring(0, 155).replace(/"/g, '&quot;')}">
