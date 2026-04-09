@@ -1542,4 +1542,96 @@ h1, h2, h3, h4 {
     .top-matches-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 }
 
+/* Show More Button */
+.btn-show-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 32px;
+    background: var(--bg-surface);
+    color: var(--green);
+    border: 2px solid var(--green);
+    border-radius: var(--r-pill);
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    transition: all var(--duration) var(--ease);
+}
+
+.btn-show-more:hover {
+    background: var(--green);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,150,94,0.25);
+}
+
+/* Editor styles in admin */
+.editor-article-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--bg-body);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    margin-bottom: 6px;
+    transition: background 0.15s;
+}
+
+.editor-article-item:hover { background: var(--bg-card-hover); }
+
+.editor-article-thumb {
+    width: 56px;
+    height: 40px;
+    border-radius: var(--r-sm);
+    background: var(--bg-body);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.editor-article-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.editor-article-info { flex: 1; min-width: 0; }
+
+.editor-article-info .ea-title {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.editor-article-info .ea-meta {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+.editor-article-actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+/* User item */
+.user-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--bg-body);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    margin-bottom: 6px;
+}
+
+.user-item .user-info { display: flex; align-items: center; gap: 10px; }
+
+.user-item .user-icon {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--green-light); color: var(--green);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+}
+
+.user-item .user-name { font-size: 14px; font-weight: 600; }
+.user-item .user-role { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
 ::selection { background: var(--green); color: white; }

@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=8">
+    <link rel="stylesheet" href="css/style.css?v=9">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -184,6 +184,11 @@
                         <div class="news-grid" id="newsGrid">
                             <div class="loading-state"><div class="spinner"></div><p>Carregando notícias...</p></div>
                         </div>
+                        <div style="text-align:center;margin-top:20px">
+                            <a href="pages/noticias.html" class="btn-show-more" id="showMoreNews">
+                                <i class="fas fa-plus-circle"></i> Mostrar Mais
+                            </a>
+                        </div>
                     </section>
 
                     <!-- Transfers -->
@@ -234,9 +239,11 @@
                 <button class="admin-close" id="adminClose"><i class="fas fa-times"></i></button>
             </div>
             <div class="admin-tabs">
-                <button class="admin-tab active" data-tab="add-game">Adicionar Jogo</button>
-                <button class="admin-tab" data-tab="manage-games">Gerenciar Jogos</button>
-                <button class="admin-tab" data-tab="settings">Configurações</button>
+                <button class="admin-tab active" data-tab="add-game">Jogos</button>
+                <button class="admin-tab" data-tab="manage-games">Gerenciar</button>
+                <button class="admin-tab" data-tab="editor">Artigos</button>
+                <button class="admin-tab" data-tab="users">Usuários</button>
+                <button class="admin-tab" data-tab="settings">Config</button>
             </div>
             <div class="admin-content">
                 <!-- Add Game Tab -->
@@ -348,6 +355,90 @@
                     </div>
                 </div>
 
+                <!-- Editor Tab -->
+                <div class="admin-tab-content" id="tab-editor">
+                    <div id="editorMode" data-mode="list">
+                        <!-- Article List -->
+                        <div id="editorList">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                                <span style="font-size:13px;color:var(--text-muted)" id="editorCount">Carregando...</span>
+                                <button class="btn-primary" onclick="Admin.showArticleForm()">
+                                    <i class="fas fa-plus"></i> Novo Artigo
+                                </button>
+                            </div>
+                            <div id="editorArticlesList"></div>
+                        </div>
+
+                        <!-- Article Form (hidden by default) -->
+                        <div id="editorForm" style="display:none">
+                            <button style="color:var(--green);font-size:13px;font-weight:600;margin-bottom:16px" onclick="Admin.hideArticleForm()">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </button>
+                            <input type="hidden" id="editSlug" value="">
+                            <div class="form-group">
+                                <label>Título</label>
+                                <input type="text" id="articleTitle" placeholder="Título do artigo" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Categoria</label>
+                                <select id="articleCategory">
+                                    <option value="Futebol Brasileiro">Futebol Brasileiro</option>
+                                    <option value="Brasileirão">Brasileirão</option>
+                                    <option value="Copa do Brasil">Copa do Brasil</option>
+                                    <option value="Libertadores">Libertadores</option>
+                                    <option value="Futebol Internacional">Futebol Internacional</option>
+                                    <option value="Mercado da Bola">Mercado da Bola</option>
+                                    <option value="Opinião">Opinião</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Autor</label>
+                                <input type="text" id="articleAuthor" placeholder="Redação Papo de Bola" value="Redação Papo de Bola">
+                            </div>
+                            <div class="form-group">
+                                <label>URL da Imagem</label>
+                                <input type="text" id="articleImage" placeholder="/artigos/img/nome.jpg ou URL externa">
+                                <small>Deixe vazio para artigo sem imagem</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Conteúdo (separe parágrafos com linha em branco)</label>
+                                <textarea id="articleText" rows="12" placeholder="Escreva o artigo aqui...&#10;&#10;Segundo parágrafo...&#10;&#10;Terceiro parágrafo..." style="resize:vertical;min-height:200px"></textarea>
+                            </div>
+                            <button class="btn-primary btn-full" onclick="Admin.saveArticle()">
+                                <i class="fas fa-save"></i> Publicar Artigo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Tab -->
+                <div class="admin-tab-content" id="tab-users">
+                    <div class="settings-section-title"><i class="fas fa-users"></i> Usuários do Sistema</div>
+                    <div id="usersList" style="margin-bottom:20px"></div>
+
+                    <hr class="settings-divider">
+
+                    <div class="settings-section-title"><i class="fas fa-user-plus"></i> Criar Novo Usuário</div>
+                    <div class="form-group">
+                        <label>Nome de Usuário</label>
+                        <input type="text" id="newUserUsername" placeholder="Ex: editor1" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" id="newUserPassword" placeholder="Mín. 6 caracteres" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Função</label>
+                        <select id="newUserRole">
+                            <option value="editor">Editor (pode criar/editar artigos)</option>
+                            <option value="admin">Admin (acesso total)</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary btn-full" onclick="Admin.createUser()">
+                        <i class="fas fa-user-plus"></i> Criar Usuário
+                    </button>
+                </div>
+
                 <!-- Settings Tab -->
                 <div class="admin-tab-content" id="tab-settings">
                     <div class="settings-section-title"><i class="fas fa-key"></i> API</div>
@@ -437,9 +528,9 @@
         </div>
     </footer>
 
-    <script src="js/config.js?v=8"></script>
-    <script src="js/api.js?v=8"></script>
-    <script src="js/admin.js?v=8"></script>
-    <script src="js/app.js?v=8"></script>
+    <script src="js/config.js?v=9"></script>
+    <script src="js/api.js?v=9"></script>
+    <script src="js/admin.js?v=9"></script>
+    <script src="js/app.js?v=9"></script>
 </body>
 </html>

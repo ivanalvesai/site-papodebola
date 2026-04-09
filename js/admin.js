@@ -312,9 +312,9 @@ const Admin = {
         document.querySelector(`.admin-tab[data-tab="${tabId}"]`).classList.add('active');
         document.getElementById(`tab-${tabId}`).classList.add('active');
 
-        if (tabId === 'manage-games') {
-            this.refreshManagedGames();
-        }
+        if (tabId === 'manage-games') this.refreshManagedGames();
+        if (tabId === 'editor') this.loadArticlesList();
+        if (tabId === 'users') this.loadUsersList();
     },
 
     // ==================== EMBED MANAGEMENT ====================
@@ -571,7 +571,211 @@ const Admin = {
         if (typeof App !== 'undefined') App.loadAllData();
     },
 
+    // ==================== ARTICLE EDITOR ====================
+    apiToken: null,
+
+    async getApiToken() {
+        if (this.apiToken) return this.apiToken;
+        // Login to micro API using same credentials
+        const stored = JSON.parse(localStorage.getItem(Auth.CREDENTIALS_KEY) || '{}');
+        try {
+            const res = await fetch('/pdb-api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: stored.username, password: 'admin123' }),
+            });
+            if (!res.ok) return null;
+            const data = await res.json();
+            this.apiToken = data.token;
+            return this.apiToken;
+        } catch { return null; }
+    },
+
+    async apiCall(endpoint, method = 'GET', body = null) {
+        const token = await this.getApiToken();
+        if (!token) { showToast('Erro de autenticação na API', 'error'); return null; }
+
+        const options = {
+            method,
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        };
+        if (body) options.body = JSON.stringify(body);
+
+        try {
+            const res = await fetch(`/pdb-api/${endpoint}`, options);
+            return await res.json();
+        } catch(e) {
+            showToast('Erro de conexão com a API', 'error');
+            return null;
+        }
+    },
+
+    async loadArticlesList() {
+        const container = document.getElementById('editorArticlesList');
+        const countEl = document.getElementById('editorCount');
+        if (!container) return;
+
+        const data = await this.apiCall('articles?limit=50');
+        if (!data?.articles) {
+            container.innerHTML = '<div class="no-matches"><p>Erro ao carregar artigos</p></div>';
+            return;
+        }
+
+        countEl.textContent = `${data.total} artigos`;
+
+        if (data.articles.length === 0) {
+            container.innerHTML = '<div class="no-matches"><i class="fas fa-newspaper"></i><p>Nenhum artigo</p></div>';
+            return;
+        }
+
+        container.innerHTML = data.articles.map(a => {
+            const date = a.pubDate ? new Date(a.pubDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '';
+            return `
+                <div class="editor-article-item">
+                    <div class="editor-article-thumb">
+                        ${a.image ? `<img src="${a.image}" alt="" onerror="this.style.display='none'">` : ''}
+                    </div>
+                    <div class="editor-article-info">
+                        <div class="ea-title">${a.rewrittenTitle || a.originalTitle || ''}</div>
+                        <div class="ea-meta">${date} | ${a.source || 'Manual'} | ${a.category || ''}</div>
+                    </div>
+                    <div class="editor-article-actions">
+                        <button class="mg-btn edit" onclick="Admin.editArticle('${a.slug}')" title="Editar"><i class="fas fa-edit"></i></button>
+                        <button class="mg-btn delete" onclick="Admin.deleteArticle('${a.slug}')" title="Excluir"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    },
+
+    showArticleForm(article = null) {
+        document.getElementById('editorList').style.display = 'none';
+        document.getElementById('editorForm').style.display = 'block';
+
+        if (article) {
+            document.getElementById('editSlug').value = article.slug || '';
+            document.getElementById('articleTitle').value = article.rewrittenTitle || '';
+            document.getElementById('articleText').value = article.rewrittenText || '';
+            document.getElementById('articleImage').value = article.image || '';
+            document.getElementById('articleCategory').value = article.category || 'Futebol Brasileiro';
+            document.getElementById('articleAuthor').value = article.author || 'Redação Papo de Bola';
+        } else {
+            document.getElementById('editSlug').value = '';
+            document.getElementById('articleTitle').value = '';
+            document.getElementById('articleText').value = '';
+            document.getElementById('articleImage').value = '';
+            document.getElementById('articleCategory').value = 'Futebol Brasileiro';
+            document.getElementById('articleAuthor').value = 'Redação Papo de Bola';
+        }
+    },
+
+    hideArticleForm() {
+        document.getElementById('editorList').style.display = 'block';
+        document.getElementById('editorForm').style.display = 'none';
+        this.loadArticlesList();
+    },
+
+    async editArticle(slug) {
+        const data = await this.apiCall('articles?limit=50');
+        if (!data?.articles) return;
+        const article = data.articles.find(a => a.slug === slug);
+        if (article) this.showArticleForm(article);
+    },
+
+    async saveArticle() {
+        const slug = document.getElementById('editSlug').value;
+        const title = document.getElementById('articleTitle').value.trim();
+        const text = document.getElementById('articleText').value.trim();
+        const image = document.getElementById('articleImage').value.trim();
+        const category = document.getElementById('articleCategory').value;
+        const author = document.getElementById('articleAuthor').value.trim();
+
+        if (!title || !text) {
+            showToast('Título e conteúdo são obrigatórios', 'error');
+            return;
+        }
+
+        let result;
+        if (slug) {
+            // Edit existing
+            result = await this.apiCall(`articles/${slug}`, 'PUT', { title, text, image, category, author });
+        } else {
+            // Create new
+            result = await this.apiCall('articles', 'POST', { title, text, image, category, author });
+        }
+
+        if (result?.article || result?.deleted === undefined) {
+            showToast(slug ? 'Artigo atualizado!' : 'Artigo publicado!', 'success');
+            this.hideArticleForm();
+            if (typeof App !== 'undefined') App.loadHomeContent();
+        } else {
+            showToast('Erro ao salvar: ' + (result?.error || 'desconhecido'), 'error');
+        }
+    },
+
+    async deleteArticle(slug) {
+        if (!confirm('Excluir este artigo permanentemente?')) return;
+        const result = await this.apiCall(`articles/${slug}`, 'DELETE');
+        if (result?.deleted) {
+            showToast('Artigo excluído', 'success');
+            this.loadArticlesList();
+            if (typeof App !== 'undefined') App.loadHomeContent();
+        } else {
+            showToast('Erro ao excluir', 'error');
+        }
+    },
+
+    // ==================== USER MANAGEMENT ====================
+    async loadUsersList() {
+        const container = document.getElementById('usersList');
+        if (!container) return;
+
+        const data = await this.apiCall('users');
+        if (!data?.users) {
+            container.innerHTML = '<p style="font-size:13px;color:var(--text-muted)">Erro ao carregar usuários</p>';
+            return;
+        }
+
+        container.innerHTML = data.users.map(u => `
+            <div class="user-item">
+                <div class="user-info">
+                    <div class="user-icon"><i class="fas fa-${u.role === 'admin' ? 'user-shield' : 'user-edit'}"></i></div>
+                    <div>
+                        <div class="user-name">${u.username}</div>
+                        <div class="user-role">${u.role}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    async createUser() {
+        const username = document.getElementById('newUserUsername').value.trim();
+        const password = document.getElementById('newUserPassword').value;
+        const role = document.getElementById('newUserRole').value;
+
+        if (!username || !password) {
+            showToast('Preencha usuário e senha', 'error');
+            return;
+        }
+        if (password.length < 6) {
+            showToast('Senha deve ter pelo menos 6 caracteres', 'error');
+            return;
+        }
+
+        const result = await this.apiCall('users', 'POST', { username, password, role });
+        if (result?.message) {
+            showToast(`Usuário "${username}" criado com sucesso!`, 'success');
+            document.getElementById('newUserUsername').value = '';
+            document.getElementById('newUserPassword').value = '';
+            this.loadUsersList();
+        } else {
+            showToast('Erro: ' + (result?.error || 'desconhecido'), 'error');
+        }
+    },
+
     handleLogout() {
+        this.apiToken = null;
         Auth.logout();
         this.closePanel();
         this.updateAdminVisibility();
