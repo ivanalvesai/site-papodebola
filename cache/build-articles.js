@@ -350,8 +350,13 @@ async function main() {
 
     // Fetch RSS feeds
     const feeds = [
-        { url: 'https://www.gazetaesportiva.com/feed/', source: 'Gazeta Esportiva' },
         { url: 'https://www.torcedores.com/feed', source: 'Torcedores' },
+        { url: 'https://www.terra.com.br/esportes/futebol/rss.xml', source: 'Terra Esportes' },
+        { url: 'https://trivela.com.br/feed/', source: 'Trivela' },
+        { url: 'https://futebolatino.com.br/feed/', source: 'Futebol Latino' },
+        { url: 'https://feeds.bbci.co.uk/sport/football/rss.xml', source: 'BBC Sport' },
+        { url: 'https://www.theguardian.com/football/rss', source: 'The Guardian' },
+        { url: 'https://www.meutimao.com.br/feed', source: 'Meu Timão' },
     ];
 
     const newArticles = [];

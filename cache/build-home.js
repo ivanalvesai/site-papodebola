@@ -158,8 +158,10 @@ async function main() {
     // 3. Get news from RSS
     console.log('\n--- News RSS ---');
     const feeds = [
-        'https://www.gazetaesportiva.com/feed/',
         'https://www.torcedores.com/feed',
+        'https://www.terra.com.br/esportes/futebol/rss.xml',
+        'https://trivela.com.br/feed/',
+        'https://futebolatino.com.br/feed/',
     ];
 
     for (const feed of feeds) {

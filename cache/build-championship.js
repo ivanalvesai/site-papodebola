@@ -57,7 +57,7 @@ async function main() {
             champData.matchesByRound = {};
             for (const round of roundsToFetch) {
                 const matchData = await fetchAPI(`tournament/${t.id}/season/${t.seasonId}/matches/round/${round}`);
-                if (matchData?.events) {
+                if (matchData?.events && matchData.events.length > 0) {
                     champData.matchesByRound[round] = matchData.events.map(e => ({
                         id: e.id,
                         home: e.homeTeam?.name,

@@ -210,7 +210,36 @@
                 box.innerHTML = '<div style="padding:20px;text-align:center;color:#8896A6">Jogos indisponíveis</div>';
                 return;
             }
-            this.showRound(this.round);
+
+            // Find the best round to show: last round with results, or first future round
+            const allRounds = Object.keys(this.data.matchesByRound).map(Number).sort((a,b) => a - b);
+            let bestRound = this.round;
+
+            // Find last round that has finished matches
+            let lastFinished = null;
+            let firstFuture = null;
+            for (const r of allRounds) {
+                const matches = this.data.matchesByRound[r];
+                if (!matches || matches.length === 0) continue;
+                const hasFinished = matches.some(m => m.status === 'finished');
+                const hasFuture = matches.some(m => m.status === 'notstarted');
+                if (hasFinished) lastFinished = r;
+                if (hasFuture && !firstFuture) firstFuture = r;
+            }
+
+            // Prefer: current round with matches > last finished > first future > any
+            if (this.data.matchesByRound[this.round]?.length > 0) {
+                bestRound = this.round;
+            } else if (lastFinished) {
+                bestRound = lastFinished;
+            } else if (firstFuture) {
+                bestRound = firstFuture;
+            } else {
+                bestRound = allRounds[allRounds.length - 1] || this.round;
+            }
+
+            this.round = bestRound;
+            this.showRound(bestRound);
         },
 
         showRound(r) {
