@@ -200,7 +200,7 @@ function generateArticleHTML(article) {
         </div>
     </main>
     <footer class="footer"><div class="container"><div class="footer-bottom" style="border-top:none;padding-top:0"><p>&copy; 2026 Papo de Bola.</p></div></div></footer>
-    <script src="../js/nav.js?v=21"></script>
+    <script src="../js/nav.js?v=22"></script>
     <script>
     (async()=>{
         try{
