@@ -111,8 +111,9 @@ foreach ($posts as $post) {
     $changes[] = $cat_name;
 
     // === 2. FOCUS KEYWORD (3 words) ===
-    $words = array_filter(explode(' ', mb_strtolower(preg_replace('/[^\w\sáéíóúâêôãõçü-]/u', '', $title))), function($w) use ($stop_words) {
-        return mb_strlen($w) > 2 && !in_array($w, $stop_words);
+    $sw = array('para','com','que','por','mais','como','sobre','entre','pela','uma','dos','das','nos','nas','mas','pode','tem','vai','sem','foi','ainda','após','não','são','está','seu','sua','ele','ela');
+    $words = array_filter(explode(' ', mb_strtolower(preg_replace('/[^\w\sáéíóúâêôãõçü-]/u', '', $title))), function($w) use ($sw) {
+        return mb_strlen($w) > 2 && !in_array($w, $sw);
     });
     $focus_kw = implode(' ', array_slice(array_values($words), 0, 3));
 
