@@ -826,22 +826,20 @@ async function main() {
         // Futebol Internacional
         { url: 'https://feeds.bbci.co.uk/sport/football/rss.xml', source: 'BBC Sport' },
         { url: 'https://www.theguardian.com/football/rss', source: 'The Guardian' },
-        // Tênis
+        // Tênis (João Fonseca, Djokovic, Alcaraz, Grand Slams)
+        { url: 'https://www.espn.com/espn/rss/tennis/news', source: 'ESPN Tênis' },
         { url: 'https://feeds.bbci.co.uk/sport/tennis/rss.xml', source: 'BBC Tênis' },
-        { url: 'https://www.theguardian.com/sport/tennis/rss', source: 'Guardian Tênis' },
         // NBA / Basquete
-        { url: 'https://feeds.bbci.co.uk/sport/basketball/rss.xml', source: 'BBC Basquete' },
-        { url: 'https://www.theguardian.com/sport/nba/rss', source: 'Guardian NBA' },
+        { url: 'https://www.espn.com/espn/rss/nba/news', source: 'ESPN NBA' },
         // Fórmula 1
-        { url: 'https://feeds.bbci.co.uk/sport/formula1/rss.xml', source: 'BBC F1' },
-        { url: 'https://www.theguardian.com/sport/formulaone/rss', source: 'Guardian F1' },
+        { url: 'https://www.formula1.com/content/fom-website/en/latest/all.xml', source: 'F1 Oficial' },
         // MMA / UFC
-        { url: 'https://www.mmafighting.com/rss/current', source: 'MMA Fighting' },
-        // eSports
+        { url: 'https://www.sherdog.com/rss/news.xml', source: 'Sherdog MMA' },
+        // eSports (PT-BR + EN)
+        { url: 'https://canaltech.com.br/rss/esports/', source: 'Canaltech eSports' },
         { url: 'https://dotesports.com/feed', source: 'Dot Esports' },
-        // NFL
-        { url: 'https://feeds.bbci.co.uk/sport/american-football/rss.xml', source: 'BBC NFL' },
-        // Multi-esporte
+        // Multi-esporte (NBA, Tennis, UFC, F1, NFL)
+        { url: 'https://www.sportskeeda.com/feed', source: 'SportsKeeda' },
         { url: 'https://www.essentiallysports.com/feed/', source: 'Essentially Sports' },
     ];
 
