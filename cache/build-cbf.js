@@ -117,20 +117,30 @@ function parseCBFDateTime(dateStr, timeStr) {
 }
 
 // Determine match status from CBF data
+// CBF retorna gols="0" tanto para jogos futuros quanto para empates 0x0.
+// A única forma de diferenciar é pela data: se o jogo já passou, é finished.
 function mapCBFStatus(match) {
     const homeGols = parseInt(match.mandante?.gols);
     const awayGols = parseInt(match.visitante?.gols);
-    const hasScore = !isNaN(homeGols) && !isNaN(awayGols);
     const timestamp = parseCBFDateTime(match.data, match.hora);
     const now = Math.floor(Date.now() / 1000);
 
-    if (hasScore && (homeGols > 0 || awayGols > 0)) {
+    // Se tem gol de algum lado, é jogo finalizado com certeza
+    if (!isNaN(homeGols) && !isNaN(awayGols) && (homeGols > 0 || awayGols > 0)) {
         return 'finished';
     }
-    // If has timestamp and it's in the past but score is 0x0, could be finished or not started
-    if (timestamp && timestamp < now - 7200) { // 2h after start = probably finished
-        return hasScore ? 'finished' : 'notstarted';
+
+    // Se a data é no futuro, não começou
+    if (!timestamp || timestamp > now) {
+        return 'notstarted';
     }
+
+    // Se a data é no passado (mais de 3h atrás), provavelmente terminou (0x0 ou com gols)
+    if (timestamp < now - 10800) {
+        return 'finished';
+    }
+
+    // Janela de 3h: pode estar em andamento ou recém-finalizado
     return 'notstarted';
 }
 
@@ -150,13 +160,10 @@ function calculateStandings(matches, teamsCount) {
         if (!teams[homeName]) teams[homeName] = { name: homeName, pts: 0, matches: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0 };
         if (!teams[awayName]) teams[awayName] = { name: awayName, pts: 0, matches: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0 };
 
-        // Only count finished matches with valid scores
+        // Only count finished matches
         if (isNaN(homeGols) || isNaN(awayGols)) continue;
-        const hasScore = homeGols > 0 || awayGols > 0;
-        const timestamp = parseCBFDateTime(match.data, match.hora);
-        const isPast = timestamp && timestamp < (Date.now() / 1000 - 7200);
-        if (!hasScore && !isPast) continue; // Skip future matches
-        // 0x0 matches that are in the past are valid finished matches
+        const status = mapCBFStatus(match);
+        if (status !== 'finished') continue;
 
         teams[homeName].matches++;
         teams[awayName].matches++;
