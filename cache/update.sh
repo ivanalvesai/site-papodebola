@@ -4,7 +4,16 @@
 # AllSportsApi Pro (10.000 req/mês)
 # Roda via cron a cada 30 minutos
 #
-# Consumo estimado: ~331 req/dia (~9.930/mês)
+# Consumo estimado: ~130 req/dia (~3.900/mês)
+#
+# Horários de cada tarefa:
+#   08h: today + tomorrow + artilheiros + campeonatos
+#   14h: homepage
+#   16h: esportes
+#   22h: campeonatos
+#   Standings: Ter/Qua 19:30-20:30 (2x) | Sáb/Dom 16-21h (6x)
+#
+# DESATIVADO: matches/live (Ao Vivo) — reativar quando necessário
 # =====================================================
 
 CACHE_DIR="/home/ivan/site-papodebola/cache"
@@ -23,6 +32,7 @@ TYEAR=$(date -d "+1 day" +%Y)
 
 HOUR=$(date +%-H)
 MIN=$(date +%-M)
+DOW=$(date +%u)  # 1=segunda, 2=terça, ..., 6=sábado, 7=domingo
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"
@@ -57,30 +67,48 @@ fetch() {
 }
 
 # =====================================================
-log "=== Update started (hora: $HOUR:$MIN) ==="
+log "=== Update started (hora: $HOUR:$MIN, dow: $DOW) ==="
 
 # =====================================================
-# FUTEBOL - 08h-23h, a cada 30 min (3 req: today + tomorrow + standings)
-# AO VIVO desativado (matches/live) — reativar quando necessário
+# JOGOS DE HOJE + AMANHÃ — 1x/dia às 08h (2 req)
 # =====================================================
-if [ "$HOUR" -ge 8 ] && [ "$HOUR" -le 23 ]; then
+if [ "$HOUR" -eq 8 ] && [ "$MIN" -lt 30 ]; then
     # DESATIVADO: Ao Vivo (reativar futuramente)
     # fetch "matches/live" "$CACHE_DIR/live.json"
 
-    # 1. Today's matches (jogos do dia, sem placar ao vivo)
+    log "Fetching today + tomorrow matches (08h)..."
     fetch "matches/${DAY}/${MONTH}/${YEAR}" "$CACHE_DIR/today.json"
-
-    # 2. Tomorrow's matches
     fetch "matches/${TDAY}/${TMONTH}/${TYEAR}" "$CACHE_DIR/tomorrow.json"
-
-    # 3. Brasileirão standings
-    fetch "tournament/325/season/87678/standings/total" "$CACHE_DIR/standings_brasileirao.json"
-else
-    log "Fora do horário ativo (08h-23h), pulando..."
 fi
 
 # =====================================================
-# ARTILHEIROS - 1x/dia às 08h (10 req)
+# STANDINGS BRASILEIRÃO — apenas em dias de jogo
+# Ter/Qua: 2x após 19:30 (20h e 20:30)
+# Sáb/Dom: 6x após 16h (16h, 17h, 18h, 19h, 20h, 21h)
+# =====================================================
+FETCH_STANDINGS=false
+
+# Terça (2) e Quarta (3): 20h e 20:30
+if [ "$DOW" -eq 2 ] || [ "$DOW" -eq 3 ]; then
+    if [ "$HOUR" -eq 20 ] || ([ "$HOUR" -eq 21 ] && [ "$MIN" -lt 30 ]); then
+        FETCH_STANDINGS=true
+    fi
+fi
+
+# Sábado (6) e Domingo (7): 16h, 17h, 18h, 19h, 20h, 21h
+if [ "$DOW" -eq 6 ] || [ "$DOW" -eq 7 ]; then
+    if [ "$HOUR" -ge 16 ] && [ "$HOUR" -le 21 ] && [ "$MIN" -lt 30 ]; then
+        FETCH_STANDINGS=true
+    fi
+fi
+
+if [ "$FETCH_STANDINGS" = true ]; then
+    log "Fetching standings (dia de jogo)..."
+    fetch "tournament/325/season/87678/standings/total" "$CACHE_DIR/standings_brasileirao.json"
+fi
+
+# =====================================================
+# ARTILHEIROS — 1x/dia às 08h (10 req)
 # =====================================================
 if [ "$HOUR" -eq 8 ] && [ "$MIN" -lt 30 ]; then
     log "Fetching top scorers (08h)..."
@@ -90,7 +118,7 @@ if [ "$HOUR" -eq 8 ] && [ "$MIN" -lt 30 ]; then
 fi
 
 # =====================================================
-# HOMEPAGE - 1x/dia às 14h (15 req)
+# HOMEPAGE — 1x/dia às 14h (15 req)
 # =====================================================
 if [ "$HOUR" -eq 14 ] && [ "$MIN" -lt 30 ]; then
     log "Building homepage content (14h)..."
@@ -100,7 +128,7 @@ if [ "$HOUR" -eq 14 ] && [ "$MIN" -lt 30 ]; then
 fi
 
 # =====================================================
-# ARTIGOS - 1 por slot, 10 slots/dia em horários de pico
+# ARTIGOS — 1 por slot, 10 slots/dia em horários de pico
 # =====================================================
 PUBLISH_SLOTS="7:00 8:30 10:00 11:30 13:00 14:30 16:00 18:00 20:00 21:30"
 SHOULD_PUBLISH=false
@@ -134,7 +162,7 @@ docker exec wordpress-papodebola-wordpress-1 wp eval-file /tmp/apply-seo-complet
 log "OK: SEO applied to new posts"
 
 # =====================================================
-# ESPORTES - 1x/dia às 16h (~45 req)
+# ESPORTES — 1x/dia às 16h (~45 req)
 # =====================================================
 if [ "$HOUR" -eq 16 ] && [ "$MIN" -lt 30 ]; then
     log "Building sports cache (16h)..."
@@ -143,14 +171,12 @@ if [ "$HOUR" -eq 16 ] && [ "$MIN" -lt 30 ]; then
 fi
 
 # =====================================================
-# CAMPEONATOS - cada 3h, 08h-23h (~28 req)
+# CAMPEONATOS — 2x/dia às 08h e 22h (~28 req cada)
 # =====================================================
-if [ "$HOUR" -ge 8 ] && [ "$HOUR" -le 23 ]; then
-    if [ $((HOUR % 3)) -eq 0 ] && [ "$MIN" -lt 30 ]; then
-        log "Building championship cache..."
-        node "$CACHE_DIR/build-championship.js" >> "$LOG_FILE" 2>&1
-        log "OK: championships cached"
-    fi
+if ([ "$HOUR" -eq 8 ] || [ "$HOUR" -eq 22 ]) && [ "$MIN" -lt 30 ]; then
+    log "Building championship cache..."
+    node "$CACHE_DIR/build-championship.js" >> "$LOG_FILE" 2>&1
+    log "OK: championships cached"
 fi
 
 # Sitemap - handled by Rank Math WordPress plugin
