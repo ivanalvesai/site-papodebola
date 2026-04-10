@@ -164,11 +164,7 @@ function generateArticleHTML(article) {
         <div class="header-top"><div class="container"><div class="header-top-content">
             <div class="logo"><a href="../index.html"><i class="fas fa-futbol logo-icon"></i><span class="logo-text">PAPO <span class="logo-accent">DE BOLA</span></span></a></div>
         </div></div></div>
-        <nav class="main-nav"><div class="container"><ul class="nav-list">
-            <li class="nav-item"><a href="../index.html" class="nav-link">Início</a></li>
-            <li class="nav-item"><a href="../pages/noticias.html" class="nav-link">Notícias</a></li>
-            <li class="nav-item"><a href="../pages/ao-vivo.html" class="nav-link live-link"><span class="live-dot"></span> AO VIVO</a></li>
-        </ul></div></nav>
+        <nav class="main-nav"><div class="container"><ul class="nav-list"></ul></div></nav>
     </header>
     <main>
         <section class="article-hero"><div class="container">
@@ -204,6 +200,7 @@ function generateArticleHTML(article) {
         </div>
     </main>
     <footer class="footer"><div class="container"><div class="footer-bottom" style="border-top:none;padding-top:0"><p>&copy; 2026 Papo de Bola.</p></div></div></footer>
+    <script src="../js/nav.js?v=21"></script>
     <script>
     (async()=>{
         try{
