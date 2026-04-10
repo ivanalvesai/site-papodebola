@@ -112,6 +112,7 @@ site-papodebola/
 │   ├── build-home.js               # Highlights, transferências, RSS para homepage
 │   ├── build-scorers.js            # Artilheiros top 10 times Brasileirão
 │   ├── build-championship.js       # Rodadas e classificações dos campeonatos
+│   ├── build-sports.js             # Cache de esportes (NBA, Tênis, F1, MMA, etc.)
 │   ├── sync-wordpress.js           # Sincroniza WP posts para front-end
 │   ├── rebuild-html.js             # Regenera HTMLs do articles.json
 │   ├── migrate-to-wp.js            # Migração de artigos para WordPress
@@ -125,6 +126,9 @@ site-papodebola/
 │   ├── home.json                   # Dados da homepage
 │   ├── articles.json               # Banco de artigos (sync do WP)
 │   ├── champ_*.json                # Cache por campeonato
+│   ├── sport_*.json                # Cache por esporte (sport_nba.json, sport_tenis.json, etc.)
+│   ├── athletes.json               # Cache de atletas (info, resultados, próximos jogos)
+│   ├── agenda_*.json               # Cache de agenda por data (agenda_2026-04-12.json)
 │   └── meta.json                   # Timestamp última atualização
 ├── api/
 │   ├── server.js                   # Micro API Node.js (CRUD artigos, auth)
@@ -315,14 +319,28 @@ Palmeiras, Flamengo, Corinthians, São Paulo, Santos, Fluminense, Botafogo, Vasc
 
 | Tarefa | Frequência | Horários |
 |---|---|---|
-| Jogos ao vivo + placares | Cada 30 min | 24h |
-| Jogos de hoje/amanhã | Cada 30 min | 24h |
+| Jogos ao vivo + placares (futebol) | Cada 30 min | 24h |
+| Jogos de hoje/amanhã (futebol) | Cada 30 min | 24h |
 | Classificação Brasileirão | Cada 30 min | 24h |
 | Sync WordPress → front-end | Cada 30 min | 24h |
-| **Geração de artigos** | **2x/dia** | **8h e 15h** |
+| **Geração de artigos** | **10x/dia** | **Peak hours (7h-21:30h)** |
 | Artilheiros (top 10 times) | Cada 6h | 0h, 6h, 12h, 18h |
 | Homepage (highlights, transfers) | Cada 3h | 0h, 3h, 6h... |
 | Campeonatos (rodadas) | Cada 3h | 0h, 3h, 6h... |
+| **Esportes (NBA, Tênis, F1, etc.)** | **Cada 3h** | **0h, 3h, 6h...** |
+| **Atletas (info, resultados)** | **Cada 3h** | **0h, 3h, 6h...** |
+| **Agenda extra (±3 dias futebol)** | **Cada 3h** | **0h, 3h, 6h...** |
+
+### Cache de Esportes (build-sports.js)
+Todas as páginas de esportes (esporte.html, atleta.html, agenda.html) lêem dados de arquivos JSON cacheados. **Nenhuma página faz chamadas diretas à API** — isso economiza requisições significativamente.
+
+| Arquivo | Conteúdo |
+|---|---|
+| `sport_{slug}.json` | Live, today, calendar, standings/rankings do esporte |
+| `athletes.json` | Info, resultados e próximos jogos dos 20 atletas |
+| `agenda_{date}.json` | Jogos de futebol por data (para agenda.html) |
+
+**Estimativa de consumo**: ~45 req/execução × 8 execuções/dia = ~360 req/dia (~10.800/mês)
 
 ---
 
