@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Agenda de jogos de futebol - Placares ao vivo, resultados e próximos jogos.">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <meta name="robots" content="index, follow">
+    <title>Agenda de Jogos - Papo de Bola</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css?v=18">
+    <style>
+        .agenda-hero { background: #fff; border-bottom: 1px solid #E2E5E9; padding: 20px 0; }
+        .agenda-hero h1 { font-size: 22px; font-weight: 700; color: #1A1D23; }
+        .agenda-nav { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+        .agenda-nav button { padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 600; background: #fff; border: 1px solid #E2E5E9; color: #4A5568; cursor: pointer; transition: all 0.2s; }
+        .agenda-nav button:hover { border-color: #00965E; color: #00965E; }
+        .agenda-nav button.active { background: #00965E; color: white; border-color: #00965E; }
+        .agenda-date-nav { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+        .agenda-date-nav button { width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 1px solid #E2E5E9; color: #4A5568; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
+        .agenda-date-nav button:hover { border-color: #00965E; color: #00965E; }
+        .agenda-date-nav .date-label { font-size: 14px; font-weight: 600; min-width: 200px; text-align: center; }
+        .agenda-content { padding: 24px 0 60px; }
+        .agenda-group { margin-bottom: 20px; background: #fff; border: 1px solid #E2E5E9; border-radius: 8px; overflow: hidden; }
+        .agenda-group-header { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: #F2F3F5; border-bottom: 1px solid #E2E5E9; font-size: 13px; font-weight: 600; }
+        .agenda-group-header img { width: 18px; height: 18px; }
+        .agenda-group-header .ag-league { color: #1A1D23; }
+        .agenda-group-header .ag-country { color: #8896A6; margin-left: auto; font-weight: 400; font-size: 12px; }
+        .ag-match { display: flex; align-items: center; padding: 10px 16px; border-bottom: 1px solid #EEF0F2; transition: background 0.15s; }
+        .ag-match:last-child { border-bottom: none; }
+        .ag-match:hover { background: #F8F9FA; }
+        .ag-match.is-live { background: #FEF2F2; border-left: 3px solid #E8312A; }
+        .ag-time { width: 50px; flex-shrink: 0; font-size: 12px; color: #8896A6; }
+        .ag-time .ag-live { color: #E8312A; font-weight: 700; font-size: 10px; text-transform: uppercase; }
+        .ag-time .ag-fin { color: #8896A6; font-size: 10px; }
+        .ag-teams { flex: 1; }
+        .ag-team { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; line-height: 1.6; }
+        .ag-team img { width: 18px; height: 18px; object-fit: contain; }
+        .ag-team .ag-score { margin-left: auto; font-weight: 700; font-size: 14px; min-width: 16px; text-align: right; }
+        .ag-team .ag-score.winner { color: #00965E; }
+        .agenda-empty { text-align: center; padding: 40px; color: #8896A6; }
+        .agenda-stats { display: flex; gap: 16px; margin-top: 8px; font-size: 12px; color: #8896A6; }
+        .agenda-stats span { display: flex; align-items: center; gap: 4px; }
+        @media (max-width: 768px) {
+            .agenda-nav { flex-wrap: wrap; }
+            .agenda-date-nav { margin-left: 0; margin-top: 8px; width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-top"><div class="container"><div class="header-top-content">
+            <div class="logo"><a href="../index.html"><i class="fas fa-futbol logo-icon"></i><span class="logo-text">PAPO <span class="logo-accent">DE BOLA</span></span></a></div>
+            <div class="header-actions"><a href="../index.html" style="color:#4A5568;font-size:14px"><i class="fas fa-arrow-left"></i> Início</a></div>
+        </div></div></div>
+        <nav class="main-nav"><div class="container"><ul class="nav-list">
+            <li class="nav-item"><a href="../index.html" class="nav-link">Início</a></li>
+            <li class="nav-item"><a href="noticias.html" class="nav-link">Notícias</a></li>
+            <li class="nav-item active"><a href="#" class="nav-link">Agenda</a></li>
+            <li class="nav-item"><a href="ao-vivo.html" class="nav-link live-link"><span class="live-dot"></span> AO VIVO</a></li>
+        </ul></div></nav>
+    </header>
+
+    <section class="agenda-hero"><div class="container">
+        <h1><i class="fas fa-calendar-alt" style="color:#00965E"></i> Agenda de Jogos</h1>
+        <div class="agenda-nav">
+            <button class="active" data-filter="all" onclick="setFilter('all',this)">Todos</button>
+            <button data-filter="live" onclick="setFilter('live',this)"><span class="live-dot" style="margin-right:4px"></span> Ao Vivo</button>
+            <button data-filter="finished" onclick="setFilter('finished',this)">Finalizados</button>
+            <button data-filter="upcoming" onclick="setFilter('upcoming',this)">Próximos</button>
+            <div class="agenda-date-nav">
+                <button onclick="changeDate(-1)"><i class="fas fa-chevron-left"></i></button>
+                <span class="date-label" id="dateLabel">Carregando...</span>
+                <button onclick="changeDate(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+        <div class="agenda-stats" id="agendaStats"></div>
+    </div></section>
+
+    <main class="agenda-content"><div class="container" id="agendaContent">
+        <div class="loading-state"><div class="spinner"></div><p>Carregando jogos...</p></div>
+    </div></main>
+
+    <footer class="footer"><div class="container"><div class="footer-bottom" style="border-top:none;padding-top:0"><p>&copy; 2026 Papo de Bola.</p></div></div></footer>
+
+    <script>
+    const API_KEY = 'cf85a77dbbmsh438760ef71d5715p13923fjsnc2f2878572d2';
+    const API_HOST = 'allsportsapi2.p.rapidapi.com';
+    let currentDate = new Date();
+    let currentFilter = 'all';
+    let allEvents = [];
+
+    // Check URL for date param
+    const urlDate = new URLSearchParams(window.location.search).get('date');
+    if (urlDate) currentDate = new Date(urlDate + 'T12:00:00');
+
+    function formatDate(d) {
+        return d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+    }
+
+    function dateStr(d) {
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function changeDate(offset) {
+        currentDate.setDate(currentDate.getDate() + offset);
+        loadGames();
+    }
+
+    function setFilter(filter, btn) {
+        currentFilter = filter;
+        document.querySelectorAll('.agenda-nav button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderGames();
+    }
+
+    async function loadGames() {
+        const d = currentDate;
+        const day = d.getDate(), month = d.getMonth() + 1, year = d.getFullYear();
+        document.getElementById('dateLabel').textContent = formatDate(d);
+        document.getElementById('agendaContent').innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+
+        // Try cache first (today only)
+        const today = new Date();
+        const isToday = dateStr(d) === dateStr(today);
+
+        let data = null;
+        if (isToday) {
+            try {
+                const res = await fetch(`/cache/today.json?_=${Date.now()}`);
+                if (res.ok) data = await res.json();
+            } catch {}
+        }
+
+        // Fallback to API
+        if (!data || !data.events) {
+            try {
+                const res = await fetch(`https://${API_HOST}/api/matches/${day}/${month}/${year}`, {
+                    headers: { 'x-rapidapi-key': API_KEY, 'x-rapidapi-host': API_HOST }
+                });
+                if (res.ok) data = await res.json();
+            } catch {}
+        }
+
+        allEvents = data?.events || [];
+
+        // Stats
+        const live = allEvents.filter(e => e.status?.type === 'inprogress').length;
+        const fin = allEvents.filter(e => e.status?.type === 'finished').length;
+        const up = allEvents.filter(e => e.status?.type === 'notstarted').length;
+        document.getElementById('agendaStats').innerHTML = `
+            <span><i class="fas fa-futbol" style="color:#00965E"></i> ${allEvents.length} jogos</span>
+            <span><span class="live-dot" style="margin-right:2px"></span> ${live} ao vivo</span>
+            <span><i class="fas fa-check" style="color:#8896A6"></i> ${fin} finalizados</span>
+            <span><i class="fas fa-clock" style="color:#8896A6"></i> ${up} próximos</span>
+        `;
+
+        renderGames();
+    }
+
+    function renderGames() {
+        const container = document.getElementById('agendaContent');
+        let events = allEvents;
+
+        // Filter
+        if (currentFilter === 'live') events = events.filter(e => e.status?.type === 'inprogress');
+        else if (currentFilter === 'finished') events = events.filter(e => e.status?.type === 'finished');
+        else if (currentFilter === 'upcoming') events = events.filter(e => e.status?.type === 'notstarted');
+
+        if (events.length === 0) {
+            container.innerHTML = '<div class="agenda-empty"><i class="fas fa-calendar-times" style="font-size:32px;margin-bottom:12px;display:block;color:#E2E5E9"></i>Nenhum jogo encontrado</div>';
+            return;
+        }
+
+        // Group by league
+        const groups = {};
+        events.forEach(e => {
+            const league = e.tournament?.uniqueTournament?.name || e.tournament?.name || 'Outros';
+            const leagueId = e.tournament?.uniqueTournament?.id || 0;
+            const country = e.tournament?.category?.name || '';
+            const key = league;
+            if (!groups[key]) groups[key] = { league, leagueId, country, events: [] };
+            groups[key].events.push(e);
+        });
+
+        // Sort: live first, then by league name
+        const sorted = Object.values(groups).sort((a, b) => {
+            const aLive = a.events.some(e => e.status?.type === 'inprogress') ? 0 : 1;
+            const bLive = b.events.some(e => e.status?.type === 'inprogress') ? 0 : 1;
+            if (aLive !== bLive) return aLive - bLive;
+            return a.league.localeCompare(b.league);
+        });
+
+        container.innerHTML = sorted.map(group => `
+            <div class="agenda-group">
+                <div class="agenda-group-header">
+                    <i class="fas fa-trophy" style="color:#00965E;font-size:12px"></i>
+                    <span class="ag-league">${group.league}</span>
+                    <span class="ag-country">${group.country}</span>
+                </div>
+                ${group.events.map(e => {
+                    const isLive = e.status?.type === 'inprogress';
+                    const isFinished = e.status?.type === 'finished';
+                    const hasScore = e.homeScore?.current !== undefined && e.homeScore?.current !== null;
+                    const dt = e.startTimestamp ? new Date(e.startTimestamp * 1000) : null;
+                    const time = dt ? dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) : '';
+                    const homeWin = hasScore && e.homeScore.current > e.awayScore.current;
+                    const awayWin = hasScore && e.awayScore.current > e.homeScore.current;
+
+                    let timeHtml = `<div>${time}</div>`;
+                    if (isLive) timeHtml = `<div class="ag-live"><span class="live-dot" style="width:5px;height:5px"></span> ${e.status?.description || 'LIVE'}</div>`;
+                    else if (isFinished) timeHtml = `<div class="ag-fin">Encerrado</div>`;
+
+                    return `<div class="ag-match ${isLive ? 'is-live' : ''}">
+                        <div class="ag-time">${timeHtml}</div>
+                        <div class="ag-teams">
+                            <div class="ag-team">
+                                ${e.homeTeam?.id ? `<img src="/img/team/${e.homeTeam.id}/image" alt="" onerror="this.style.display='none'">` : ''}
+                                <span>${e.homeTeam?.name || '?'}</span>
+                                ${hasScore ? `<span class="ag-score ${homeWin ? 'winner' : ''}">${e.homeScore.current}</span>` : ''}
+                            </div>
+                            <div class="ag-team">
+                                ${e.awayTeam?.id ? `<img src="/img/team/${e.awayTeam.id}/image" alt="" onerror="this.style.display='none'">` : ''}
+                                <span>${e.awayTeam?.name || '?'}</span>
+                                ${hasScore ? `<span class="ag-score ${awayWin ? 'winner' : ''}">${e.awayScore.current}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>
+        `).join('');
+    }
+
+    loadGames();
+    </script>
+</body>
+</html>

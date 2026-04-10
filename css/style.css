@@ -1747,6 +1747,191 @@ h1, h2, h3, h4 {
     .teams-panel { width: 300px; }
 }
 
+/* === MATCH BAR (abas: Ao Vivo / Próximos / Finalizados) === */
+.match-bar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+}
+
+.match-bar-tabs {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border-bottom: 1px solid var(--border-light);
+    padding: 0 20px;
+}
+
+.match-bar-tab {
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.match-bar-tab:hover { color: var(--text-primary); }
+
+.match-bar-tab.active {
+    color: var(--green);
+    border-bottom-color: var(--green);
+}
+
+.match-bar-tab.live-tab {
+    color: var(--red);
+}
+
+.match-bar-tab.live-tab.active {
+    color: var(--red);
+    border-bottom-color: var(--red);
+}
+
+.match-bar-tab .tab-count {
+    background: var(--bg-body);
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    margin-left: 4px;
+    font-weight: 700;
+}
+
+.match-bar-tab.live-tab .tab-count {
+    background: var(--red);
+    color: white;
+}
+
+.match-bar-link {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+    padding: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.match-bar-link:hover { text-decoration: underline; }
+
+.match-bar-scroll {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.match-bar-scroll::-webkit-scrollbar { display: none; }
+
+.mb-game {
+    flex-shrink: 0;
+    width: 180px;
+    padding: 10px 14px;
+    border-right: 1px solid var(--border-light);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.mb-game:hover { background: var(--bg-body); }
+
+.mb-game:last-child { border-right: none; }
+
+.mb-game.is-live { background: #FEF2F2; }
+
+.mb-league {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mb-team-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 3px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.mb-team-row img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.mb-team-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+}
+
+.mb-score {
+    font-weight: 700;
+    font-size: 13px;
+    min-width: 14px;
+    text-align: right;
+}
+
+.mb-score.winner { color: var(--green); }
+
+.mb-time {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 4px;
+}
+
+.mb-live-badge {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--red);
+    text-transform: uppercase;
+}
+
+.mb-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.mb-nav:hover { border-color: var(--green); color: var(--green); }
+.mb-nav.left { left: 8px; }
+.mb-nav.right { right: 8px; }
+
+@media (max-width: 768px) {
+    .match-bar-tabs { padding: 0 12px; }
+    .match-bar-tab { padding: 8px 10px; font-size: 11px; }
+    .mb-game { width: 160px; padding: 8px 10px; }
+}
+
 /* Copa do Mundo Banner */
 .copa-banner {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);

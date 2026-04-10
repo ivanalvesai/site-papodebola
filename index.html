@@ -37,7 +37,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=18">
+    <link rel="stylesheet" href="css/style.css?v=19">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -182,15 +182,20 @@
         </div>
     </a>
 
-    <!-- Live Ticker Bar -->
-    <div class="ticker-bar" id="tickerBar">
-        <div class="container">
-            <div class="ticker-label"><span class="live-dot"></span> AO VIVO</div>
-            <div class="ticker-wrapper">
-                <div class="ticker-track" id="tickerTrack">
-                    <!-- Populated by JS -->
-                </div>
+    <!-- Match Bar with Tabs -->
+    <div class="match-bar" id="matchBar">
+        <div class="match-bar-tabs">
+            <button class="match-bar-tab live-tab active" data-tab="live" onclick="switchMatchTab('live',this)"><span class="live-dot"></span> Ao Vivo <span class="tab-count" id="liveCount">0</span></button>
+            <button class="match-bar-tab" data-tab="upcoming" onclick="switchMatchTab('upcoming',this)">Próximos</button>
+            <button class="match-bar-tab" data-tab="finished" onclick="switchMatchTab('finished',this)">Finalizados</button>
+            <a href="pages/agenda.html" class="match-bar-link">Ver todos <i class="fas fa-chevron-right"></i></a>
+        </div>
+        <div style="position:relative">
+            <button class="mb-nav left" onclick="scrollMatchBar(-300)"><i class="fas fa-chevron-left"></i></button>
+            <div class="match-bar-scroll" id="matchBarScroll">
+                <!-- Populated by JS -->
             </div>
+            <button class="mb-nav right" onclick="scrollMatchBar(300)"><i class="fas fa-chevron-right"></i></button>
         </div>
     </div>
 
@@ -699,11 +704,99 @@
         <button class="cookie-accept" onclick="document.getElementById('cookieBanner').style.display='none';localStorage.setItem('pdb_cookies','1')">Aceitar</button>
     </div>
 
-    <script src="js/config.js?v=18"></script>
-    <script src="js/api.js?v=18"></script>
-    <script src="js/admin.js?v=18"></script>
-    <script src="js/app.js?v=18"></script>
+    <script src="js/config.js?v=19"></script>
+    <script src="js/api.js?v=19"></script>
+    <script src="js/admin.js?v=19"></script>
+    <script src="js/app.js?v=19"></script>
     <script>
+    // === MATCH BAR ===
+    let matchBarData = { live: [], upcoming: [], finished: [] };
+    let currentMatchTab = 'live';
+
+    async function loadMatchBar() {
+        try {
+            const [liveRes, todayRes] = await Promise.all([
+                fetch('/cache/live.json?_=' + Date.now()),
+                fetch('/cache/today.json?_=' + Date.now()),
+            ]);
+            const liveData = liveRes.ok ? await liveRes.json() : {};
+            const todayData = todayRes.ok ? await todayRes.json() : {};
+
+            const allEvents = todayData.events || [];
+            const liveEvents = liveData.events || [];
+
+            // Categorize
+            matchBarData.live = liveEvents.slice(0, 30);
+            matchBarData.finished = allEvents.filter(e => e.status?.type === 'finished').slice(0, 40);
+            matchBarData.upcoming = allEvents.filter(e => e.status?.type === 'notstarted').slice(0, 40);
+
+            // Update count
+            document.getElementById('liveCount').textContent = matchBarData.live.length;
+
+            // Auto-select tab: live if games exist, otherwise upcoming
+            if (matchBarData.live.length > 0) {
+                switchMatchTab('live', document.querySelector('[data-tab="live"]'));
+            } else if (matchBarData.upcoming.length > 0) {
+                switchMatchTab('upcoming', document.querySelector('[data-tab="upcoming"]'));
+            } else {
+                switchMatchTab('finished', document.querySelector('[data-tab="finished"]'));
+            }
+        } catch(e) { console.error('Match bar error:', e); }
+    }
+
+    function switchMatchTab(tab, btn) {
+        currentMatchTab = tab;
+        document.querySelectorAll('.match-bar-tab').forEach(t => t.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        renderMatchBar(matchBarData[tab] || []);
+    }
+
+    function renderMatchBar(events) {
+        const container = document.getElementById('matchBarScroll');
+        if (events.length === 0) {
+            container.innerHTML = '<div style="padding:20px 30px;color:#8896A6;font-size:13px;white-space:nowrap">Nenhum jogo nesta categoria</div>';
+            return;
+        }
+
+        container.innerHTML = events.map(e => {
+            const isLive = e.status?.type === 'inprogress';
+            const isFinished = e.status?.type === 'finished';
+            const hasScore = e.homeScore?.current !== undefined && e.homeScore?.current !== null;
+            const dt = e.startTimestamp ? new Date(e.startTimestamp * 1000) : null;
+            const time = dt ? dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) : '';
+            const league = e.tournament?.uniqueTournament?.name || e.tournament?.name || '';
+            const homeWin = hasScore && e.homeScore.current > e.awayScore.current;
+            const awayWin = hasScore && e.awayScore.current > e.homeScore.current;
+
+            let statusHtml = '';
+            if (isLive) statusHtml = `<div class="mb-live-badge"><span class="live-dot" style="width:5px;height:5px;margin-right:2px"></span> ${e.status?.description || 'AO VIVO'}</div>`;
+            else if (isFinished) statusHtml = `<div class="mb-time">Encerrado</div>`;
+            else statusHtml = `<div class="mb-time">${time}</div>`;
+
+            return `<div class="mb-game ${isLive ? 'is-live' : ''}">
+                <div class="mb-league">${league}</div>
+                <div class="mb-team-row">
+                    ${e.homeTeam?.id ? `<img src="/img/team/${e.homeTeam.id}/image" alt="" onerror="this.style.display='none'">` : ''}
+                    <span class="mb-team-name">${e.homeTeam?.name || '?'}</span>
+                    ${hasScore ? `<span class="mb-score ${homeWin ? 'winner' : ''}">${e.homeScore.current}</span>` : ''}
+                </div>
+                <div class="mb-team-row">
+                    ${e.awayTeam?.id ? `<img src="/img/team/${e.awayTeam.id}/image" alt="" onerror="this.style.display='none'">` : ''}
+                    <span class="mb-team-name">${e.awayTeam?.name || '?'}</span>
+                    ${hasScore ? `<span class="mb-score ${awayWin ? 'winner' : ''}">${e.awayScore.current}</span>` : ''}
+                </div>
+                ${statusHtml}
+            </div>`;
+        }).join('');
+    }
+
+    function scrollMatchBar(amount) {
+        document.getElementById('matchBarScroll').scrollBy({ left: amount, behavior: 'smooth' });
+    }
+
+    loadMatchBar();
+    setInterval(loadMatchBar, 60000); // Refresh every 60s
+
     // Copa do Mundo 2026 Countdown (June 11, 2026)
     function updateCopaCountdown(){
         const copa=new Date('2026-06-11T18:00:00Z').getTime();
