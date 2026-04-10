@@ -198,7 +198,9 @@
             if (prevEvents.length === 0) {
                 container.innerHTML = '<div style="padding:20px;text-align:center;color:#8896A6">Nenhum resultado recente</div>';
             } else {
-                container.innerHTML = prevEvents.slice(0, 15).map(e => {
+                // API returns oldest first - reverse to show most recent on top
+                const sorted = [...prevEvents].reverse();
+                container.innerHTML = sorted.slice(0, 15).map(e => {
                     const dt = e.startTimestamp ? new Date(e.startTimestamp * 1000) : null;
                     const dateStr = dt ? dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '';
                     const isHome = e.homeTeam?.id === this.id;
