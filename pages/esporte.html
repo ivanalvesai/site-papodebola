@@ -63,7 +63,11 @@
         .sp-news-date { font-size: 10px; color: #8896A6; margin-top: 4px; }
         .sp-link { display: block; text-align: center; padding: 10px; font-size: 12px; font-weight: 600; color: #00965E; border-top: 1px solid #EEF0F2; }
         .sp-link:hover { background: #F0FDF4; }
-        @media (max-width: 768px) { .sp-grid { grid-template-columns: 1fr; } }
+        .sp-athletes { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; padding: 12px 16px; }
+        .sp-athlete { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: #F8F9FA; border-radius: 6px; font-size: 13px; font-weight: 500; color: #1A1D23; transition: all 0.15s; }
+        .sp-athlete:hover { background: #E6F5EE; color: #00965E; }
+        .sp-athlete img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; background: #E2E5E9; }
+        @media (max-width: 768px) { .sp-grid { grid-template-columns: 1fr; } .sp-athletes { grid-template-columns: 1fr 1fr; } }
     </style>
 </head>
 <body>
@@ -113,6 +117,12 @@
                     <div class="sp-card-body" id="sportNews"><div class="loading-state"><div class="spinner"></div></div></div>
                     <a href="" id="sportAllNews" class="sp-link">Ver todas as notícias <i class="fas fa-arrow-right"></i></a>
                 </div>
+
+                <!-- Popular Athletes -->
+                <div class="sp-card" id="athletesCard" style="display:none">
+                    <div class="sp-card-title">Atletas Populares</div>
+                    <div class="sp-athletes" id="athletesList"></div>
+                </div>
             </aside>
         </div>
     </div></main>
@@ -129,30 +139,61 @@
         'nba': {
             name: 'NBA / Basquete', api: 'basketball', tournamentId: 132, seasonId: 80229,
             hasStandings: true, hasRankings: false, category: 'NBA',
+            athletes: [
+                { id: 817181, name: 'LeBron James' },
+                { id: 826157, name: 'Stephen Curry' },
+                { id: 827389, name: 'Luka Doncic' },
+                { id: 838689, name: 'Nikola Jokic' },
+                { id: 944485, name: 'Victor Wembanyama' },
+                { id: 835014, name: 'Jayson Tatum' },
+            ],
         },
         'tenis': {
             name: 'Tênis', api: 'tennis', tournamentId: null, seasonId: null,
             hasStandings: false, hasRankings: true, rankingType: 'atp', category: 'Tênis',
+            athletes: [
+                { id: 275923, name: 'Carlos Alcaraz' },
+                { id: 206570, name: 'Jannik Sinner' },
+                { id: 14882, name: 'Novak Djokovic' },
+                { id: 403869, name: 'João Fonseca' },
+                { id: 46570, name: 'Alexander Zverev' },
+                { id: 162760, name: 'Lorenzo Musetti' },
+            ],
         },
         'f1': {
             name: 'Fórmula 1', api: 'motorsport', tournamentId: null, seasonId: null,
             hasStandings: false, hasRankings: false, category: 'Fórmula 1',
+            athletes: [
+                { id: 356338, name: 'Max Verstappen' },
+                { id: 214741, name: 'Lewis Hamilton' },
+                { id: 356342, name: 'Charles Leclerc' },
+                { id: 356345, name: 'Lando Norris' },
+                { id: 1061966, name: 'Gabriel Bortoleto' },
+            ],
         },
         'mma': {
             name: 'MMA / UFC', api: 'mma', tournamentId: 19906, seasonId: null,
             hasStandings: false, hasRankings: false, category: 'MMA',
+            athletes: [
+                { id: 258988, name: 'Islam Makhachev' },
+                { id: 198277, name: 'Alex Pereira' },
+                { id: 461564, name: 'Ilia Topuria' },
+            ],
         },
         'volei': {
             name: 'Vôlei', api: 'volleyball', tournamentId: null, seasonId: null,
             hasStandings: false, hasRankings: false, category: 'Vôlei',
+            athletes: [],
         },
         'nfl': {
             name: 'NFL', api: 'american-football', tournamentId: null, seasonId: null,
             hasStandings: false, hasRankings: false, category: 'NFL',
+            athletes: [],
         },
         'esports': {
             name: 'eSports', api: null, tournamentId: null, seasonId: null,
             hasStandings: false, hasRankings: false, category: 'eSports',
+            athletes: [],
         },
     };
 
@@ -200,6 +241,7 @@
                 this.loadCalendar();
             }
             this.loadNews();
+            this.loadAthletes();
         },
 
         async loadMatches() {
@@ -361,6 +403,19 @@
             }
         },
     };
+
+        loadAthletes() {
+            const athletes = this.config.athletes || [];
+            if (athletes.length === 0) return;
+
+            document.getElementById('athletesCard').style.display = 'block';
+            document.getElementById('athletesList').innerHTML = athletes.map(a =>
+                `<a href="atleta.html?s=${this.config.api}&id=${a.id}&name=${encodeURIComponent(a.name)}" class="sp-athlete">
+                    <img src="https://api.sofascore.app/api/v1/team/${a.id}/image" alt="${a.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><rect fill=%22%23E2E5E9%22 width=%2240%22 height=%2240%22/><text x=%2220%22 y=%2226%22 text-anchor=%22middle%22 fill=%22%238896A6%22 font-size=%2216%22>${a.name.charAt(0)}</text></svg>'">
+                    ${a.name}
+                </a>`
+            ).join('');
+        },
 
     document.addEventListener('DOMContentLoaded', () => Page.init());
     </script>
