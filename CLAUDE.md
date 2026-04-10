@@ -74,8 +74,9 @@ cd /opt/signsimples && sudo docker compose -f docker-compose.prod.yml up -d --fo
 ```
 
 ### Cache-busting
-Ao alterar CSS ou JS, incrementar `?v=N` em TODOS os HTMLs. Atual: `v=18`.
+Ao alterar CSS ou JS, incrementar `?v=N` em TODOS os HTMLs. Atual: `v=22`.
 Após deploy visual: **Purge Everything** no Cloudflare.
+**IMPORTANTE**: Manter TODAS as páginas na mesma versão de CSS/JS. Versões desincronizadas causam bugs (ex: side panel invisível).
 
 ---
 
@@ -93,6 +94,7 @@ site-papodebola/
 │   ├── config.js                   # API keys, tournament IDs, categories
 │   ├── api.js                      # Lê cache JSON ou chama API direta
 │   ├── admin.js                    # Painel admin (auth via API, editor, usuários)
+│   ├── nav.js                      # Navegação compartilhada + side panel (todas as páginas)
 │   └── app.js                      # Renderiza homepage, ao vivo, sidebar
 ├── pages/
 │   ├── ao-vivo.html                # Jogos ao vivo com placares
@@ -402,11 +404,15 @@ O Sofascore bloqueia requests sem referer. O nginx faz proxy com header correto:
 - Artigos relacionados (4 posts da mesma categoria)
 - Schema NewsArticle
 
-### Menu lateral (Meu Time)
-- 55+ times: Série A (20), Série B (16), Premier League, La Liga, Serie A, Bundesliga, Ligue 1
-- Busca em tempo real
-- Seções colapsáveis
-- Escudos via Sofascore proxy
+### Menu lateral (Side Panel)
+- Injetado via `js/nav.js` em TODAS as páginas (index, pages/, artigos/)
+- Funções globais: `toggleTeamsPanel()`, `filterTeams()`
+- Ativado pelo botão "Menu" na nav bar (primeiro item)
+- Seções: links rápidos, esportes, "Meu Time" com busca e escudos
+- Times: Série A (12) + Europa (6), com escudos via Sofascore proxy
+- Seções colapsáveis, busca em tempo real
+- Fecha com Escape, clique no overlay, ou botão X
+- **IMPORTANTE**: `nav.js` sempre substitui o conteúdo do `.nav-list` — não colocar itens fixos dentro do `<ul class="nav-list">` nos HTMLs
 
 ### Página de time
 - Notícias filtradas por time
@@ -422,7 +428,7 @@ O Sofascore bloqueia requests sem referer. O nginx faz proxy com header correto:
 2. API keys estão em `js/config.js` (AllSportsApi) e `cache/build-articles.js` (WP + Anthropic)
 3. Para rodar local, caches precisam existir em `/cache/*.json`
 4. Cron e micro API só rodam no servidor
-5. Ao alterar CSS/JS, incrementar `?v=N` nos HTMLs (atual: v=18)
+5. Ao alterar CSS/JS, incrementar `?v=N` em TODOS os HTMLs (atual: v=22) — manter sincronizado
 6. Após push, fazer pull no servidor e Purge no Cloudflare
 7. WordPress é headless: front-end não usa temas WP, só API REST
 8. Artigos são publicados no WP E como HTML estático (dupla publicação)
