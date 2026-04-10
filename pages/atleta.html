@@ -117,8 +117,6 @@
     <footer class="footer"><div class="container"><div class="footer-bottom" style="border-top:none;padding-top:0"><p>&copy; 2026 Papo de Bola.</p></div></div></footer>
 
     <script>
-    const API_KEY = 'cf85a77dbbmsh438760ef71d5715p13923fjsnc2f2878572d2';
-    const API_HOST = 'allsportsapi2.p.rapidapi.com';
     const CACHE_BASE = window.location.origin + '/cache';
 
     const COUNTRY_FLAGS = {
@@ -127,12 +125,22 @@
         'PT':'🇵🇹','NL':'🇳🇱','BE':'🇧🇪','SE':'🇸🇪','CL':'🇨🇱','CO':'🇨🇴','MX':'🇲🇽','IE':'🇮🇪',
     };
 
-    async function apiFetch(endpoint) {
+    // Load athletes cache
+    let _athletesCache = null;
+    async function loadAthletesCache() {
+        if (_athletesCache) return _athletesCache;
         try {
-            const res = await fetch(`https://${API_HOST}/api/${endpoint}`, {
-                headers: { 'x-rapidapi-key': API_KEY, 'x-rapidapi-host': API_HOST }
-            });
-            if (res.ok && res.status !== 204) return await res.json();
+            const res = await fetch(`${CACHE_BASE}/athletes.json?_=${Date.now()}`);
+            if (res.ok) { _athletesCache = await res.json(); return _athletesCache; }
+        } catch {}
+        return null;
+    }
+
+    // Load sport cache (for tennis rankings)
+    async function loadSportCache(slug) {
+        try {
+            const res = await fetch(`${CACHE_BASE}/sport_${slug}.json?_=${Date.now()}`);
+            if (res.ok) return await res.json();
         } catch {}
         return null;
     }
@@ -148,9 +156,11 @@
 
             if (!this.id) { document.getElementById('athleteName').textContent = 'Atleta não encontrado'; return; }
 
-            // Load player details
-            const data = await apiFetch(`${this.sport}/team/${this.id}`);
-            const player = data?.team;
+            // Load cached data
+            const cache = await loadAthletesCache();
+            const athleteKey = `${this.sport}_${this.id}`;
+            const athleteData = cache?.[athleteKey];
+            const player = athleteData?.info || null;
 
             if (player) {
                 document.getElementById('athleteName').textContent = player.name || this.name;
@@ -169,10 +179,11 @@
                 img.src = `/img/team/${this.id}/image`;
                 img.onload = () => { if (img.naturalWidth > 1) photoEl.innerHTML = `<img src="${img.src}" alt="${player.name}">`; };
 
-                // Rankings (tennis)
+                // Rankings (tennis - from sport cache)
                 if (this.sport === 'tennis') {
-                    const rankings = await apiFetch('tennis/rankings/atp');
-                    const rank = rankings?.rankings?.find(r => r.team?.id === this.id);
+                    const sportCache = await loadSportCache('tenis');
+                    const rankings = sportCache?.rankings;
+                    const rank = rankings?.find(r => r.team?.id === this.id);
                     if (rank) {
                         document.getElementById('athleteStats').innerHTML = `
                             <div class="at-stat"><div class="at-stat-value">${rank.ranking}º</div><div class="at-stat-label">Ranking</div></div>
@@ -190,9 +201,11 @@
         },
 
         async loadMatches() {
-            // Previous matches
-            const prevData = await apiFetch(`${this.sport}/team/${this.id}/events/previous/0`);
-            const prevEvents = prevData?.events || [];
+            // Previous matches (from cache)
+            const cache = _athletesCache;
+            const athleteKey = `${this.sport}_${this.id}`;
+            const athleteData = cache?.[athleteKey];
+            const prevEvents = athleteData?.previous || [];
             const container = document.getElementById('previousMatches');
 
             if (prevEvents.length === 0) {
@@ -227,9 +240,8 @@
                 }).join('');
             }
 
-            // Next match
-            const nextData = await apiFetch(`${this.sport}/team/${this.id}/events/next/0`);
-            const nextEvents = nextData?.events || [];
+            // Next match (from cache)
+            const nextEvents = athleteData?.next || [];
 
             if (nextEvents.length > 0) {
                 const e = nextEvents[0];

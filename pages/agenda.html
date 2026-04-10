@@ -103,8 +103,7 @@
         return desc;
     }
 
-    const API_KEY = 'cf85a77dbbmsh438760ef71d5715p13923fjsnc2f2878572d2';
-    const API_HOST = 'allsportsapi2.p.rapidapi.com';
+    const CACHE_BASE = window.location.origin + '/cache';
     let currentDate = new Date();
     let currentFilter = 'all';
     let allEvents = [];
@@ -139,27 +138,23 @@
         document.getElementById('dateLabel').textContent = formatDate(d);
         document.getElementById('agendaContent').innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
 
-        // Try cache first (today only)
+        // Try cache files (today.json, tomorrow.json, or agenda_{date}.json)
         const today = new Date();
-        const isToday = dateStr(d) === dateStr(today);
+        const todayStr = dateStr(today);
+        const tomorrowStr = dateStr(new Date(Date.now() + 86400000));
+        const requestedDate = dateStr(d);
 
         let data = null;
-        if (isToday) {
-            try {
-                const res = await fetch(`/cache/today.json?_=${Date.now()}`);
-                if (res.ok) data = await res.json();
-            } catch {}
-        }
+        let cacheFile = null;
 
-        // Fallback to API
-        if (!data || !data.events) {
-            try {
-                const res = await fetch(`https://${API_HOST}/api/matches/${day}/${month}/${year}`, {
-                    headers: { 'x-rapidapi-key': API_KEY, 'x-rapidapi-host': API_HOST }
-                });
-                if (res.ok) data = await res.json();
-            } catch {}
-        }
+        if (requestedDate === todayStr) cacheFile = 'today.json';
+        else if (requestedDate === tomorrowStr) cacheFile = 'tomorrow.json';
+        else cacheFile = `agenda_${requestedDate}.json`;
+
+        try {
+            const res = await fetch(`${CACHE_BASE}/${cacheFile}?_=${Date.now()}`);
+            if (res.ok) data = await res.json();
+        } catch {}
 
         allEvents = data?.events || [];
 

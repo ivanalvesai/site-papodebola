@@ -122,7 +122,12 @@ log "OK: SEO applied to new posts"
 # DISABLED - Sitemap now managed by Rank Math in WordPress
 # 8-old. Sitemap generation moved to WordPress/Rank Math
 
-# 8. Championship data (every 3 hours)
+# 8. Sports cache - NBA, Tennis, F1, MMA, etc. (every 30 min)
+log "Building sports cache..."
+node "$CACHE_DIR/build-sports.js" >> "$LOG_FILE" 2>&1
+log "OK: sports cached"
+
+# 9. Championship data (every 3 hours)
 CHAMP_FILE="$CACHE_DIR/champ_325.json"
 CHAMP_SIZE=$(stat -c%s "$CHAMP_FILE" 2>/dev/null || echo "0")
 if [ "$CHAMP_SIZE" -lt 20 ] || [ $((HOUR % 3)) -eq 0 ]; then
