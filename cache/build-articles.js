@@ -921,62 +921,117 @@ async function main() {
         const detected = detectCategoryAndTags(rewritten.title + ' ' + rewritten.text);
         const category = detected.category;
 
-        // Sport-specific fallback images for Pexels
-        const SPORT_FALLBACKS = {
-            'NBA': 'basketball game nba court',
-            'Basquete': 'basketball game nba court',
-            'Tênis': 'tennis match court player',
-            'Fórmula 1': 'formula 1 race car track',
-            'MMA': 'mma ufc octagon fight',
-            'Vôlei': 'volleyball match game',
-            'eSports': 'esports gaming tournament',
-            'NFL': 'american football nfl game',
-            'MLB': 'baseball mlb game stadium',
-            'NHL': 'ice hockey nhl game',
-            'Futsal': 'futsal indoor football',
-            'Handebol': 'handball match game',
+        // Sport API paths and fallback images
+        const SPORT_CONFIG = {
+            'NBA':        { api: 'basketball', fallback: 'basketball game nba court' },
+            'Basquete':   { api: 'basketball', fallback: 'basketball game nba court' },
+            'Tênis':      { api: 'tennis', fallback: 'tennis match court player' },
+            'Fórmula 1':  { api: 'motorsport', fallback: 'formula 1 race car track' },
+            'MMA':        { api: 'mma', fallback: 'mma ufc octagon fight' },
+            'Vôlei':      { api: null, fallback: 'volleyball match game' },
+            'eSports':    { api: null, fallback: 'esports gaming tournament' },
+            'NFL':        { api: 'american-football', fallback: 'american football nfl game' },
+            'MLB':        { api: 'baseball', fallback: 'baseball mlb game stadium' },
+            'NHL':        { api: 'ice-hockey', fallback: 'ice hockey nhl game' },
+            'Futsal':     { api: null, fallback: 'futsal indoor football' },
+            'Handebol':   { api: 'handball', fallback: 'handball match game' },
         };
 
-        const isFootball = !SPORT_FALLBACKS[category]; // If not in map, it's football
+        const sportConfig = SPORT_CONFIG[category];
+        const isFootball = !sportConfig;
 
-        // Image search - different strategy per sport type
         console.log(`  Finding image... (${isFootball ? 'futebol' : category})`);
-        const team = detectTeamId(rewritten.title) || detectTeamId(item.title) || detectTeamId(rewritten.text?.substring(0, 300) || '');
         let localImage = null;
 
-        // 1. Try AllSportsApi team media (works for football teams)
-        if (team) {
-            localImage = await fetchRealTeamImage(team.id, team.name, slug);
-        }
+        // 1. Try AllSportsApi - search for team/player by title keywords, get media
+        const titleForSearch = (rewritten.title || item.title || '').substring(0, 80);
+        const searchWords = titleForSearch.replace(/[^a-záéíóúâêôãõçüA-Z\s]/gi, '').split(/\s+/).filter(w => w.length > 3).slice(0, 2);
 
-        // 2. Try Pexels with specific search from title
-        if (!localImage) {
-            const titleWords = (rewritten.title || item.title || '')
-                .replace(/[^a-záéíóúâêôãõçüA-Z\s]/gi, '')
-                .split(/\s+/)
-                .filter(w => w.length > 4)
-                .slice(0, 3)
-                .join(' ');
-            if (titleWords) {
-                const sportTerm = isFootball ? 'football' : (SPORT_FALLBACKS[category]?.split(' ')[0] || 'sport');
-                localImage = await fetchPexelsImage(`${titleWords} ${sportTerm}`, slug);
+        if (isFootball) {
+            // Football: use existing team detection
+            const team = detectTeamId(rewritten.title) || detectTeamId(item.title) || detectTeamId(rewritten.text?.substring(0, 300) || '');
+            if (team) localImage = await fetchRealTeamImage(team.id, team.name, slug);
+        } else if (sportConfig?.api) {
+            // Other sports: search API for team/player, then get media
+            for (const word of searchWords) {
+                if (localImage) break;
+                try {
+                    const searchUrl = `https://allsportsapi2.p.rapidapi.com/api/${sportConfig.api}/search/${encodeURIComponent(word)}`;
+                    const searchData = await new Promise((resolve) => {
+                        https.get(searchUrl, {
+                            headers: { 'x-rapidapi-key': 'cf85a77dbbmsh438760ef71d5715p13923fjsnc2f2878572d2', 'x-rapidapi-host': 'allsportsapi2.p.rapidapi.com' },
+                            rejectUnauthorized: false,
+                        }, res => {
+                            let d = ''; res.on('data', c => d += c);
+                            res.on('end', () => { try { resolve(JSON.parse(d)); } catch { resolve(null); } });
+                        }).on('error', () => resolve(null));
+                    });
+
+                    const entity = searchData?.results?.[0]?.entity;
+                    if (entity?.id) {
+                        console.log(`  [API] Found: ${entity.name} (${sportConfig.api}, ID: ${entity.id})`);
+                        // Get media
+                        const mediaUrl = `https://allsportsapi2.p.rapidapi.com/api/${sportConfig.api}/team/${entity.id}/media`;
+                        const mediaData = await new Promise((resolve) => {
+                            https.get(mediaUrl, {
+                                headers: { 'x-rapidapi-key': 'cf85a77dbbmsh438760ef71d5715p13923fjsnc2f2878572d2', 'x-rapidapi-host': 'allsportsapi2.p.rapidapi.com' },
+                                rejectUnauthorized: false,
+                            }, res => {
+                                let d = ''; res.on('data', c => d += c);
+                                res.on('end', () => { try { resolve(JSON.parse(d)); } catch { resolve(null); } });
+                            }).on('error', () => resolve(null));
+                        });
+
+                        const videos = mediaData?.media?.filter(m => m.thumbnailUrl);
+                        if (videos?.length > 0) {
+                            const pick = videos[Math.floor(Math.random() * Math.min(videos.length, 5))];
+                            let thumbUrl = pick.thumbnailUrl;
+                            if (thumbUrl.includes('hqdefault')) thumbUrl = thumbUrl.replace('hqdefault', 'maxresdefault');
+
+                            const imgData = await new Promise((resolve) => {
+                                https.get(thumbUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } }, res => {
+                                    if (res.statusCode !== 200) {
+                                        const fb = thumbUrl.replace('maxresdefault', 'hqdefault');
+                                        https.get(fb, res2 => {
+                                            const ch = []; res2.on('data', c => ch.push(c));
+                                            res2.on('end', () => resolve(Buffer.concat(ch)));
+                                        }).on('error', () => resolve(null));
+                                        res.resume(); return;
+                                    }
+                                    const ch = []; res.on('data', c => ch.push(c));
+                                    res.on('end', () => resolve(Buffer.concat(ch)));
+                                }).on('error', () => resolve(null));
+                            });
+
+                            if (imgData && imgData.length > 3000) {
+                                const imgPath = path.join(IMAGES_DIR, `${slug}.jpg`);
+                                fs.writeFileSync(imgPath, imgData);
+                                localImage = `/artigos/img/${slug}.jpg`;
+                                console.log(`  [API] Image OK: ${entity.name} (${imgData.length} bytes)`);
+                            }
+                        }
+                    }
+                } catch(e) { /* continue */ }
             }
         }
 
-        // 3. Sport-specific fallback
+        // 2. Fallback: Pexels with title keywords + sport term
+        if (!localImage) {
+            const kw = searchWords.join(' ');
+            if (kw) {
+                const sportTerm = isFootball ? 'football' : (sportConfig?.fallback?.split(' ')[0] || 'sport');
+                localImage = await fetchPexelsImage(`${kw} ${sportTerm}`, slug);
+            }
+        }
+
+        // 3. Final fallback: sport-specific generic image
         if (!localImage) {
             if (isFootball) {
-                // Football: aerial stadium photo
-                if (team) {
-                    localImage = await fetchPexelsImage(`${team.name} football stadium`, slug);
-                }
-                if (!localImage) {
-                    localImage = await fetchPexelsImage('football stadium aerial view', slug);
-                }
+                const team = detectTeamId(rewritten.title) || detectTeamId(item.title);
+                if (team) localImage = await fetchPexelsImage(`${team.name} football stadium`, slug);
+                if (!localImage) localImage = await fetchPexelsImage('football stadium aerial view', slug);
             } else {
-                // Other sports: generic sport image
-                const fallbackQuery = SPORT_FALLBACKS[category] || `${category} sport`;
-                localImage = await fetchPexelsImage(fallbackQuery, slug);
+                localImage = await fetchPexelsImage(sportConfig?.fallback || 'sport stadium', slug);
             }
         }
 
