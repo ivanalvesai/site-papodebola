@@ -17,10 +17,8 @@ const CACHE_DIR = path.dirname(__filename);
 const API_KEY = 'cf85a77dbbmsh438760ef71d5715p13923fjsnc2f2878572d2';
 const API_HOST = 'allsportsapi2.p.rapidapi.com';
 
-// 4 torneios principais apenas
+// Torneios internacionais (brasileiros agora vêm da API CBF via build-cbf.js)
 const TOURNAMENTS = [
-    { id: 325, seasonId: 87678, name: 'Brasileirão Série A' },
-    { id: 373, seasonId: 89353, name: 'Copa do Brasil' },
     { id: 384, seasonId: 87760, name: 'Libertadores' },
     { id: 7,  seasonId: 76953, name: 'Champions League' },
 ];
@@ -127,33 +125,8 @@ async function main() {
             console.log(`    Standings: ${champData.standings[0]?.rows?.length || 0} teams`);
         }
 
-        // Scorers: só para Brasileirão (campeonato.html usa topScorers)
-        // Outros torneios: reaproveita do cache anterior se existir
-        if (t.id === 325 && champData.standings?.[0]?.rows?.length) {
-            champData.topScorers = [];
-            const topTeams = champData.standings[0].rows.slice(0, 6);
-            for (const row of topTeams) {
-                const bp = await fetchAPI(`team/${row.teamId}/tournament/${t.id}/season/${t.seasonId}/best-players`);
-                await delay(300);
-                if (bp?.topPlayers?.goals) {
-                    bp.topPlayers.goals.forEach(p => {
-                        champData.topScorers.push({
-                            name: p.player?.name || p.player?.shortName,
-                            playerId: p.player?.id,
-                            team: row.team,
-                            teamId: row.teamId,
-                            goals: p.statistics?.goals || 0,
-                        });
-                    });
-                }
-            }
-            const seen = new Set();
-            champData.topScorers = champData.topScorers
-                .filter(s => { if (seen.has(s.playerId)) return false; seen.add(s.playerId); return true; })
-                .sort((a, b) => b.goals - a.goals)
-                .slice(0, 10);
-            console.log(`    Top scorers: ${champData.topScorers.length}`);
-        } else if (existing.topScorers) {
+        // Scorers: preservar do cache anterior (Brasileirão agora via CBF)
+        if (existing.topScorers) {
             champData.topScorers = existing.topScorers;
         }
 
