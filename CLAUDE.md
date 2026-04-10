@@ -113,22 +113,26 @@ site-papodebola/
 │   ├── build-scorers.js            # Artilheiros top 10 times Brasileirão
 │   ├── build-championship.js       # Rodadas e classificações dos campeonatos
 │   ├── build-sports.js             # Cache de esportes (NBA, Tênis, F1, MMA, etc.)
+│   ├── build-cbf.js                # Calendário futebol brasileiro via API CBF (gratuita)
+│   ├── build-apifootball.js        # API-Football (DESATIVADO - plano grátis só 2022-2024)
 │   ├── sync-wordpress.js           # Sincroniza WP posts para front-end
 │   ├── rebuild-html.js             # Regenera HTMLs do articles.json
 │   ├── migrate-to-wp.js            # Migração de artigos para WordPress
 │   ├── configure-rankmath.php      # Configuração do Rank Math
 │   ├── optimize-seo-v*.php         # Scripts de otimização SEO
 │   ├── fix-images.php              # Corrige posts sem featured image
-│   ├── live.json                   # Jogos ao vivo
-│   ├── today.json / tomorrow.json  # Jogos do dia
-│   ├── standings_brasileirao.json  # Classificação
-│   ├── scorers_brasileirao.json    # Artilheiros
-│   ├── home.json                   # Dados da homepage
+│   ├── live.json                   # Jogos ao vivo (DESATIVADO)
+│   ├── today.json / tomorrow.json  # Jogos do dia (AllSportsApi)
+│   ├── standings_brasileirao.json  # Classificação Brasileirão (AllSportsApi)
+│   ├── scorers_brasileirao.json    # Artilheiros (AllSportsApi)
+│   ├── home.json                   # Dados da homepage (AllSportsApi)
 │   ├── articles.json               # Banco de artigos (sync do WP)
-│   ├── champ_*.json                # Cache por campeonato
-│   ├── sport_*.json                # Cache por esporte (sport_nba.json, sport_tenis.json, etc.)
-│   ├── athletes.json               # Cache de atletas (info, resultados, próximos jogos)
-│   ├── agenda_*.json               # Cache de agenda por data (agenda_2026-04-12.json)
+│   ├── champ_*.json                # Cache por campeonato (AllSportsApi)
+│   ├── sport_*.json                # Cache por esporte (AllSportsApi)
+│   ├── athletes.json               # Cache de atletas (AllSportsApi)
+│   ├── agenda_*.json               # Cache de agenda por data (AllSportsApi)
+│   ├── cbf_calendario.json         # Calendário futebol brasileiro (CBF API gratuita)
+│   ├── cbf_hoje.json               # Jogos brasileiros de hoje (CBF API gratuita)
 │   └── meta.json                   # Timestamp última atualização
 ├── api/
 │   ├── server.js                   # Micro API Node.js (CRUD artigos, auth)
@@ -144,10 +148,12 @@ site-papodebola/
 
 ## APIs Externas
 
-### AllSportsApi (Sofascore) - RapidAPI Pro
+### AllSportsApi (Sofascore) - RapidAPI Pro — FALLBACK
 - **Host**: `allsportsapi2.p.rapidapi.com`
 - **Key**: `cf85a77dbbmsh438760ef71d5715p13923fjsnc2f2878572d2`
 - **Plano**: Pro ($19.99/mês, 10.000 req/mês)
+- **Uso atual**: Esportes (NBA, Tênis, F1, MMA) + futebol (standings, placares, rodadas) + homepage
+- **Consumo**: ~130 req/dia (~3.900/mês, 39% do plano)
 
 #### Endpoints usados:
 | Endpoint | Uso |
@@ -207,6 +213,47 @@ site-papodebola/
 | Bragantino | 1999 | | Aston Villa | 40 |
 | Coritiba | 1982 | | Dortmund | 2673 |
 
+### CBF API (Gratuita) — Calendário do futebol brasileiro
+- **Base URL**: `https://gweb.cbf.com.br/api/site/v1`
+- **Auth**: `Authorization: Bearer Cbf@2022!` (token público do JS do site cbf.com.br)
+- **Custo**: Gratuito, sem limite documentado
+- **Uso**: Calendário (datas, horários, estádios, confrontos)
+- **NÃO usar para**: Placares e standings (dados de mandante/visitante invertidos)
+- **Consumo**: 6 req/dia (2x/dia, 3 campeonatos)
+- **Script**: `cache/build-cbf.js`
+
+#### Endpoints confirmados:
+| Endpoint | Retorno |
+|---|---|
+| `/campeonatos` | Lista todos os campeonatos |
+| `/campeonatos/anos` | Campeonatos por ano com IDs e categorias |
+| `/jogos/campeonato/{id}` | TODOS os jogos (1 req = tudo, com datas/horários/estádios) |
+
+#### IDs CBF 2026:
+| Campeonato | CBF ID |
+|---|---|
+| Brasileirão Série A | 1260611 |
+| Brasileirão Série B | 1260612 |
+| Copa do Brasil | 1260615 |
+| Supercopa | 1260616 |
+| Copa do Nordeste | 1260624 |
+
+#### Arquivos gerados:
+| Arquivo | Conteúdo |
+|---|---|
+| `cbf_calendario.json` | Todos os jogos brasileiros (datas, horários, estádios, rodadas) |
+| `cbf_hoje.json` | Jogos brasileiros de hoje |
+
+**AVISO**: O token `Cbf@2022!` é público (extraído do JS do site cbf.com.br) e pode mudar sem aviso.
+
+### API-Football (DESATIVADA)
+- **Base URL**: `https://v3.football.api-sports.io`
+- **Key**: `767b3820c4470e045a70cf44ef4a6da7`
+- **Plano**: Grátis (100 req/dia)
+- **Status**: DESATIVADA — plano grátis só dá acesso a temporadas 2022-2024, não 2025-2026
+- **Script**: `cache/build-apifootball.js` (pronto, mas não é usado)
+- **Para reativar**: Assinar plano pago e descomentar no update.sh
+
 ### Anthropic (Claude API)
 - **Uso**: Reescrita de artigos (2000+ palavras, humanizado)
 - **Modelo**: claude-sonnet-4-6
@@ -249,9 +296,9 @@ RSS (7 feeds) → Claude Sonnet (reescreve 2000+ palavras em PT-BR)
 | meutimao.com.br/feed | 16/dia | Corinthians |
 
 ### Limites de geração:
-- **Max 1 artigo por feed por execução**
-- **Max 5 artigos totais por execução**
-- **2 execuções/dia** (8h e 15h) = **~5 artigos/dia**
+- **Max 1 artigo por execução** (1 por slot)
+- **10 slots/dia** em horários de pico: 7:00, 8:30, 10:00, 11:30, 13:00, 14:30, 16:00, 18:00, 20:00, 21:30
+- **~10 artigos/dia** (5 futebol + 5 esportes variados, rotação)
 
 ### SEO aplicado em cada post (Rank Math 75+):
 - Focus keyword (3 palavras do título, sem stop words)
@@ -317,55 +364,54 @@ Palmeiras, Flamengo, Corinthians, São Paulo, Santos, Fluminense, Botafogo, Vasc
 */30 * * * * /bin/bash /home/ivan/site-papodebola/cache/update.sh
 ```
 
-| Tarefa | Frequência | Horários | Req/exec |
-|---|---|---|---|
-| Jogos de hoje + amanhã | **1x/dia** | **08h** | 2 |
-| Standings Brasileirão | Ter/Qua 2x + Sáb/Dom 6x | Dias de jogo | 1 |
-| Sync WordPress → front-end | 30 min | 24h | 0 (local) |
-| **Geração de artigos** | **10x/dia** | **7h-21:30h** | 0 (Claude API) |
-| Artilheiros (build-scorers) | **1x/dia** | **08h** | 10 |
-| Homepage (build-home) | **1x/dia** | **14h** | 15 |
-| Esportes (build-sports) | **1x/dia** | **16h** | ~45 |
-| Campeonatos (build-championship) | **2x/dia** | **08h e 22h** | ~28 |
-| ~~Ao Vivo (matches/live)~~ | **DESATIVADO** | — | — |
+### Tabela do Cron
 
-### Ao Vivo (DESATIVADO)
-O fetch de `matches/live` e o menu "AO VIVO" estão desativados para economizar quota.
+| Tarefa | API | Frequência | Horários | Req/exec |
+|---|---|---|---|---|
+| Jogos de hoje + amanhã | AllSportsApi | 1x/dia | 08h | 2 |
+| Standings Brasileirão | AllSportsApi | Ter/Qua 2x + Sáb/Dom 6x | Dias de jogo | 1 |
+| Artilheiros (build-scorers) | AllSportsApi | 1x/dia | 08h | 10 |
+| Homepage (build-home) | AllSportsApi | 1x/dia | 14h | 15 |
+| Esportes (build-sports) | AllSportsApi | 1x/dia | 16h | ~45 |
+| Campeonatos (build-championship) | AllSportsApi | 2x/dia | 08h, 22h | ~28 |
+| **Calendário brasileiro (build-cbf)** | **CBF** | **2x/dia** | **08h, 20h** | **3** |
+| Geração de artigos | Claude API | 10x/dia | 7h-21:30h | 0 (API Anthropic) |
+| Sync WordPress → front-end | Local | 30 min | 24h | 0 |
+| SEO posts novos | Local/WP | 30 min | 24h | 0 |
+| ~~Ao Vivo (matches/live)~~ | ~~AllSportsApi~~ | **DESATIVADO** | — | — |
+| ~~API-Football~~ | ~~API-Football~~ | **DESATIVADO** | — | — |
+
+### Funcionalidades desativadas
+
+**Ao Vivo**: O fetch de `matches/live` e o menu "AO VIVO" estão desativados para economizar quota.
 Para reativar: descomentar `fetch "matches/live"` no update.sh, restaurar o link no nav.js,
-e restaurar as tabs (Ao Vivo/Próximos/Finalizados) com placares no index.html.
+e restaurar as tabs com placares no index.html.
+
+**API-Football**: Plano grátis só dá acesso a temporadas 2022-2024.
+Para reativar: assinar plano pago, configurar `APIFOOTBALL_KEY` no `.env`, descomentar no update.sh.
+Script pronto em `cache/build-apifootball.js`.
 
 ### Cache de Esportes (build-sports.js)
 Todas as páginas de esportes (esporte.html, atleta.html, agenda.html) lêem dados de arquivos JSON cacheados. **Nenhuma página faz chamadas diretas à API**.
 
-| Arquivo | Conteúdo |
-|---|---|
-| `sport_{slug}.json` | Live, today, calendar, standings/rankings do esporte |
-| `athletes.json` | Info, resultados e próximos jogos dos 20 atletas |
-| `agenda_{date}.json` | Jogos de futebol por data (para agenda.html) |
+| Arquivo | Fonte | Conteúdo |
+|---|---|---|
+| `sport_{slug}.json` | AllSportsApi | Live, today, calendar, standings/rankings do esporte |
+| `athletes.json` | AllSportsApi | Info, resultados e próximos jogos dos 20 atletas |
+| `agenda_{date}.json` | AllSportsApi | Jogos de futebol por data (agenda.html) |
+| `cbf_calendario.json` | CBF API | Calendário brasileiro (datas, horários, estádios) |
+| `cbf_hoje.json` | CBF API | Jogos brasileiros de hoje |
 
-### Consumo estimado
+### Consumo estimado mensal
 
-**CBF API (gratuita — SOMENTE CALENDÁRIO):**
-Placares da CBF têm dados invertidos. Usar apenas para datas, horários, estádios.
+| API | Req/dia | Req/mês | Custo | % do plano |
+|---|---|---|---|---|
+| **CBF** | 6 | 180 | Grátis | — |
+| **AllSportsApi** | ~130 | ~3.900 | $19.99 | 39% |
+| **API-Football** | 0 | 0 | Grátis (desativada) | — |
+| **TOTAL** | ~136 | ~4.080 | **$19.99** | — |
 
-| Tarefa | Exec/dia | Req/exec | Req/dia |
-|---|---|---|---|
-| CBF Calendário (Série A + B + Copa do Brasil) | 2 (08h/20h) | 3 | **6** |
-| **TOTAL CBF** | | | **6/dia (grátis)** |
-
-**AllSportsApi Pro (10.000 req/mês):**
-
-| Tarefa | Exec/dia | Req/exec | Req/dia |
-|---|---|---|---|
-| Today + Tomorrow | 1 | 2 | 2 |
-| Standings Brasileirão (dias de jogo) | ~2 avg | 1 | ~2 |
-| Campeonatos (4 torneios, ±2 rodadas) | 2 | 28 | 56 |
-| Esportes (NBA, Tênis, F1, etc.) | 1 | 45 | 45 |
-| Homepage | 1 | 15 | 15 |
-| Artilheiros | 1 | 10 | 10 |
-| **TOTAL AllSportsApi** | | | **~130/dia** |
-
-**Mensal AllSportsApi: ~3.900 req/mês** ✅ 39% do plano Pro
+Sobram ~6.100 req/mês na AllSportsApi para reativar funcionalidades.
 
 ---
 
@@ -416,14 +462,15 @@ O Sofascore bloqueia requests sem referer. O nginx faz proxy com header correto:
 
 ### Homepage
 - Banner Copa do Mundo 2026 com countdown
-- Ticker de jogos ao vivo
-- Barra de jogos em destaque
+- **Match bar com 2 abas**: "Hoje" (AllSportsApi, sem placar) + "Próximos" (CBF, jogos brasileiros)
 - Destaques em vídeo (highlights YouTube)
 - Últimas notícias (do WordPress) + botão "Mostrar Mais"
 - Mercado da Bola (transferências)
 - Sidebar: próximo jogo, classificação, artilheiros, resultados
 - Cookie banner LGPD
 - Fade-in animations on scroll
+- ~~Ticker de jogos ao vivo~~ (DESATIVADO)
+- ~~Ao Vivo com placares~~ (DESATIVADO)
 
 ### Página de campeonato
 - Layout estilo ge.globo.com: classificação à esquerda, jogos à direita
@@ -471,12 +518,15 @@ O Sofascore bloqueia requests sem referer. O nginx faz proxy com header correto:
 2. API keys estão em `js/config.js` (AllSportsApi) e `cache/build-articles.js` (WP + Anthropic)
 3. Para rodar local, caches precisam existir em `/cache/*.json`
 4. Cron e micro API só rodam no servidor
-5. Ao alterar CSS/JS, incrementar `?v=N` em TODOS os HTMLs (atual: v=22) — manter sincronizado
+5. Ao alterar CSS/JS, incrementar `?v=N` em TODOS os HTMLs (atual: v=22) — manter sincronizado em TODAS as páginas
 6. Após push, fazer pull no servidor e Purge no Cloudflare
 7. WordPress é headless: front-end não usa temas WP, só API REST
 8. Artigos são publicados no WP E como HTML estático (dupla publicação)
 9. Imagens passam por proxy nginx (nunca usar api.sofascore.app direto)
 10. Rank Math SEO deve ser mantido em novos posts (scripts PHP em cache/)
+11. **nav.js sempre substitui `.nav-list`** — não colocar itens fixos no HTML
+12. **3 APIs de dados**: AllSportsApi (paga, principal), CBF (grátis, calendário), API-Football (desativada)
+13. **Nenhuma página faz chamada direta à API** — todas lêem de cache JSON
 
 ---
 
