@@ -4,12 +4,12 @@
 # CBF API (gratuita) + AllSportsApi Pro (10.000 req/mês, fallback)
 # Roda via cron a cada 30 minutos
 #
-# Consumo API-Football: ~50 req/dia (grátis, limite 100/dia)
-# Consumo AllSportsApi: ~60 req/dia (~1.800/mês, só esportes + homepage)
+# Consumo AllSportsApi: ~130 req/dia (~3.900/mês, 39% do plano Pro)
 # Consumo CBF API: ~6 req/dia (grátis, calendário)
+# API-Football: DESATIVADA (plano grátis só tem 2022-2024)
 #
 # Horários de cada tarefa:
-#   08h: API-Football (futebol) + CBF (calendário)
+#   08h: today + tomorrow + artilheiros + campeonatos + CBF
 #   14h: homepage
 #   16h: esportes
 #   22h: campeonatos
@@ -72,38 +72,16 @@ fetch() {
 log "=== Update started (hora: $HOUR:$MIN, dow: $DOW) ==="
 
 # =====================================================
-# API-FOOTBALL (GRÁTIS) — Todo o futebol: today, standings, rodadas, artilheiros
-# 2x/dia: 08h e 22h (~25 req cada = ~50 req/dia de 100 disponíveis)
-# Gera: today.json, tomorrow.json, champ_*.json, standings_brasileirao.json, scorers_brasileirao.json
+# JOGOS DE HOJE + AMANHÃ — AllSportsApi 1x/dia às 08h (2 req)
 # =====================================================
-if ([ "$HOUR" -eq 8 ] || [ "$HOUR" -eq 22 ]) && [ "$MIN" -lt 30 ]; then
-    export APIFOOTBALL_KEY=$(grep "^APIFOOTBALL_KEY=" /home/ivan/automacao-site/.env 2>/dev/null | cut -d= -f2)
-    if [ -n "$APIFOOTBALL_KEY" ]; then
-        log "Building API-Football cache (futebol grátis)..."
-        if node "$CACHE_DIR/build-apifootball.js" >> "$LOG_FILE" 2>&1; then
-            log "OK: API-Football cached"
-        else
-            log "WARN: API-Football failed, using AllSportsApi fallback..."
-            fetch "matches/${DAY}/${MONTH}/${YEAR}" "$CACHE_DIR/today.json"
-            fetch "matches/${TDAY}/${TMONTH}/${TYEAR}" "$CACHE_DIR/tomorrow.json"
-            fetch "tournament/325/season/87678/standings/total" "$CACHE_DIR/standings_brasileirao.json"
-            node "$CACHE_DIR/build-championship.js" >> "$LOG_FILE" 2>&1
-            node "$CACHE_DIR/build-scorers.js" >> "$LOG_FILE" 2>&1
-            log "OK: AllSportsApi fallback used"
-        fi
-    else
-        log "APIFOOTBALL_KEY not set, using AllSportsApi..."
-        fetch "matches/${DAY}/${MONTH}/${YEAR}" "$CACHE_DIR/today.json"
-        fetch "matches/${TDAY}/${TMONTH}/${TYEAR}" "$CACHE_DIR/tomorrow.json"
-        fetch "tournament/325/season/87678/standings/total" "$CACHE_DIR/standings_brasileirao.json"
-        node "$CACHE_DIR/build-championship.js" >> "$LOG_FILE" 2>&1
-        node "$CACHE_DIR/build-scorers.js" >> "$LOG_FILE" 2>&1
-        log "OK: AllSportsApi fallback used"
-    fi
-fi
+if [ "$HOUR" -eq 8 ] && [ "$MIN" -lt 30 ]; then
+    # DESATIVADO: Ao Vivo (reativar futuramente)
+    # fetch "matches/live" "$CACHE_DIR/live.json"
 
-# DESATIVADO: Ao Vivo (reativar futuramente)
-# fetch "matches/live" "$CACHE_DIR/live.json"
+    log "Fetching today + tomorrow matches (08h)..."
+    fetch "matches/${DAY}/${MONTH}/${YEAR}" "$CACHE_DIR/today.json"
+    fetch "matches/${TDAY}/${TMONTH}/${TYEAR}" "$CACHE_DIR/tomorrow.json"
+fi
 
 # =====================================================
 # CBF API — Calendário do futebol brasileiro (GRATUITA)
@@ -114,6 +92,41 @@ if ([ "$HOUR" -eq 8 ] || [ "$HOUR" -eq 20 ]) && [ "$MIN" -lt 30 ]; then
     node "$CACHE_DIR/build-cbf.js" >> "$LOG_FILE" 2>&1 || log "WARN: CBF calendar failed"
     log "OK: CBF calendar cached"
 fi
+
+# =====================================================
+# STANDINGS BRASILEIRÃO — AllSportsApi em dias de jogo
+# Ter/Qua: 2x após 19:30 | Sáb/Dom: 6x após 16h
+# =====================================================
+FETCH_STANDINGS=false
+if [ "$DOW" -eq 2 ] || [ "$DOW" -eq 3 ]; then
+    if [ "$HOUR" -eq 20 ] || ([ "$HOUR" -eq 21 ] && [ "$MIN" -lt 30 ]); then
+        FETCH_STANDINGS=true
+    fi
+fi
+if [ "$DOW" -eq 6 ] || [ "$DOW" -eq 7 ]; then
+    if [ "$HOUR" -ge 16 ] && [ "$HOUR" -le 21 ] && [ "$MIN" -lt 30 ]; then
+        FETCH_STANDINGS=true
+    fi
+fi
+if [ "$FETCH_STANDINGS" = true ]; then
+    log "Fetching standings (dia de jogo)..."
+    fetch "tournament/325/season/87678/standings/total" "$CACHE_DIR/standings_brasileirao.json"
+fi
+
+# =====================================================
+# ARTILHEIROS — 1x/dia às 08h (10 req AllSportsApi)
+# =====================================================
+if [ "$HOUR" -eq 8 ] && [ "$MIN" -lt 30 ]; then
+    log "Fetching top scorers (08h)..."
+    node "$CACHE_DIR/build-scorers.js" >> "$LOG_FILE" 2>&1
+    SCORERS_FILE="$CACHE_DIR/scorers_brasileirao.json"
+    log "OK: scorers ($(stat -c%s $SCORERS_FILE 2>/dev/null || echo 0) bytes)"
+fi
+
+# DESATIVADO: API-Football (plano grátis só tem dados de 2022-2024)
+# Para reativar: registrar plano pago em dashboard.api-football.com
+# e descomentar a linha abaixo:
+# APIFOOTBALL_KEY=xxx node "$CACHE_DIR/build-apifootball.js"
 
 # =====================================================
 # HOMEPAGE — 1x/dia às 14h (15 req)
@@ -168,8 +181,15 @@ if [ "$HOUR" -eq 16 ] && [ "$MIN" -lt 30 ]; then
     log "OK: sports cached"
 fi
 
-# CAMPEONATOS AllSportsApi — agora só como fallback (movido para dentro do bloco API-Football acima)
-# build-championship.js só roda se API-Football falhar ou não estiver configurada
+# =====================================================
+# CAMPEONATOS — 2x/dia às 08h e 22h (~28 req AllSportsApi)
+# Brasileirão, Copa do Brasil, Libertadores, Champions
+# =====================================================
+if ([ "$HOUR" -eq 8 ] || [ "$HOUR" -eq 22 ]) && [ "$MIN" -lt 30 ]; then
+    log "Building championship cache..."
+    node "$CACHE_DIR/build-championship.js" >> "$LOG_FILE" 2>&1
+    log "OK: championships cached"
+fi
 
 # Sitemap - handled by Rank Math WordPress plugin
 # Sitemap URL: https://admin.papodebola.com.br/sitemap_index.xml
