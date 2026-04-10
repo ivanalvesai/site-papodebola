@@ -25,6 +25,18 @@ function pdb_detect_category($title, $content) {
         'Copa do Mundo' => array('copa do mundo','world cup','mundial'),
         'Seleção Brasileira' => array('seleção brasileira','seleção'),
         'Brasileirão' => array('brasileirão','campeonato brasileiro','série a'),
+        // Outros esportes
+        'NBA' => array('nba','basquete','basketball','lakers','celtics','warriors'),
+        'Tênis' => array('tênis','tenis','tennis','atp','wta','grand slam','roland garros','wimbledon','joão fonseca','joao fonseca','djokovic','alcaraz','sinner'),
+        'Fórmula 1' => array('fórmula 1','formula 1','f1','verstappen','hamilton','leclerc'),
+        'MMA' => array('ufc','mma','bellator','dana white'),
+        'Vôlei' => array('vôlei','volei','volleyball','superliga vôlei'),
+        'eSports' => array('esports','e-sports','cs2','counter-strike','valorant','league of legends','cblol'),
+        'NFL' => array('nfl','super bowl','american football'),
+        'MLB' => array('mlb','baseball','beisebol'),
+        'NHL' => array('nhl','hockey','hóquei'),
+        'Futsal' => array('futsal'),
+        'Handebol' => array('handebol','handball'),
     );
     foreach ($title_rules as $cat => $kws) {
         foreach ($kws as $kw) {
@@ -42,6 +54,12 @@ function pdb_detect_category($title, $content) {
         'Copa do Mundo' => array('copa do mundo','world cup'),
         'Mercado da Bola' => array('negocia','transferência','contratação','sondagem','naming rights','saf','rescisão'),
         'Brasileirão' => array('brasileirão','série a','rodada do'),
+        'NBA' => array('nba','basquete','basketball'),
+        'Tênis' => array('tênis','tennis','atp','wta'),
+        'Fórmula 1' => array('fórmula 1','formula 1','f1'),
+        'MMA' => array('ufc','mma'),
+        'eSports' => array('esports','cs2','valorant','league of legends'),
+        'NFL' => array('nfl','super bowl'),
     );
     foreach ($text_rules as $cat => $kws) {
         foreach ($kws as $kw) {
@@ -92,6 +110,18 @@ $ext_links = array(
     'La Liga' => array('https://www.laliga.com/', 'La Liga'),
     'Mercado da Bola' => array('https://www.cbf.com.br/', 'CBF'),
     'Futebol Brasileiro' => array('https://www.cbf.com.br/', 'CBF'),
+    'NBA' => array('https://www.nba.com/', 'NBA'),
+    'Basquete' => array('https://www.nba.com/', 'NBA'),
+    'Tênis' => array('https://www.atptour.com/', 'ATP Tour'),
+    'Fórmula 1' => array('https://www.formula1.com/', 'Formula 1'),
+    'MMA' => array('https://www.ufc.com/', 'UFC'),
+    'Vôlei' => array('https://www.fivb.com/', 'FIVB'),
+    'eSports' => array('https://www.hltv.org/', 'HLTV'),
+    'NFL' => array('https://www.nfl.com/', 'NFL'),
+    'MLB' => array('https://www.mlb.com/', 'MLB'),
+    'NHL' => array('https://www.nhl.com/', 'NHL'),
+    'Futsal' => array('https://www.fifa.com/futsal', 'FIFA Futsal'),
+    'Handebol' => array('https://www.ihf.info/', 'IHF'),
 );
 
 global $stop_words;

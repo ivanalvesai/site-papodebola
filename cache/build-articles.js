@@ -411,6 +411,22 @@ const COMPETITIONS_MAP = {
     'brasileirão': 'Brasileirão',
     'série a': 'Brasileirão',
     'série b': 'Brasileirão Série B',
+    // Outros esportes
+    'nba': 'NBA', 'basquete': 'NBA', 'basketball': 'NBA', 'lakers': 'NBA', 'celtics': 'NBA', 'warriors': 'NBA', 'nbb': 'NBA',
+    'tênis': 'Tênis', 'tenis': 'Tênis', 'tennis': 'Tênis', 'atp': 'Tênis', 'wta': 'Tênis', 'grand slam': 'Tênis',
+    'roland garros': 'Tênis', 'wimbledon': 'Tênis', 'us open': 'Tênis', 'australian open': 'Tênis',
+    'joão fonseca': 'Tênis', 'joao fonseca': 'Tênis', 'djokovic': 'Tênis', 'alcaraz': 'Tênis', 'sinner': 'Tênis', 'nadal': 'Tênis',
+    'fórmula 1': 'Fórmula 1', 'formula 1': 'Fórmula 1', 'f1': 'Fórmula 1', 'verstappen': 'Fórmula 1', 'hamilton': 'Fórmula 1', 'leclerc': 'Fórmula 1',
+    'red bull racing': 'Fórmula 1', 'ferrari f1': 'Fórmula 1', 'mclaren': 'Fórmula 1', 'mercedes f1': 'Fórmula 1',
+    'ufc': 'MMA', 'mma': 'MMA', 'bellator': 'MMA', 'octagon': 'MMA', 'dana white': 'MMA',
+    'vôlei': 'Vôlei', 'volei': 'Vôlei', 'volleyball': 'Vôlei', 'superliga': 'Vôlei',
+    'esports': 'eSports', 'e-sports': 'eSports', 'cs2': 'eSports', 'counter-strike': 'eSports', 'valorant': 'eSports',
+    'league of legends': 'eSports', 'lol': 'eSports', 'dota': 'eSports', 'cblol': 'eSports',
+    'nfl': 'NFL', 'super bowl': 'NFL', 'touchdown': 'NFL', 'quarterback': 'NFL', 'american football': 'NFL',
+    'mlb': 'MLB', 'baseball': 'MLB', 'beisebol': 'MLB',
+    'nhl': 'NHL', 'hockey': 'NHL', 'hóquei': 'NHL',
+    'futsal': 'Futsal',
+    'handebol': 'Handebol', 'handball': 'Handebol',
 };
 
 function detectCategoryAndTags(text) {
@@ -564,6 +580,17 @@ async function publishToWordPress(article) {
         'Copa do Mundo': ['https://www.fifa.com/', 'FIFA'],
         'Futebol Internacional': ['https://www.uefa.com/', 'UEFA'],
         'Copa do Brasil': ['https://www.cbf.com.br/', 'CBF'],
+        'NBA': ['https://www.nba.com/', 'NBA'],
+        'Basquete': ['https://www.nba.com/', 'NBA'],
+        'Tênis': ['https://www.atptour.com/', 'ATP Tour'],
+        'Fórmula 1': ['https://www.formula1.com/', 'Formula 1'],
+        'MMA': ['https://www.ufc.com/', 'UFC'],
+        'Vôlei': ['https://www.fivb.com/', 'FIVB'],
+        'eSports': ['https://www.hltv.org/', 'HLTV'],
+        'NFL': ['https://www.nfl.com/', 'NFL'],
+        'MLB': ['https://www.mlb.com/', 'MLB'],
+        'NHL': ['https://www.nhl.com/', 'NHL'],
+        'Seleção Brasileira': ['https://www.cbf.com.br/', 'CBF'],
     };
     const ext = extLinks[article.category] || ['https://www.cbf.com.br/', 'CBF'];
     htmlParts.push(`<p><em>Fonte oficial: <a href="${ext[0]}" target="_blank" rel="noopener">${ext[1]}</a></em></p>`);
@@ -790,13 +817,32 @@ async function main() {
 
     // Fetch RSS feeds
     const feeds = [
+        // Futebol BR
         { url: 'https://www.torcedores.com/feed', source: 'Torcedores' },
         { url: 'https://www.terra.com.br/esportes/futebol/rss.xml', source: 'Terra Esportes' },
         { url: 'https://trivela.com.br/feed/', source: 'Trivela' },
         { url: 'https://futebolatino.com.br/feed/', source: 'Futebol Latino' },
+        { url: 'https://www.meutimao.com.br/feed', source: 'Meu Timão' },
+        // Futebol Internacional
         { url: 'https://feeds.bbci.co.uk/sport/football/rss.xml', source: 'BBC Sport' },
         { url: 'https://www.theguardian.com/football/rss', source: 'The Guardian' },
-        { url: 'https://www.meutimao.com.br/feed', source: 'Meu Timão' },
+        // Tênis
+        { url: 'https://feeds.bbci.co.uk/sport/tennis/rss.xml', source: 'BBC Tênis' },
+        { url: 'https://www.theguardian.com/sport/tennis/rss', source: 'Guardian Tênis' },
+        // NBA / Basquete
+        { url: 'https://feeds.bbci.co.uk/sport/basketball/rss.xml', source: 'BBC Basquete' },
+        { url: 'https://www.theguardian.com/sport/nba/rss', source: 'Guardian NBA' },
+        // Fórmula 1
+        { url: 'https://feeds.bbci.co.uk/sport/formula1/rss.xml', source: 'BBC F1' },
+        { url: 'https://www.theguardian.com/sport/formulaone/rss', source: 'Guardian F1' },
+        // MMA / UFC
+        { url: 'https://www.mmafighting.com/rss/current', source: 'MMA Fighting' },
+        // eSports
+        { url: 'https://dotesports.com/feed', source: 'Dot Esports' },
+        // NFL
+        { url: 'https://feeds.bbci.co.uk/sport/american-football/rss.xml', source: 'BBC NFL' },
+        // Multi-esporte
+        { url: 'https://www.essentiallysports.com/feed/', source: 'Essentially Sports' },
     ];
 
     const newArticles = [];
@@ -813,11 +859,11 @@ async function main() {
         const items = parseRSS(xml);
         console.log(`  Found ${items.length} articles`);
 
-        // Process only new articles (max 1 per feed per run, runs 2x/day = ~5 articles/day)
+        // Process only new articles (max 1 per feed per run, runs 2x/day with 18 feeds = ~10 articles/day)
         let processed = 0;
         for (const item of items) {
             if (processed >= 1) break;
-            if (totalProcessed >= 5) break; // Max 5 total per run
+            if (totalProcessed >= 7) break; // Max 7 total per run (~14/day with 2 runs)
             if (existingTitles.has(item.title)) continue;
             if (!item.title || item.fullText.length < 100) continue;
 

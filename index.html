@@ -37,7 +37,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=20">
+    <link rel="stylesheet" href="css/style.css?v=21">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -590,6 +590,26 @@
             </div>
         </div>
 
+        <!-- Esportes -->
+        <div class="teams-section" style="border-top:2px solid #E2E5E9">
+            <div style="padding:12px 20px;font-size:13px;font-weight:700;color:#1A1D23;background:#F2F3F5"><i class="fas fa-medal" style="color:#00965E;margin-right:6px"></i> Esportes</div>
+        </div>
+        <div class="teams-section">
+            <div class="teams-section-list" style="display:block">
+                <a href="pages/noticias.html?cat=NBA" class="teams-item"><i class="fas fa-basketball-ball" style="width:24px;text-align:center;color:#E8612D"></i> NBA / Basquete</a>
+                <a href="pages/noticias.html?cat=Tênis" class="teams-item"><i class="fas fa-table-tennis" style="width:24px;text-align:center;color:#C4E538"></i> Tênis</a>
+                <a href="pages/noticias.html?cat=Fórmula 1" class="teams-item"><i class="fas fa-flag-checkered" style="width:24px;text-align:center;color:#E8312A"></i> Fórmula 1</a>
+                <a href="pages/noticias.html?cat=MMA" class="teams-item"><i class="fas fa-fist-raised" style="width:24px;text-align:center;color:#B33939"></i> MMA / UFC</a>
+                <a href="pages/noticias.html?cat=Vôlei" class="teams-item"><i class="fas fa-volleyball-ball" style="width:24px;text-align:center;color:#F1C40F"></i> Vôlei</a>
+                <a href="pages/noticias.html?cat=eSports" class="teams-item"><i class="fas fa-gamepad" style="width:24px;text-align:center;color:#8B5CF6"></i> eSports</a>
+                <a href="pages/noticias.html?cat=NFL" class="teams-item"><i class="fas fa-football-ball" style="width:24px;text-align:center;color:#013369"></i> NFL</a>
+                <a href="pages/noticias.html?cat=MLB" class="teams-item"><i class="fas fa-baseball-ball" style="width:24px;text-align:center;color:#BF0D3E"></i> MLB / Beisebol</a>
+                <a href="pages/noticias.html?cat=NHL" class="teams-item"><i class="fas fa-hockey-puck" style="width:24px;text-align:center;color:#236192"></i> NHL / Hóquei</a>
+                <a href="pages/noticias.html?cat=Futsal" class="teams-item"><i class="fas fa-futbol" style="width:24px;text-align:center;color:#F97316"></i> Futsal</a>
+                <a href="pages/noticias.html?cat=Handebol" class="teams-item"><i class="fas fa-hand-paper" style="width:24px;text-align:center;color:#0EA5E9"></i> Handebol</a>
+            </div>
+        </div>
+
         <!-- Search Teams -->
         <div class="teams-search">
             <input type="text" id="teamsSearchInput" placeholder="Buscar time..." oninput="filterTeams(this.value)">
@@ -699,10 +719,10 @@
         <button class="cookie-accept" onclick="document.getElementById('cookieBanner').style.display='none';localStorage.setItem('pdb_cookies','1')">Aceitar</button>
     </div>
 
-    <script src="js/config.js?v=20"></script>
-    <script src="js/api.js?v=20"></script>
-    <script src="js/admin.js?v=20"></script>
-    <script src="js/app.js?v=20"></script>
+    <script src="js/config.js?v=21"></script>
+    <script src="js/api.js?v=21"></script>
+    <script src="js/admin.js?v=21"></script>
+    <script src="js/app.js?v=21"></script>
     <script>
     // === MATCH BAR ===
     let matchBarData = { live: [], upcoming: [], finished: [] };
