@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Placares ao vivo, classificação, rankings e calendário.">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <meta name="robots" content="index, follow">
+    <title>Esporte - Papo de Bola</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css?v=21">
+    <style>
+        .sp-hero { background: #fff; border-bottom: 1px solid #E2E5E9; padding: 24px 0; }
+        .sp-hero h1 { font-size: 24px; font-weight: 700; color: #1A1D23; }
+        .sp-hero .sp-sub { font-size: 13px; color: #8896A6; margin-top: 4px; }
+        .sp-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; padding: 24px 0 60px; }
+        .sp-card { background: #fff; border: 1px solid #E2E5E9; border-radius: 8px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+        .sp-card-title { padding: 12px 16px; font-size: 14px; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid #E2E5E9; background: #F2F3F5; display: flex; align-items: center; gap: 6px; }
+        .sp-card-title .sp-accent { color: #00965E; }
+        .sp-card-body { padding: 0; }
+        .sp-match { display: flex; align-items: center; padding: 10px 16px; border-bottom: 1px solid #EEF0F2; transition: background 0.15s; }
+        .sp-match:last-child { border-bottom: none; }
+        .sp-match:hover { background: #F8F9FA; }
+        .sp-match.is-live { background: #FEF2F2; border-left: 3px solid #E8312A; }
+        .sp-time { width: 50px; font-size: 11px; color: #8896A6; flex-shrink: 0; }
+        .sp-time .sp-live { color: #E8312A; font-weight: 700; font-size: 10px; }
+        .sp-teams { flex: 1; }
+        .sp-team { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; line-height: 1.6; }
+        .sp-team img { width: 18px; height: 18px; object-fit: contain; }
+        .sp-team .sp-score { margin-left: auto; font-weight: 700; font-size: 14px; min-width: 16px; text-align: right; }
+        .sp-team .sp-score.winner { color: #00965E; }
+        /* Rankings table */
+        .sp-rank-table { width: 100%; border-collapse: collapse; }
+        .sp-rank-table th { font-size: 10px; font-weight: 600; text-transform: uppercase; color: #8896A6; padding: 8px 12px; text-align: left; background: #F2F3F5; }
+        .sp-rank-table th:first-child { width: 40px; text-align: center; }
+        .sp-rank-table th:last-child { text-align: right; }
+        .sp-rank-table td { font-size: 13px; padding: 8px 12px; border-bottom: 1px solid #EEF0F2; }
+        .sp-rank-table td:first-child { text-align: center; font-weight: 700; color: #8896A6; }
+        .sp-rank-table td:last-child { text-align: right; font-weight: 700; color: #00965E; }
+        .sp-rank-table tr:hover { background: #F8F9FA; }
+        .sp-rank-table .sp-name { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+        .sp-rank-table .sp-name img { width: 20px; height: 20px; object-fit: contain; border-radius: 2px; }
+        .sp-rank-table .top3 { color: #F59E0B; }
+        /* Calendar */
+        .sp-event { padding: 12px 16px; border-bottom: 1px solid #EEF0F2; }
+        .sp-event:last-child { border-bottom: none; }
+        .sp-event:hover { background: #F8F9FA; }
+        .sp-event-name { font-size: 14px; font-weight: 600; color: #1A1D23; }
+        .sp-event-date { font-size: 12px; color: #8896A6; margin-top: 2px; }
+        .sp-event-status { font-size: 10px; font-weight: 600; text-transform: uppercase; }
+        .sp-event-status.live { color: #E8312A; }
+        .sp-event-status.upcoming { color: #00965E; }
+        .sp-event-status.finished { color: #8896A6; }
+        /* News sidebar */
+        .sp-news-item { display: flex; gap: 10px; padding: 10px 16px; border-bottom: 1px solid #EEF0F2; }
+        .sp-news-item:last-child { border-bottom: none; }
+        .sp-news-item:hover { background: #F8F9FA; }
+        .sp-news-item img { width: 80px; height: 56px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+        .sp-news-title { font-size: 13px; font-weight: 600; line-height: 1.3; color: #1A1D23; }
+        .sp-news-date { font-size: 10px; color: #8896A6; margin-top: 4px; }
+        .sp-link { display: block; text-align: center; padding: 10px; font-size: 12px; font-weight: 600; color: #00965E; border-top: 1px solid #EEF0F2; }
+        .sp-link:hover { background: #F0FDF4; }
+        @media (max-width: 768px) { .sp-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-top"><div class="container"><div class="header-top-content">
+            <div class="logo"><a href="../index.html"><i class="fas fa-futbol logo-icon"></i><span class="logo-text">PAPO <span class="logo-accent">DE BOLA</span></span></a></div>
+            <div class="header-actions"><a href="../index.html" style="color:#4A5568;font-size:14px"><i class="fas fa-arrow-left"></i> Início</a></div>
+        </div></div></div>
+        <nav class="main-nav"><div class="container"><ul class="nav-list">
+            <li class="nav-item"><a href="../index.html" class="nav-link">Início</a></li>
+            <li class="nav-item"><a href="noticias.html" class="nav-link">Notícias</a></li>
+            <li class="nav-item"><a href="ao-vivo.html" class="nav-link live-link"><span class="live-dot"></span> AO VIVO</a></li>
+        </ul></div></nav>
+    </header>
+
+    <section class="sp-hero"><div class="container">
+        <h1 id="sportTitle">Carregando...</h1>
+        <div class="sp-sub" id="sportSub"></div>
+    </div></section>
+
+    <main><div class="container">
+        <div class="sp-grid">
+            <div>
+                <!-- Live / Recent matches -->
+                <div class="sp-card">
+                    <div class="sp-card-title"><span class="sp-accent"><span class="live-dot"></span></span> Jogos Ao Vivo e Recentes</div>
+                    <div class="sp-card-body" id="sportMatches"><div class="loading-state"><div class="spinner"></div></div></div>
+                </div>
+
+                <!-- Standings / Rankings -->
+                <div class="sp-card">
+                    <div class="sp-card-title"><span class="sp-accent">#</span> Classificação / Ranking</div>
+                    <div class="sp-card-body" id="sportStandings"><div class="loading-state"><div class="spinner"></div></div></div>
+                </div>
+
+                <!-- Calendar -->
+                <div class="sp-card">
+                    <div class="sp-card-title"><span class="sp-accent"><i class="fas fa-calendar-alt"></i></span> Calendário</div>
+                    <div class="sp-card-body" id="sportCalendar"><div class="loading-state"><div class="spinner"></div></div></div>
+                </div>
+            </div>
+
+            <aside>
+                <!-- News -->
+                <div class="sp-card">
+                    <div class="sp-card-title"><span class="sp-accent"><i class="fas fa-newspaper"></i></span> Notícias</div>
+                    <div class="sp-card-body" id="sportNews"><div class="loading-state"><div class="spinner"></div></div></div>
+                    <a href="" id="sportAllNews" class="sp-link">Ver todas as notícias <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </aside>
+        </div>
+    </div></main>
+
+    <footer class="footer"><div class="container"><div class="footer-bottom" style="border-top:none;padding-top:0"><p>&copy; 2026 Papo de Bola.</p></div></div></footer>
+
+    <script>
+    const API_KEY = 'cf85a77dbbmsh438760ef71d5715p13923fjsnc2f2878572d2';
+    const API_HOST = 'allsportsapi2.p.rapidapi.com';
+    const CACHE_BASE = window.location.origin + '/cache';
+
+    // Sport configurations
+    const SPORTS = {
+        'nba': {
+            name: 'NBA / Basquete', api: 'basketball', tournamentId: 132, seasonId: 80229,
+            hasStandings: true, hasRankings: false, category: 'NBA',
+        },
+        'tenis': {
+            name: 'Tênis', api: 'tennis', tournamentId: null, seasonId: null,
+            hasStandings: false, hasRankings: true, rankingType: 'atp', category: 'Tênis',
+        },
+        'f1': {
+            name: 'Fórmula 1', api: 'motorsport', tournamentId: null, seasonId: null,
+            hasStandings: false, hasRankings: false, category: 'Fórmula 1',
+        },
+        'mma': {
+            name: 'MMA / UFC', api: 'mma', tournamentId: 19906, seasonId: null,
+            hasStandings: false, hasRankings: false, category: 'MMA',
+        },
+        'volei': {
+            name: 'Vôlei', api: 'volleyball', tournamentId: null, seasonId: null,
+            hasStandings: false, hasRankings: false, category: 'Vôlei',
+        },
+        'nfl': {
+            name: 'NFL', api: 'american-football', tournamentId: null, seasonId: null,
+            hasStandings: false, hasRankings: false, category: 'NFL',
+        },
+        'esports': {
+            name: 'eSports', api: null, tournamentId: null, seasonId: null,
+            hasStandings: false, hasRankings: false, category: 'eSports',
+        },
+    };
+
+    function translateStatus(desc) {
+        if (!desc) return '';
+        const map = {'1st half':'1º Tempo','2nd half':'2º Tempo','Halftime':'Intervalo','Half Time':'Intervalo','Full Time':'Encerrado','Finished':'Encerrado','Not started':'Não iniciado','Postponed':'Adiado','Extra Time':'Prorrogação','Penalties':'Pênaltis','Live':'Ao Vivo','Ended':'Encerrado','Started':'Iniciado',
+            '1st quarter':'1º Quarto','2nd quarter':'2º Quarto','3rd quarter':'3º Quarto','4th quarter':'4º Quarto','1st set':'1º Set','2nd set':'2º Set','3rd set':'3º Set','4th set':'4º Set','5th set':'5º Set',
+            '1st period':'1º Período','2nd period':'2º Período','3rd period':'3º Período','Overtime':'Prorrogação','Break Time':'Intervalo',
+            'Round 1':'Round 1','Round 2':'Round 2','Round 3':'Round 3','Round 4':'Round 4','Round 5':'Round 5'};
+        if (map[desc]) return map[desc];
+        const l = desc.toLowerCase();
+        if (l.includes('quarter')) return desc.replace(/quarter/i, 'Quarto').replace(/(\d)(?:st|nd|rd|th)/,'$1º');
+        if (l.includes('set')) return desc.replace(/set/i, 'Set').replace(/(\d)(?:st|nd|rd|th)/,'$1º');
+        if (l.includes('half')) return 'Intervalo';
+        if (l.includes('finish') || l.includes('ended')) return 'Encerrado';
+        return desc;
+    }
+
+    async function apiFetch(endpoint) {
+        try {
+            const res = await fetch(`https://${API_HOST}/api/${endpoint}`, {
+                headers: { 'x-rapidapi-key': API_KEY, 'x-rapidapi-host': API_HOST }
+            });
+            if (res.ok) return await res.json();
+        } catch {}
+        return null;
+    }
+
+    const Page = {
+        sport: null, config: null,
+
+        async init() {
+            const slug = new URLSearchParams(window.location.search).get('s') || 'nba';
+            this.config = SPORTS[slug];
+            if (!this.config) { document.getElementById('sportTitle').textContent = 'Esporte não encontrado'; return; }
+
+            this.sport = slug;
+            document.getElementById('sportTitle').textContent = this.config.name;
+            document.title = `${this.config.name} - Papo de Bola`;
+            document.getElementById('sportAllNews').href = `noticias.html?cat=${encodeURIComponent(this.config.category)}`;
+
+            if (this.config.api) {
+                this.loadMatches();
+                this.loadStandingsOrRankings();
+                this.loadCalendar();
+            }
+            this.loadNews();
+        },
+
+        async loadMatches() {
+            const container = document.getElementById('sportMatches');
+            // Get live + today's matches
+            const data = await apiFetch(`${this.config.api}/matches/live`);
+            const events = data?.events || [];
+
+            // Also get today's scheduled
+            const now = new Date();
+            const todayData = await apiFetch(`${this.config.api}/matches/${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`);
+            const todayEvents = todayData?.events || [];
+
+            // Merge: live first, then today (avoid duplicates)
+            const liveIds = new Set(events.map(e => e.id));
+            const all = [...events, ...todayEvents.filter(e => !liveIds.has(e.id))].slice(0, 20);
+
+            if (all.length === 0) {
+                container.innerHTML = '<div style="padding:20px;text-align:center;color:#8896A6">Nenhum jogo hoje</div>';
+                return;
+            }
+
+            container.innerHTML = all.map(e => {
+                const isLive = e.status?.type === 'inprogress';
+                const isFinished = e.status?.type === 'finished';
+                const hasScore = e.homeScore?.current !== undefined && e.homeScore?.current !== null;
+                const dt = e.startTimestamp ? new Date(e.startTimestamp * 1000) : null;
+                const time = dt ? dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) : '';
+                const homeWin = hasScore && e.homeScore.current > e.awayScore.current;
+                const awayWin = hasScore && e.awayScore.current > e.homeScore.current;
+
+                let timeHtml = `<div>${time}</div>`;
+                if (isLive) timeHtml = `<div class="sp-live"><span class="live-dot" style="width:5px;height:5px"></span> ${translateStatus(e.status?.description)}</div>`;
+                else if (isFinished) timeHtml = '<div>Encerrado</div>';
+
+                return `<div class="sp-match ${isLive ? 'is-live' : ''}">
+                    <div class="sp-time">${timeHtml}</div>
+                    <div class="sp-teams">
+                        <div class="sp-team">
+                            ${e.homeTeam?.id ? `<img src="https://api.sofascore.app/api/v1/team/${e.homeTeam.id}/image" alt="" onerror="this.style.display='none'">` : ''}
+                            <span>${e.homeTeam?.name || '?'}</span>
+                            ${hasScore ? `<span class="sp-score ${homeWin ? 'winner' : ''}">${e.homeScore.current}</span>` : ''}
+                        </div>
+                        <div class="sp-team">
+                            ${e.awayTeam?.id ? `<img src="https://api.sofascore.app/api/v1/team/${e.awayTeam.id}/image" alt="" onerror="this.style.display='none'">` : ''}
+                            <span>${e.awayTeam?.name || '?'}</span>
+                            ${hasScore ? `<span class="sp-score ${awayWin ? 'winner' : ''}">${e.awayScore.current}</span>` : ''}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            document.getElementById('sportSub').textContent = `${events.length} ao vivo | ${todayEvents.length} jogos hoje`;
+        },
+
+        async loadStandingsOrRankings() {
+            const container = document.getElementById('sportStandings');
+
+            if (this.config.hasRankings && this.config.rankingType) {
+                // Tennis rankings
+                const data = await apiFetch(`${this.config.api}/rankings/${this.config.rankingType}`);
+                if (!data?.rankings) { container.innerHTML = '<div style="padding:20px;text-align:center;color:#8896A6">Ranking indisponível</div>'; return; }
+
+                container.innerHTML = `<table class="sp-rank-table"><thead><tr><th>#</th><th>Jogador</th><th>Pontos</th></tr></thead><tbody>
+                    ${data.rankings.slice(0, 20).map(r => `<tr>
+                        <td class="${r.ranking <= 3 ? 'top3' : ''}">${r.ranking}</td>
+                        <td><div class="sp-name">${r.team?.id ? `<img src="https://api.sofascore.app/api/v1/team/${r.team.id}/image" alt="" onerror="this.style.display='none'">` : ''} ${r.team?.name || r.rowName || '?'}</div></td>
+                        <td>${r.points?.toLocaleString('pt-BR') || '-'}</td>
+                    </tr>`).join('')}
+                </tbody></table>`;
+                return;
+            }
+
+            if (this.config.hasStandings && this.config.tournamentId && this.config.seasonId) {
+                const data = await apiFetch(`${this.config.api}/tournament/${this.config.tournamentId}/season/${this.config.seasonId}/standings/total`);
+                if (!data?.standings) { container.innerHTML = '<div style="padding:20px;text-align:center;color:#8896A6">Classificação indisponível</div>'; return; }
+
+                let html = '';
+                data.standings.forEach(group => {
+                    html += `<div style="padding:8px 12px;font-size:12px;font-weight:700;background:#F2F3F5;border-bottom:1px solid #E2E5E9">${group.name || 'Conferência'}</div>`;
+                    html += '<table class="sp-rank-table"><thead><tr><th>#</th><th>Time</th><th>V</th><th>D</th><th>%</th></tr></thead><tbody>';
+                    (group.rows || []).forEach(r => {
+                        html += `<tr>
+                            <td>${r.position}</td>
+                            <td><div class="sp-name">${r.team?.id ? `<img src="https://api.sofascore.app/api/v1/team/${r.team.id}/image" alt="" onerror="this.style.display='none'">` : ''} ${r.team?.name || '?'}</div></td>
+                            <td>${r.wins || 0}</td><td>${r.losses || 0}</td>
+                            <td>${r.percentage ? (r.percentage * 100).toFixed(1) + '%' : '-'}</td>
+                        </tr>`;
+                    });
+                    html += '</tbody></table>';
+                });
+                container.innerHTML = html;
+                return;
+            }
+
+            container.innerHTML = '<div style="padding:20px;text-align:center;color:#8896A6">Classificação indisponível para este esporte</div>';
+        },
+
+        async loadCalendar() {
+            const container = document.getElementById('sportCalendar');
+            if (!this.config.api) { container.innerHTML = '<div style="padding:20px;text-align:center;color:#8896A6">Calendário indisponível</div>'; return; }
+
+            // Get tomorrow and day after
+            const dates = [];
+            for (let i = 1; i <= 3; i++) {
+                const d = new Date(Date.now() + i * 86400000);
+                dates.push({ d: d.getDate(), m: d.getMonth() + 1, y: d.getFullYear(), label: d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' }) });
+            }
+
+            let html = '';
+            for (const date of dates) {
+                const data = await apiFetch(`${this.config.api}/matches/${date.d}/${date.m}/${date.y}`);
+                const events = data?.events || [];
+                if (events.length === 0) continue;
+
+                html += `<div style="padding:8px 12px;font-size:12px;font-weight:700;background:#F2F3F5;border-bottom:1px solid #E2E5E9">${date.label} (${events.length} jogos)</div>`;
+                events.slice(0, 5).forEach(e => {
+                    const dt = e.startTimestamp ? new Date(e.startTimestamp * 1000) : null;
+                    const time = dt ? dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
+                    html += `<div class="sp-event">
+                        <div class="sp-event-name">${e.homeTeam?.name || '?'} vs ${e.awayTeam?.name || '?'}</div>
+                        <div class="sp-event-date">${time} | ${e.tournament?.uniqueTournament?.name || e.tournament?.name || ''}</div>
+                    </div>`;
+                });
+                if (events.length > 5) html += `<div style="padding:8px 16px;font-size:11px;color:#8896A6">+ ${events.length - 5} jogos</div>`;
+            }
+
+            container.innerHTML = html || '<div style="padding:20px;text-align:center;color:#8896A6">Sem jogos nos próximos dias</div>';
+        },
+
+        async loadNews() {
+            const container = document.getElementById('sportNews');
+            try {
+                const res = await fetch(`${CACHE_BASE}/articles.json?_=${Date.now()}`);
+                if (!res.ok) throw new Error();
+                const articles = await res.json();
+                const filtered = articles.filter(a =>
+                    (a.category || '').toLowerCase().includes(this.config.category.toLowerCase()) ||
+                    (a.tags || []).some(t => t.toLowerCase().includes(this.config.category.toLowerCase()))
+                ).slice(0, 5);
+
+                if (filtered.length === 0) {
+                    container.innerHTML = '<div style="padding:20px;text-align:center;color:#8896A6">Nenhuma notícia</div>';
+                    return;
+                }
+
+                container.innerHTML = filtered.map(a => {
+                    const date = a.pubDate ? new Date(a.pubDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) : '';
+                    return `<a href="../artigos/${a.slug}.html" class="sp-news-item">
+                        ${a.image ? `<img src="${a.image}" alt="" loading="lazy" onerror="this.style.display='none'">` : ''}
+                        <div>
+                            <div class="sp-news-title">${a.rewrittenTitle || ''}</div>
+                            <div class="sp-news-date">${date}</div>
+                        </div>
+                    </a>`;
+                }).join('');
+            } catch {
+                container.innerHTML = '<div style="padding:20px;text-align:center;color:#8896A6">Erro ao carregar notícias</div>';
+            }
+        },
+    };
+
+    document.addEventListener('DOMContentLoaded', () => Page.init());
+    </script>
+</body>
+</html>
