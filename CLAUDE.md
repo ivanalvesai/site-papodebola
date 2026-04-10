@@ -343,19 +343,28 @@ Todas as páginas de esportes (esporte.html, atleta.html, agenda.html) lêem dad
 | `athletes.json` | Info, resultados e próximos jogos dos 20 atletas |
 | `agenda_{date}.json` | Jogos de futebol por data (para agenda.html) |
 
-### Consumo estimado (AllSportsApi Pro — 10.000 req/mês)
+### Consumo estimado
+
+**CBF API (gratuita, sem limite):**
+
+| Tarefa | Exec/dia | Req/exec | Req/dia |
+|---|---|---|---|
+| CBF (Brasileirão A + B + Copa do Brasil) | 4 (08/14/18/22h) | 3 | **12** |
+| **TOTAL CBF** | | | **12/dia (grátis)** |
+
+**AllSportsApi Pro (10.000 req/mês):**
 
 | Tarefa | Exec/dia | Req/exec | Req/dia |
 |---|---|---|---|
 | Today + Tomorrow | 1 | 2 | 2 |
-| Standings Brasileirão | ~2.3 avg | 1 | ~2 |
-| Campeonatos (4 torneios, ±2 rodadas) | 2 | 28 | 56 |
-| Esportes | 1 | 45 | 45 |
+| Standings (fallback, só se CBF >6h) | ~2 avg | 1 | ~2 |
+| Campeonatos internacionais (Libertadores + Champions) | 2 | 14 | 28 |
+| Esportes (NBA, Tênis, F1, etc.) | 1 | 45 | 45 |
 | Homepage | 1 | 15 | 15 |
 | Artilheiros | 1 | 10 | 10 |
-| **TOTAL** | | | **~130/dia** |
+| **TOTAL AllSportsApi** | | | **~102/dia** |
 
-**Mensal: ~3.900 req/mês** ✅ 39% do plano Pro
+**Mensal AllSportsApi: ~3.060 req/mês** ✅ 31% do plano Pro
 
 ---
 
