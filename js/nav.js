@@ -8,7 +8,7 @@
 
     const navHTML = `
         <li class="nav-item">
-            <a href="#" class="nav-link" onclick="toggleTeamsPanel();return false"><i class="fas fa-bars" style="margin-right:3px"></i> Menu</a>
+            <a href="#" class="nav-link" id="menuToggleBtn"><i class="fas fa-bars" style="margin-right:3px"></i> Menu</a>
         </li>
         <li class="nav-item">
             <a href="${prefix}index.html" class="nav-link">Início</a>
@@ -105,6 +105,15 @@
     if (navList) {
         navList.innerHTML = navHTML;
 
+        // Menu toggle button
+        const menuBtn = document.getElementById('menuToggleBtn');
+        if (menuBtn) {
+            menuBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                toggleTeamsPanel();
+            });
+        }
+
         // Highlight active page
         const path = window.location.pathname;
         navList.querySelectorAll('.nav-link').forEach(link => {
@@ -124,6 +133,29 @@
             });
         }
     }
+
+    // Global functions for side panel (define BEFORE panel injection)
+    window.toggleTeamsPanel = function() {
+        var panel = document.getElementById('teamsPanel');
+        var overlay = document.getElementById('teamsPanelOverlay');
+        if (panel && overlay) {
+            panel.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = panel.classList.contains('active') ? 'hidden' : '';
+        }
+    };
+
+    window.filterTeams = function(q) {
+        var lower = q.toLowerCase();
+        document.querySelectorAll('#teamsPanel .teams-item').forEach(function(item) {
+            item.style.display = item.textContent.toLowerCase().includes(lower) ? 'flex' : 'none';
+        });
+        if (q) document.querySelectorAll('#teamsPanel .teams-section-title').forEach(function(t) { t.classList.remove('collapsed'); });
+    };
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.getElementById('teamsPanel') && document.getElementById('teamsPanel').classList.contains('active')) toggleTeamsPanel();
+    });
 
     // === INJECT SIDE PANEL (if not already on page) ===
     if (!document.getElementById('teamsPanel')) {
@@ -215,23 +247,5 @@
         document.body.appendChild(panel);
     }
 
-    // Global functions for side panel
-    window.toggleTeamsPanel = function() {
-        document.getElementById('teamsPanel').classList.toggle('active');
-        document.getElementById('teamsPanelOverlay').classList.toggle('active');
-        document.body.style.overflow = document.getElementById('teamsPanel').classList.contains('active') ? 'hidden' : '';
-    };
-
-    window.filterTeams = function(q) {
-        const lower = q.toLowerCase();
-        document.querySelectorAll('.teams-item').forEach(item => {
-            if (item.closest('.teams-panel-header') || item.closest('.teams-section-list:first-child')) return;
-            item.style.display = item.textContent.toLowerCase().includes(lower) ? 'flex' : 'none';
-        });
-        if (q) document.querySelectorAll('.teams-section-title').forEach(t => t.classList.remove('collapsed'));
-    };
-
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape' && document.getElementById('teamsPanel')?.classList.contains('active')) toggleTeamsPanel();
-    });
+    // Functions already defined above
 })();
