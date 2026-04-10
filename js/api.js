@@ -150,7 +150,7 @@ const API = {
             date: startTime ? startTime.toISOString().split('T')[0] : '',
             status: status.type,
             statusText: status.text,
-            minute: event.statusTime?.played ? `${event.statusTime.played}'` : (event.status?.description || ''),
+            minute: event.statusTime?.played ? `${event.statusTime.played}'` : (typeof translateStatus === 'function' ? translateStatus(event.status?.description || '') : (event.status?.description || '')),
             embeds: [],
             isManual: false,
             category: getLeagueCategory(tournamentId),

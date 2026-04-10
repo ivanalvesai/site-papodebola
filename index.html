@@ -769,7 +769,7 @@
             const awayWin = hasScore && e.awayScore.current > e.homeScore.current;
 
             let statusHtml = '';
-            if (isLive) statusHtml = `<div class="mb-live-badge"><span class="live-dot" style="width:5px;height:5px;margin-right:2px"></span> ${e.status?.description || 'AO VIVO'}</div>`;
+            if (isLive) statusHtml = `<div class="mb-live-badge"><span class="live-dot" style="width:5px;height:5px;margin-right:2px"></span> ${translateStatus(e.status?.description) || 'AO VIVO'}</div>`;
             else if (isFinished) statusHtml = `<div class="mb-time">Encerrado</div>`;
             else statusHtml = `<div class="mb-time">${time}</div>`;
 

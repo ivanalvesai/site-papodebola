@@ -73,3 +73,65 @@ function getLeagueCategory(tournamentId) {
 function getLeagueName(tournamentId) {
     return CONFIG.TOURNAMENT_BY_ID[tournamentId]?.name || '';
 }
+
+// Translate match status to PT-BR
+function translateStatus(description) {
+    if (!description) return '';
+    const map = {
+        // Status types
+        '1st half': '1º Tempo',
+        '2nd half': '2º Tempo',
+        'Halftime': 'Intervalo',
+        'Half Time': 'Intervalo',
+        'HT': 'Intervalo',
+        'Full Time': 'Encerrado',
+        'FT': 'Encerrado',
+        'Finished': 'Encerrado',
+        'Not started': 'Não iniciado',
+        'Postponed': 'Adiado',
+        'Cancelled': 'Cancelado',
+        'Suspended': 'Suspenso',
+        'Interrupted': 'Interrompido',
+        'Abandoned': 'Abandonado',
+        'Extra Time': 'Prorrogação',
+        'ET': 'Prorrogação',
+        'Extra time half time': 'Intervalo Prorr.',
+        'Penalties': 'Pênaltis',
+        'Penalty': 'Pênaltis',
+        'After Pens': 'Após Pênaltis',
+        'After Extra Time': 'Após Prorrogação',
+        'AET': 'Após Prorrogação',
+        'Break Time': 'Intervalo',
+        'Awaiting updates': 'Aguardando',
+        'Live': 'Ao Vivo',
+        'Ended': 'Encerrado',
+        'AP': 'Após Pênaltis',
+        'Started': 'Iniciado',
+        'About to start': 'Prestes a iniciar',
+        // Periods
+        '1st period': '1º Período',
+        '2nd period': '2º Período',
+        '3rd period': '3º Período',
+        'Overtime': 'Prorrogação',
+    };
+    // Exact match
+    if (map[description]) return map[description];
+    // Case-insensitive match
+    const lower = description.toLowerCase();
+    for (const [en, pt] of Object.entries(map)) {
+        if (lower === en.toLowerCase()) return pt;
+    }
+    // Partial matches
+    if (lower.includes('1st half')) return '1º Tempo';
+    if (lower.includes('2nd half')) return '2º Tempo';
+    if (lower.includes('half')) return 'Intervalo';
+    if (lower.includes('extra')) return 'Prorrogação';
+    if (lower.includes('penal')) return 'Pênaltis';
+    if (lower.includes('finish') || lower.includes('ended')) return 'Encerrado';
+    if (lower.includes('postpone')) return 'Adiado';
+    if (lower.includes('cancel')) return 'Cancelado';
+    if (lower.includes('suspend')) return 'Suspenso';
+    if (lower.includes('start')) return 'Iniciado';
+    // Return original if no match
+    return description;
+}

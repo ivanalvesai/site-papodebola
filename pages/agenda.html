@@ -87,6 +87,22 @@
     <footer class="footer"><div class="container"><div class="footer-bottom" style="border-top:none;padding-top:0"><p>&copy; 2026 Papo de Bola.</p></div></div></footer>
 
     <script>
+    function translateMatchStatus(desc) {
+        if (!desc) return '';
+        const map = {'1st half':'1º Tempo','2nd half':'2º Tempo','Halftime':'Intervalo','Half Time':'Intervalo','HT':'Intervalo','Full Time':'Encerrado','FT':'Encerrado','Finished':'Encerrado','Not started':'Não iniciado','Postponed':'Adiado','Cancelled':'Cancelado','Suspended':'Suspenso','Extra Time':'Prorrogação','ET':'Prorrogação','Penalties':'Pênaltis','After Pens':'Após Pênaltis','After Extra Time':'Após Prorrogação','AET':'Após Prorrogação','Break Time':'Intervalo','Live':'Ao Vivo','Ended':'Encerrado','Started':'Iniciado','About to start':'Prestes a iniciar'};
+        if (map[desc]) return map[desc];
+        const l = desc.toLowerCase();
+        if (l.includes('1st half')) return '1º Tempo';
+        if (l.includes('2nd half')) return '2º Tempo';
+        if (l.includes('half')) return 'Intervalo';
+        if (l.includes('extra')) return 'Prorrogação';
+        if (l.includes('penal')) return 'Pênaltis';
+        if (l.includes('finish') || l.includes('ended')) return 'Encerrado';
+        if (l.includes('postpone')) return 'Adiado';
+        if (l.includes('start')) return 'Iniciado';
+        return desc;
+    }
+
     const API_KEY = 'cf85a77dbbmsh438760ef71d5715p13923fjsnc2f2878572d2';
     const API_HOST = 'allsportsapi2.p.rapidapi.com';
     let currentDate = new Date();
@@ -211,7 +227,7 @@
                     const awayWin = hasScore && e.awayScore.current > e.homeScore.current;
 
                     let timeHtml = `<div>${time}</div>`;
-                    if (isLive) timeHtml = `<div class="ag-live"><span class="live-dot" style="width:5px;height:5px"></span> ${e.status?.description || 'LIVE'}</div>`;
+                    if (isLive) timeHtml = `<div class="ag-live"><span class="live-dot" style="width:5px;height:5px"></span> ${translateMatchStatus(e.status?.description) || 'AO VIVO'}</div>`;
                     else if (isFinished) timeHtml = `<div class="ag-fin">Encerrado</div>`;
 
                     return `<div class="ag-match ${isLive ? 'is-live' : ''}">
