@@ -815,136 +815,177 @@ async function main() {
     }
     const existingTitles = new Set(existingArticles.map(a => a.originalTitle));
 
-    // Fetch RSS feeds
-    const feeds = [
-        // Futebol BR
+    // === FEED SCHEDULE ===
+    // 5 futebol (fixo) + 5 esporte do dia (rotação)
+    // Rotação: Tênis → NBA → F1 → MMA → Vôlei → eSports → NFL → MLB → NHL → Futsal → Handebol
+    const FOOTBALL_FEEDS = [
         { url: 'https://www.torcedores.com/feed', source: 'Torcedores' },
         { url: 'https://www.terra.com.br/esportes/futebol/rss.xml', source: 'Terra Esportes' },
         { url: 'https://trivela.com.br/feed/', source: 'Trivela' },
         { url: 'https://futebolatino.com.br/feed/', source: 'Futebol Latino' },
         { url: 'https://www.meutimao.com.br/feed', source: 'Meu Timão' },
-        // Futebol Internacional
         { url: 'https://feeds.bbci.co.uk/sport/football/rss.xml', source: 'BBC Sport' },
         { url: 'https://www.theguardian.com/football/rss', source: 'The Guardian' },
-        // Tênis (João Fonseca, Djokovic, Alcaraz, Grand Slams)
-        { url: 'https://www.espn.com/espn/rss/tennis/news', source: 'ESPN Tênis' },
-        { url: 'https://feeds.bbci.co.uk/sport/tennis/rss.xml', source: 'BBC Tênis' },
-        // NBA / Basquete
-        { url: 'https://www.espn.com/espn/rss/nba/news', source: 'ESPN NBA' },
-        // Fórmula 1
-        { url: 'https://www.formula1.com/content/fom-website/en/latest/all.xml', source: 'F1 Oficial' },
-        // MMA / UFC
-        { url: 'https://www.sherdog.com/rss/news.xml', source: 'Sherdog MMA' },
-        // eSports (PT-BR + EN)
-        { url: 'https://canaltech.com.br/rss/esports/', source: 'Canaltech eSports' },
-        { url: 'https://dotesports.com/feed', source: 'Dot Esports' },
-        // Multi-esporte (NBA, Tennis, UFC, F1, NFL)
-        { url: 'https://www.sportskeeda.com/feed', source: 'SportsKeeda' },
-        { url: 'https://www.essentiallysports.com/feed/', source: 'Essentially Sports' },
     ];
 
-    const newArticles = [];
-    let totalProcessed = 0;
+    // Esportes em rotação diária (1 por dia, volta ao início após completar)
+    const SPORT_ROTATION = [
+        { name: 'Tênis', feeds: [
+            { url: 'https://www.espn.com/espn/rss/tennis/news', source: 'ESPN Tênis' },
+            { url: 'https://feeds.bbci.co.uk/sport/tennis/rss.xml', source: 'BBC Tênis' },
+            { url: 'https://www.sportskeeda.com/feed', source: 'SportsKeeda' },
+        ]},
+        { name: 'NBA', feeds: [
+            { url: 'https://www.espn.com/espn/rss/nba/news', source: 'ESPN NBA' },
+            { url: 'https://www.essentiallysports.com/feed/', source: 'Essentially Sports' },
+        ]},
+        { name: 'Fórmula 1', feeds: [
+            { url: 'https://www.formula1.com/content/fom-website/en/latest/all.xml', source: 'F1 Oficial' },
+            { url: 'https://www.essentiallysports.com/feed/', source: 'Essentially Sports' },
+        ]},
+        { name: 'MMA', feeds: [
+            { url: 'https://www.sherdog.com/rss/news.xml', source: 'Sherdog MMA' },
+            { url: 'https://www.sportskeeda.com/feed', source: 'SportsKeeda' },
+        ]},
+        { name: 'Vôlei', feeds: [
+            { url: 'https://www.sportskeeda.com/feed', source: 'SportsKeeda' },
+        ]},
+        { name: 'eSports', feeds: [
+            { url: 'https://canaltech.com.br/rss/esports/', source: 'Canaltech eSports' },
+            { url: 'https://dotesports.com/feed', source: 'Dot Esports' },
+        ]},
+        { name: 'NFL', feeds: [
+            { url: 'https://www.sportskeeda.com/feed', source: 'SportsKeeda' },
+            { url: 'https://www.essentiallysports.com/feed/', source: 'Essentially Sports' },
+        ]},
+        { name: 'MLB', feeds: [
+            { url: 'https://www.sportskeeda.com/feed', source: 'SportsKeeda' },
+        ]},
+        { name: 'NHL', feeds: [
+            { url: 'https://www.sportskeeda.com/feed', source: 'SportsKeeda' },
+        ]},
+        { name: 'Futsal', feeds: [
+            { url: 'https://www.torcedores.com/feed', source: 'Torcedores' },
+        ]},
+        { name: 'Handebol', feeds: [
+            { url: 'https://www.sportskeeda.com/feed', source: 'SportsKeeda' },
+        ]},
+    ];
 
-    for (const feed of feeds) {
+    // Determine today's 5 sports (rotation: pick 5 consecutive from the list, shift each day)
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+    const startIndex = (dayOfYear * 5) % SPORT_ROTATION.length;
+    const todaySports = [];
+    for (let i = 0; i < 5; i++) {
+        todaySports.push(SPORT_ROTATION[(startIndex + i) % SPORT_ROTATION.length]);
+    }
+
+    console.log(`Today's sports: ${todaySports.map(s => s.name).join(', ')}`);
+    console.log('Schedule: 5 futebol + 1 de cada esporte acima = 10 max\n');
+
+    const newArticles = [];
+
+    // Helper: process a single article
+    async function processOneArticle(item, feed) {
+        console.log(`  Rewriting: ${item.title.substring(0, 60)}...`);
+        const rewritten = await rewriteWithClaude(item.title, item.fullText);
+        const wordCount = (rewritten.text || '').split(/\s+/).filter(w => w.length > 0).length;
+        console.log(`  [WORDS] ${wordCount} palavras`);
+
+        const slug = generateSlug(rewritten.title);
+
+        // Image search
+        console.log('  Finding image...');
+        const team = detectTeamId(rewritten.title) || detectTeamId(item.title) || detectTeamId(rewritten.text?.substring(0, 300) || '');
+        let localImage = null;
+
+        if (team) localImage = await fetchRealTeamImage(team.id, team.name, slug);
+        if (!localImage && team) localImage = await fetchPexelsImage(`${team.name} stadium`, slug);
+        if (!localImage) {
+            const kw = (rewritten.title || item.title || '').replace(/[^a-záéíóúâêôãõçüA-Z\s]/gi, '').split(/\s+/).filter(w => w.length > 4).slice(0, 3).join(' ');
+            if (kw) localImage = await fetchPexelsImage(`${kw} sport`, slug);
+        }
+        if (!localImage) localImage = await fetchPexelsImage('stadium aerial view', slug);
+
+        const detected = detectCategoryAndTags(rewritten.title + ' ' + rewritten.text);
+
+        const article = {
+            originalTitle: item.title,
+            rewrittenTitle: rewritten.title,
+            rewrittenText: rewritten.text,
+            slug, source: feed.source,
+            image: localImage || '',
+            category: detected.category,
+            tags: detected.tags,
+            team: detected.mainTeam,
+            pubDate: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            url: `/artigos/${slug}.html`,
+        };
+
+        const wpPublished = await publishToWordPress(article);
+        if (wpPublished) console.log(`  [WP] Published: ${wpPublished}`);
+
+        const html = generateArticlePage(article);
+        fs.writeFileSync(path.join(ARTICLES_DIR, `${slug}.html`), html);
+        console.log(`  OK: ${slug}.html`);
+
+        newArticles.push(article);
+        existingTitles.add(item.title);
+    }
+
+    // === PHASE 1: Football articles (max 5) ===
+    let footballCount = 0;
+    console.log('=== FUTEBOL (max 5) ===');
+    for (const feed of FOOTBALL_FEEDS) {
+        if (footballCount >= 5) break;
         console.log(`\nFetching: ${feed.source}...`);
         const xml = await fetchURL(feed.url);
-        if (!xml || !xml.includes('<item>')) {
-            console.log('  No data');
-            continue;
-        }
-
+        if (!xml || !xml.includes('<item>')) { console.log('  No data'); continue; }
         const items = parseRSS(xml);
         console.log(`  Found ${items.length} articles`);
 
-        // Process only new articles (max 1 per feed per run, runs 2x/day with 18 feeds = ~10 articles/day)
-        let processed = 0;
         for (const item of items) {
-            if (processed >= 1) break;
-            if (totalProcessed >= 7) break; // Max 7 total per run (~14/day with 2 runs)
+            if (footballCount >= 5) break;
             if (existingTitles.has(item.title)) continue;
             if (!item.title || item.fullText.length < 100) continue;
-
-            console.log(`  Rewriting: ${item.title.substring(0, 60)}...`);
-
-            const rewritten = await rewriteWithClaude(item.title, item.fullText);
-            const wordCount = (rewritten.text || '').split(/\s+/).filter(w => w.length > 0).length;
-            console.log(`  [WORDS] ${wordCount} palavras no artigo`);
-
-            const slug = generateSlug(rewritten.title);
-
-            // Get real match image
-            console.log(`  Finding image...`);
-            // Try detecting team from both original and rewritten titles
-            const team = detectTeamId(rewritten.title) || detectTeamId(item.title) || detectTeamId(rewritten.text?.substring(0, 300) || '');
-            let localImage = null;
-
-            // 1st: Try real match thumbnail from team media
-            if (team) {
-                localImage = await fetchRealTeamImage(team.id, team.name, slug);
-            }
-
-            // 2nd: Try searching Pexels with the team name + stadium
-            if (!localImage && team) {
-                localImage = await fetchPexelsImage(`${team.name} football stadium`, slug);
-            }
-
-            // 3rd: Try Pexels with keywords from title
-            if (!localImage) {
-                const titleWords = (rewritten.title || item.title || '')
-                    .replace(/[^a-záéíóúâêôãõçüA-Z\s]/gi, '')
-                    .split(/\s+/)
-                    .filter(w => w.length > 4)
-                    .slice(0, 3)
-                    .join(' ');
-                if (titleWords) {
-                    localImage = await fetchPexelsImage(`${titleWords} football`, slug);
-                }
-            }
-
-            // 4th: Final fallback - aerial stadium photo
-            if (!localImage) {
-                localImage = await fetchPexelsImage('football stadium aerial view', slug);
-            }
-
-            // Auto-detect category and team tags
-            const detected = detectCategoryAndTags(rewritten.title + ' ' + rewritten.text);
-
-            const article = {
-                originalTitle: item.title,
-                rewrittenTitle: rewritten.title,
-                rewrittenText: rewritten.text,
-                slug,
-                source: feed.source,
-                image: localImage || '',
-                category: detected.category,
-                tags: detected.tags,
-                team: detected.mainTeam,
-                pubDate: new Date().toISOString(),
-                createdAt: new Date().toISOString(),
-                url: `/artigos/${slug}.html`,
-            };
-
-            // Publish to WordPress via REST API
-            const wpPublished = await publishToWordPress(article);
-            if (wpPublished) {
-                console.log(`  [WP] Published: ${wpPublished}`);
-            }
-
-            // Also generate static HTML page (for SEO/static fallback)
-            const html = generateArticlePage(article);
-            fs.writeFileSync(path.join(ARTICLES_DIR, `${slug}.html`), html);
-            console.log(`  OK: ${slug}.html`);
-
-            newArticles.push(article);
-            totalProcessed++;
-            existingTitles.add(item.title);
-            processed++;
+            await processOneArticle(item, feed);
+            footballCount++;
+            break; // Max 1 per feed
         }
     }
+    console.log(`\nFutebol: ${footballCount} artigos`);
 
-    // Merge and save articles DB (keep last 50)
-    const allArticles = [...newArticles, ...existingArticles].slice(0, 50);
+    // === PHASE 2: 5 different sports (1 article each) ===
+    let sportCount = 0;
+    console.log('\n=== OUTROS ESPORTES (1 de cada, 5 esportes) ===');
+    for (const sport of todaySports) {
+        console.log(`\n--- ${sport.name} ---`);
+        let found = false;
+        for (const feed of sport.feeds) {
+            if (found) break;
+            console.log(`  Fetching: ${feed.source}...`);
+            const xml = await fetchURL(feed.url);
+            if (!xml || !xml.includes('<item>')) { console.log('  No data'); continue; }
+            const items = parseRSS(xml);
+
+            for (const item of items) {
+                if (existingTitles.has(item.title)) continue;
+                if (!item.title || item.fullText.length < 100) continue;
+                await processOneArticle(item, feed);
+                sportCount++;
+                found = true;
+                break;
+            }
+        }
+        if (!found) console.log(`  No new articles for ${sport.name}`);
+    }
+    console.log(`\nEsportes: ${sportCount} artigos`);
+    console.log(`Total: ${footballCount + sportCount} artigos`);
+
+    // === Save and sync ===
+    // Merge and save articles DB (keep last 100)
+    const allArticles = [...newArticles, ...existingArticles].slice(0, 100);
     fs.writeFileSync(ARTICLES_DB, JSON.stringify(allArticles, null, 2));
 
     // Update home.json with local article links
