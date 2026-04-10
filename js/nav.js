@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Inject nav items
     var navList = document.querySelector('.nav-list');
-    if (navList && navList.children.length === 0) {
+    if (navList) {
         navList.innerHTML = '<li class="nav-item"><a href="#" class="nav-link" id="navMenuBtn"><i class="fas fa-bars" style="margin-right:3px"></i> Menu</a></li>'
             + '<li class="nav-item"><a href="' + p + 'index.html" class="nav-link">Início</a></li>'
             + '<li class="nav-item has-dropdown"><a href="#" class="nav-link">Brasil <i class="fas fa-chevron-down"></i></a><div class="dropdown-menu mega-menu"><div class="mega-col"><h4>Nacionais</h4><ul>'
