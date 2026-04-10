@@ -317,22 +317,24 @@ Palmeiras, Flamengo, Corinthians, São Paulo, Santos, Fluminense, Botafogo, Vasc
 */30 * * * * /bin/bash /home/ivan/site-papodebola/cache/update.sh
 ```
 
-| Tarefa | Frequência | Horários |
-|---|---|---|
-| Jogos ao vivo + placares (futebol) | Cada 30 min | 24h |
-| Jogos de hoje/amanhã (futebol) | Cada 30 min | 24h |
-| Classificação Brasileirão | Cada 30 min | 24h |
-| Sync WordPress → front-end | Cada 30 min | 24h |
-| **Geração de artigos** | **10x/dia** | **Peak hours (7h-21:30h)** |
-| Artilheiros (top 10 times) | Cada 6h | 0h, 6h, 12h, 18h |
-| Homepage (highlights, transfers) | Cada 3h | 0h, 3h, 6h... |
-| Campeonatos (rodadas) | Cada 3h | 0h, 3h, 6h... |
-| **Esportes (NBA, Tênis, F1, etc.)** | **Cada 3h** | **0h, 3h, 6h...** |
-| **Atletas (info, resultados)** | **Cada 3h** | **0h, 3h, 6h...** |
-| **Agenda extra (±3 dias futebol)** | **Cada 3h** | **0h, 3h, 6h...** |
+| Tarefa | Frequência | Horários | Req/exec |
+|---|---|---|---|
+| Jogos de hoje/amanhã + standings | 30 min, 08-23h | 31x/dia | 3 |
+| Sync WordPress → front-end | 30 min | 24h | 0 (local) |
+| **Geração de artigos** | **10x/dia** | **7h-21:30h** | 0 (Claude API) |
+| Artilheiros (build-scorers) | **1x/dia** | **08h** | 10 |
+| Homepage (build-home) | **1x/dia** | **14h** | 15 |
+| Esportes (build-sports) | **1x/dia** | **16h** | ~45 |
+| Campeonatos (build-championship) | 3h, 08-23h | 6x/dia | ~28 |
+| ~~Ao Vivo (matches/live)~~ | **DESATIVADO** | — | — |
+
+### Ao Vivo (DESATIVADO)
+O fetch de `matches/live` e o menu "AO VIVO" estão desativados para economizar quota.
+Para reativar: descomentar `fetch "matches/live"` no update.sh, restaurar o link no nav.js,
+e restaurar as tabs (Ao Vivo/Próximos/Finalizados) com placares no index.html.
 
 ### Cache de Esportes (build-sports.js)
-Todas as páginas de esportes (esporte.html, atleta.html, agenda.html) lêem dados de arquivos JSON cacheados. **Nenhuma página faz chamadas diretas à API** — isso economiza requisições significativamente.
+Todas as páginas de esportes (esporte.html, atleta.html, agenda.html) lêem dados de arquivos JSON cacheados. **Nenhuma página faz chamadas diretas à API**.
 
 | Arquivo | Conteúdo |
 |---|---|
@@ -340,7 +342,18 @@ Todas as páginas de esportes (esporte.html, atleta.html, agenda.html) lêem dad
 | `athletes.json` | Info, resultados e próximos jogos dos 20 atletas |
 | `agenda_{date}.json` | Jogos de futebol por data (para agenda.html) |
 
-**Estimativa de consumo**: ~45 req/execução × 8 execuções/dia = ~360 req/dia (~10.800/mês)
+### Consumo estimado (AllSportsApi Pro — 10.000 req/mês)
+
+| Tarefa | Exec/dia | Req/exec | Req/dia |
+|---|---|---|---|
+| Futebol (today + tomorrow + standings) | 31 | 3 | 93 |
+| Campeonatos (4 torneios, ±2 rodadas) | 6 | 28 | 168 |
+| Esportes | 1 | 45 | 45 |
+| Homepage | 1 | 15 | 15 |
+| Artilheiros | 1 | 10 | 10 |
+| **TOTAL** | | | **331/dia** |
+
+**Mensal: ~9.930 req/mês** ✅ Cabe no plano Pro
 
 ---
 
