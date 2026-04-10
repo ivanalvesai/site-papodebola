@@ -928,8 +928,8 @@ async function main() {
             'Tênis':      { api: 'tennis', fallback: 'tennis match court player' },
             'Fórmula 1':  { api: 'motorsport', fallback: 'formula 1 race car track' },
             'MMA':        { api: 'mma', fallback: 'mma ufc octagon fight' },
-            'Vôlei':      { api: null, fallback: 'volleyball match game' },
-            'eSports':    { api: null, fallback: 'esports gaming tournament' },
+            'Vôlei':      { api: 'volleyball', fallback: 'volleyball match game' },
+            'eSports':    { api: null, fallback: 'esports gaming tournament' },  // No API endpoint
             'NFL':        { api: 'american-football', fallback: 'american football nfl game' },
             'MLB':        { api: 'baseball', fallback: 'baseball mlb game stadium' },
             'NHL':        { api: 'ice-hockey', fallback: 'ice hockey nhl game' },
