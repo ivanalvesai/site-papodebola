@@ -283,12 +283,12 @@
                     <div class="sp-time">${timeHtml}</div>
                     <div class="sp-teams">
                         <div class="sp-team">
-                            ${e.homeTeam?.id ? `<img src="/img/team/${e.homeTeam.id}/image" alt="" onerror="this.style.display='none'">` : ''}
+                            ${e.homeTeam?.id ? `<img src="/img/team/${e.homeTeam.id}/image" alt="" style="width:18px;height:18px" onerror="this.remove()">` : ''}
                             <span>${e.homeTeam?.name || '?'}</span>
                             ${hasScore ? `<span class="sp-score ${homeWin ? 'winner' : ''}">${e.homeScore.current}</span>` : ''}
                         </div>
                         <div class="sp-team">
-                            ${e.awayTeam?.id ? `<img src="/img/team/${e.awayTeam.id}/image" alt="" onerror="this.style.display='none'">` : ''}
+                            ${e.awayTeam?.id ? `<img src="/img/team/${e.awayTeam.id}/image" alt="" style="width:18px;height:18px" onerror="this.remove()">` : ''}
                             <span>${e.awayTeam?.name || '?'}</span>
                             ${hasScore ? `<span class="sp-score ${awayWin ? 'winner' : ''}">${e.awayScore.current}</span>` : ''}
                         </div>
@@ -310,7 +310,7 @@
                 container.innerHTML = `<table class="sp-rank-table"><thead><tr><th>#</th><th>Jogador</th><th>Pontos</th></tr></thead><tbody>
                     ${data.rankings.slice(0, 20).map(r => `<tr>
                         <td class="${r.ranking <= 3 ? 'top3' : ''}">${r.ranking}</td>
-                        <td><div class="sp-name">${r.team?.id ? `<img src="/img/team/${r.team.id}/image" alt="" onerror="this.style.display='none'">` : ''} ${r.team?.name || r.rowName || '?'}</div></td>
+                        <td><div class="sp-name">${r.team?.id ? `<img src="/img/team/${r.team.id}/image" alt="" onerror="this.remove()">` : ''} ${r.team?.name || r.rowName || '?'}</div></td>
                         <td>${r.points?.toLocaleString('pt-BR') || '-'}</td>
                     </tr>`).join('')}
                 </tbody></table>`;
@@ -328,7 +328,7 @@
                     (group.rows || []).forEach(r => {
                         html += `<tr>
                             <td>${r.position}</td>
-                            <td><div class="sp-name">${r.team?.id ? `<img src="/img/team/${r.team.id}/image" alt="" onerror="this.style.display='none'">` : ''} ${r.team?.name || '?'}</div></td>
+                            <td><div class="sp-name">${r.team?.id ? `<img src="/img/team/${r.team.id}/image" alt="" onerror="this.remove()">` : ''} ${r.team?.name || '?'}</div></td>
                             <td>${r.wins || 0}</td><td>${r.losses || 0}</td>
                             <td>${r.percentage ? (r.percentage * 100).toFixed(1) + '%' : '-'}</td>
                         </tr>`;
@@ -395,7 +395,7 @@
                 container.innerHTML = filtered.map(a => {
                     const date = a.pubDate ? new Date(a.pubDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) : '';
                     return `<a href="../artigos/${a.slug}.html" class="sp-news-item">
-                        ${a.image ? `<img src="${a.image}" alt="" loading="lazy" onerror="this.style.display='none'">` : ''}
+                        ${a.image ? `<img src="${a.image}" alt="" loading="lazy" onerror="this.remove()">` : ''}
                         <div>
                             <div class="sp-news-title">${a.rewrittenTitle || ''}</div>
                             <div class="sp-news-date">${date}</div>
@@ -415,7 +415,7 @@
             document.getElementById('athletesList').innerHTML = athletes.map(a => {
                 const imgType = a.img || 'team';
                 return `<a href="atleta.html?s=${this.config.api}&id=${a.id}&name=${encodeURIComponent(a.name)}" class="sp-athlete">
-                    <img src="/img/${imgType}/${a.id}/image" alt="${a.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><rect fill=%22%23E2E5E9%22 width=%2240%22 height=%2240%22/><text x=%2220%22 y=%2226%22 text-anchor=%22middle%22 fill=%22%238896A6%22 font-size=%2216%22>${a.name.charAt(0)}</text></svg>'">
+                    <img src="/img/${imgType}/${a.id}/image" alt="${a.name}" onerror="this.remove()">
                     ${a.name}
                 </a>`;
             }).join('');
