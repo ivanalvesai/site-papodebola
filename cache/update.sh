@@ -83,45 +83,33 @@ if [ "$HOUR" -eq 8 ] && [ "$MIN" -lt 30 ]; then
 fi
 
 # =====================================================
-# CBF API — Brasileirão, Série B, Copa do Brasil (GRATUITA)
-# 4x/dia: 08h, 14h, 18h, 22h (3 req CBF, 0 req AllSportsApi)
-# Gera: champ_325.json, champ_390.json, champ_373.json, standings_brasileirao.json
+# CBF API — Calendário do futebol brasileiro (GRATUITA)
+# 2x/dia: 08h e 20h (3 req CBF = datas, horários, estádios)
+# NÃO usa placares/standings da CBF (dados invertidos)
 # =====================================================
-if ([ "$HOUR" -eq 8 ] || [ "$HOUR" -eq 14 ] || [ "$HOUR" -eq 18 ] || [ "$HOUR" -eq 22 ]) && [ "$MIN" -lt 30 ]; then
-    log "Building CBF cache (futebol brasileiro)..."
-    if node "$CACHE_DIR/build-cbf.js" >> "$LOG_FILE" 2>&1; then
-        log "OK: CBF data cached"
-    else
-        log "WARN: CBF failed, AllSportsApi fallback será usado no próximo ciclo"
-    fi
+if ([ "$HOUR" -eq 8 ] || [ "$HOUR" -eq 20 ]) && [ "$MIN" -lt 30 ]; then
+    log "Building CBF calendar..."
+    node "$CACHE_DIR/build-cbf.js" >> "$LOG_FILE" 2>&1 || log "WARN: CBF calendar failed"
+    log "OK: CBF calendar cached"
 fi
 
-# STANDINGS BRASILEIRÃO — Fallback AllSportsApi em dias de jogo
-# Só busca da AllSportsApi se o standings_brasileirao.json for muito antigo (>6h)
-# Ter/Qua: 20h e 20:30 | Sáb/Dom: 16h-21h
+# =====================================================
+# STANDINGS BRASILEIRÃO — AllSportsApi em dias de jogo
+# Ter/Qua: 2x após 19:30 | Sáb/Dom: 6x após 16h
+# =====================================================
 FETCH_STANDINGS=false
-STANDINGS_FILE="$CACHE_DIR/standings_brasileirao.json"
-STANDINGS_AGE=999999
-if [ -f "$STANDINGS_FILE" ]; then
-    STANDINGS_AGE=$(( $(date +%s) - $(stat -c%Y "$STANDINGS_FILE") ))
-fi
-
-# Só faz fallback se arquivo tiver mais de 6h (21600s)
-if [ "$STANDINGS_AGE" -gt 21600 ]; then
-    if [ "$DOW" -eq 2 ] || [ "$DOW" -eq 3 ]; then
-        if [ "$HOUR" -eq 20 ] || ([ "$HOUR" -eq 21 ] && [ "$MIN" -lt 30 ]); then
-            FETCH_STANDINGS=true
-        fi
-    fi
-    if [ "$DOW" -eq 6 ] || [ "$DOW" -eq 7 ]; then
-        if [ "$HOUR" -ge 16 ] && [ "$HOUR" -le 21 ] && [ "$MIN" -lt 30 ]; then
-            FETCH_STANDINGS=true
-        fi
+if [ "$DOW" -eq 2 ] || [ "$DOW" -eq 3 ]; then
+    if [ "$HOUR" -eq 20 ] || ([ "$HOUR" -eq 21 ] && [ "$MIN" -lt 30 ]); then
+        FETCH_STANDINGS=true
     fi
 fi
-
+if [ "$DOW" -eq 6 ] || [ "$DOW" -eq 7 ]; then
+    if [ "$HOUR" -ge 16 ] && [ "$HOUR" -le 21 ] && [ "$MIN" -lt 30 ]; then
+        FETCH_STANDINGS=true
+    fi
+fi
 if [ "$FETCH_STANDINGS" = true ]; then
-    log "Fetching standings AllSportsApi (fallback, CBF antigo >6h)..."
+    log "Fetching standings (dia de jogo)..."
     fetch "tournament/325/season/87678/standings/total" "$CACHE_DIR/standings_brasileirao.json"
 fi
 
@@ -189,13 +177,13 @@ if [ "$HOUR" -eq 16 ] && [ "$MIN" -lt 30 ]; then
 fi
 
 # =====================================================
-# CAMPEONATOS INTERNACIONAIS — 2x/dia às 08h e 22h
-# Só Libertadores + Champions (~14 req cada, brasileiros via CBF)
+# CAMPEONATOS — 2x/dia às 08h e 22h (~28 req)
+# Brasileirão, Copa do Brasil, Libertadores, Champions (standings + placares)
 # =====================================================
 if ([ "$HOUR" -eq 8 ] || [ "$HOUR" -eq 22 ]) && [ "$MIN" -lt 30 ]; then
-    log "Building international championship cache..."
+    log "Building championship cache..."
     node "$CACHE_DIR/build-championship.js" >> "$LOG_FILE" 2>&1
-    log "OK: international championships cached"
+    log "OK: championships cached"
 fi
 
 # Sitemap - handled by Rank Math WordPress plugin

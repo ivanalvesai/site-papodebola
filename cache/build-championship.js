@@ -17,8 +17,11 @@ const CACHE_DIR = path.dirname(__filename);
 const API_KEY = 'cf85a77dbbmsh438760ef71d5715p13923fjsnc2f2878572d2';
 const API_HOST = 'allsportsapi2.p.rapidapi.com';
 
-// Torneios internacionais (brasileiros agora vêm da API CBF via build-cbf.js)
+// 4 torneios principais (standings e placares via AllSportsApi)
+// Calendário/datas/estádios complementados pela CBF API (build-cbf.js)
 const TOURNAMENTS = [
+    { id: 325, seasonId: 87678, name: 'Brasileirão Série A' },
+    { id: 373, seasonId: 89353, name: 'Copa do Brasil' },
     { id: 384, seasonId: 87760, name: 'Libertadores' },
     { id: 7,  seasonId: 76953, name: 'Champions League' },
 ];
