@@ -917,20 +917,68 @@ async function main() {
 
         const slug = generateSlug(rewritten.title);
 
-        // Image search
-        console.log('  Finding image...');
+        // Detect category first to know the sport
+        const detected = detectCategoryAndTags(rewritten.title + ' ' + rewritten.text);
+        const category = detected.category;
+
+        // Sport-specific fallback images for Pexels
+        const SPORT_FALLBACKS = {
+            'NBA': 'basketball game nba court',
+            'Basquete': 'basketball game nba court',
+            'Tênis': 'tennis match court player',
+            'Fórmula 1': 'formula 1 race car track',
+            'MMA': 'mma ufc octagon fight',
+            'Vôlei': 'volleyball match game',
+            'eSports': 'esports gaming tournament',
+            'NFL': 'american football nfl game',
+            'MLB': 'baseball mlb game stadium',
+            'NHL': 'ice hockey nhl game',
+            'Futsal': 'futsal indoor football',
+            'Handebol': 'handball match game',
+        };
+
+        const isFootball = !SPORT_FALLBACKS[category]; // If not in map, it's football
+
+        // Image search - different strategy per sport type
+        console.log(`  Finding image... (${isFootball ? 'futebol' : category})`);
         const team = detectTeamId(rewritten.title) || detectTeamId(item.title) || detectTeamId(rewritten.text?.substring(0, 300) || '');
         let localImage = null;
 
-        if (team) localImage = await fetchRealTeamImage(team.id, team.name, slug);
-        if (!localImage && team) localImage = await fetchPexelsImage(`${team.name} stadium`, slug);
-        if (!localImage) {
-            const kw = (rewritten.title || item.title || '').replace(/[^a-záéíóúâêôãõçüA-Z\s]/gi, '').split(/\s+/).filter(w => w.length > 4).slice(0, 3).join(' ');
-            if (kw) localImage = await fetchPexelsImage(`${kw} sport`, slug);
+        // 1. Try AllSportsApi team media (works for football teams)
+        if (team) {
+            localImage = await fetchRealTeamImage(team.id, team.name, slug);
         }
-        if (!localImage) localImage = await fetchPexelsImage('stadium aerial view', slug);
 
-        const detected = detectCategoryAndTags(rewritten.title + ' ' + rewritten.text);
+        // 2. Try Pexels with specific search from title
+        if (!localImage) {
+            const titleWords = (rewritten.title || item.title || '')
+                .replace(/[^a-záéíóúâêôãõçüA-Z\s]/gi, '')
+                .split(/\s+/)
+                .filter(w => w.length > 4)
+                .slice(0, 3)
+                .join(' ');
+            if (titleWords) {
+                const sportTerm = isFootball ? 'football' : (SPORT_FALLBACKS[category]?.split(' ')[0] || 'sport');
+                localImage = await fetchPexelsImage(`${titleWords} ${sportTerm}`, slug);
+            }
+        }
+
+        // 3. Sport-specific fallback
+        if (!localImage) {
+            if (isFootball) {
+                // Football: aerial stadium photo
+                if (team) {
+                    localImage = await fetchPexelsImage(`${team.name} football stadium`, slug);
+                }
+                if (!localImage) {
+                    localImage = await fetchPexelsImage('football stadium aerial view', slug);
+                }
+            } else {
+                // Other sports: generic sport image
+                const fallbackQuery = SPORT_FALLBACKS[category] || `${category} sport`;
+                localImage = await fetchPexelsImage(fallbackQuery, slug);
+            }
+        }
 
         const article = {
             originalTitle: item.title,
