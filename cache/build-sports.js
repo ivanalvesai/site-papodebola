@@ -123,20 +123,24 @@ async function buildSportCache(slug, config) {
     console.log(`  Today: ${result.today.length} events`);
     await delay(300);
 
-    // 3. Calendar (next 3 days)
-    for (let i = 1; i <= 3; i++) {
-        const d = new Date(Date.now() + i * 86400000);
-        const calData = await apiFetch(`${config.api}/${pathPrefix}/${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`);
-        const events = calData?.events || [];
-        if (events.length > 0) {
-            result.calendar.push({
-                date: d.toISOString().split('T')[0],
-                label: d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' }),
-                events: events,
-            });
+    // 3. Calendar (next 3 days) — skip if today had 0 events (sport likely off-season)
+    if (result.today.length > 0 || result.live.length > 0) {
+        for (let i = 1; i <= 3; i++) {
+            const d = new Date(Date.now() + i * 86400000);
+            const calData = await apiFetch(`${config.api}/${pathPrefix}/${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`);
+            const events = calData?.events || [];
+            if (events.length > 0) {
+                result.calendar.push({
+                    date: d.toISOString().split('T')[0],
+                    label: d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' }),
+                    events: events,
+                });
+            }
+            console.log(`  Day +${i}: ${events.length} events`);
+            await delay(300);
         }
-        console.log(`  Day +${i}: ${events.length} events`);
-        await delay(300);
+    } else {
+        console.log('  Skipping calendar (no events today)');
     }
 
     // 4. Standings (NBA)
@@ -159,24 +163,13 @@ async function buildSportCache(slug, config) {
 }
 
 async function buildAgendaCache() {
-    console.log('\nBuilding agenda cache (football, 7 days)...');
+    console.log('\nBuilding agenda cache (football)...');
 
     // Today and tomorrow are already cached by update.sh (today.json, tomorrow.json)
-    // Cache days +2 to +6 for agenda navigation
-    for (let i = 2; i <= 6; i++) {
+    // Cache +2 to +3 days ahead and 1 day back (4 requests total)
+    const offsets = [2, 3, -1];
+    for (const i of offsets) {
         const d = new Date(Date.now() + i * 86400000);
-        const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        const data = await apiFetch(`matches/${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`);
-        if (data?.events) {
-            saveCache(`agenda_${dateStr}.json`, data);
-        }
-        console.log(`  Agenda ${dateStr}: ${data?.events?.length || 0} events`);
-        await delay(300);
-    }
-
-    // Past 3 days
-    for (let i = 1; i <= 3; i++) {
-        const d = new Date(Date.now() - i * 86400000);
         const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         const data = await apiFetch(`matches/${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`);
         if (data?.events) {
@@ -189,31 +182,38 @@ async function buildAgendaCache() {
 
 async function buildAthleteCache() {
     console.log('\nBuilding athlete cache...');
-    const athletes = {};
+
+    // Load existing cache to preserve info (rarely changes)
+    const cacheFile = path.join(CACHE_DIR, 'athletes.json');
+    let athletes = {};
+    try { athletes = JSON.parse(fs.readFileSync(cacheFile, 'utf8')); } catch {}
 
     for (const athlete of ATHLETES) {
         const key = `${athlete.sport}_${athlete.id}`;
+        const existing = athletes[key] || {};
         console.log(`  Fetching ${athlete.name}...`);
 
-        const result = { info: null, previous: [], next: [], updated: new Date().toISOString() };
+        const result = { info: existing.info || null, previous: [], next: [], updated: new Date().toISOString() };
 
-        // Player info
-        const infoData = await apiFetch(`${athlete.sport}/team/${athlete.id}`);
-        result.info = infoData?.team || null;
-        await delay(300);
+        // Only fetch info if we don't have it cached yet
+        if (!result.info) {
+            const infoData = await apiFetch(`${athlete.sport}/team/${athlete.id}`);
+            result.info = infoData?.team || null;
+            await delay(300);
+        }
 
-        // Previous events
+        // Previous events (1 request)
         const prevData = await apiFetch(`${athlete.sport}/team/${athlete.id}/events/previous/0`);
         result.previous = prevData?.events || [];
         await delay(300);
 
-        // Next events
+        // Next events (1 request)
         const nextData = await apiFetch(`${athlete.sport}/team/${athlete.id}/events/next/0`);
         result.next = nextData?.events || [];
         await delay(300);
 
         athletes[key] = result;
-        console.log(`  ${athlete.name}: info=${result.info ? 'OK' : 'N/A'}, prev=${result.previous.length}, next=${result.next.length}`);
+        console.log(`  ${athlete.name}: info=${result.info ? 'OK' : 'cached'}, prev=${result.previous.length}, next=${result.next.length}`);
     }
 
     saveCache('athletes.json', athletes);
