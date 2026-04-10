@@ -183,7 +183,8 @@
     <!-- Match Bar - Jogos de Hoje -->
     <div class="match-bar" id="matchBar">
         <div class="match-bar-tabs">
-            <button class="match-bar-tab active"><i class="fas fa-calendar-day" style="margin-right:4px"></i> Hoje <span class="tab-count" id="todayCount">0</span></button>
+            <button class="match-bar-tab active" onclick="switchMatchTab('today',this)"><i class="fas fa-calendar-day" style="margin-right:4px"></i> Hoje <span class="tab-count" id="todayCount">0</span></button>
+            <button class="match-bar-tab" onclick="switchMatchTab('upcoming',this)"><i class="fas fa-calendar-alt" style="margin-right:4px"></i> Próximos <span class="tab-count" id="upcomingCount">0</span></button>
             <a href="pages/agenda.html" class="match-bar-link">Ver todos <i class="fas fa-chevron-right"></i></a>
         </div>
         <div style="position:relative">
@@ -720,33 +721,61 @@
     <script src="js/admin.js?v=22"></script>
     <script src="js/app.js?v=22"></script>
     <script>
-    // === MATCH BAR - Jogos de Hoje (sem placar, sem ao vivo) ===
-    // NOTA: Ao Vivo desativado. Para reativar, restaurar fetch de live.json,
-    // tabs (Ao Vivo/Próximos/Finalizados), placares e setInterval de 60s.
+    // === MATCH BAR - Hoje (AllSportsApi) + Próximos (CBF API gratuita) ===
+    // NOTA: Ao Vivo desativado. Para reativar, restaurar fetch de live.json e placares.
+    let matchBarData = { today: [], upcoming: [] };
 
     async function loadMatchBar() {
         try {
-            const res = await fetch('/cache/today.json?_=' + Date.now());
-            const data = res.ok ? await res.json() : {};
-            const events = (data.events || []).slice(0, 50);
+            // Hoje: AllSportsApi (today.json)
+            const todayRes = await fetch('/cache/today.json?_=' + Date.now());
+            const todayData = todayRes.ok ? await todayRes.json() : {};
+            matchBarData.today = (todayData.events || []).slice(0, 50);
+            document.getElementById('todayCount').textContent = matchBarData.today.length;
 
-            document.getElementById('todayCount').textContent = events.length;
-            renderMatchBar(events);
+            // Próximos: CBF API (cbf_calendario.json)
+            const cbfRes = await fetch('/cache/cbf_calendario.json?_=' + Date.now());
+            const cbfData = cbfRes.ok ? await cbfRes.json() : {};
+            const allUpcoming = [];
+            (cbfData.championships || []).forEach(c => {
+                (c.upcoming || []).forEach(m => {
+                    allUpcoming.push({ ...m, championship: c.name });
+                });
+            });
+            allUpcoming.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+            matchBarData.upcoming = allUpcoming.slice(0, 50);
+            document.getElementById('upcomingCount').textContent = matchBarData.upcoming.length;
+
+            // Show today by default, or upcoming if no games today
+            if (matchBarData.today.length > 0) {
+                renderTodayGames(matchBarData.today);
+            } else {
+                switchMatchTab('upcoming', document.querySelector('[onclick*="upcoming"]'));
+            }
         } catch(e) { console.error('Match bar error:', e); }
     }
 
-    function renderMatchBar(events) {
+    function switchMatchTab(tab, btn) {
+        document.querySelectorAll('.match-bar-tab').forEach(t => t.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        if (tab === 'today') {
+            renderTodayGames(matchBarData.today);
+        } else {
+            renderUpcomingGames(matchBarData.upcoming);
+        }
+    }
+
+    // Today: AllSportsApi format (without scores)
+    function renderTodayGames(events) {
         const container = document.getElementById('matchBarScroll');
         if (events.length === 0) {
             container.innerHTML = '<div style="padding:20px 30px;color:#8896A6;font-size:13px;white-space:nowrap">Nenhum jogo hoje</div>';
             return;
         }
-
         container.innerHTML = events.map(e => {
             const dt = e.startTimestamp ? new Date(e.startTimestamp * 1000) : null;
             const time = dt ? dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) : '';
             const league = e.tournament?.uniqueTournament?.name || e.tournament?.name || '';
-
             return `<div class="mb-game">
                 <div class="mb-teams-line">
                     ${e.homeTeam?.id ? `<img src="/img/team/${e.homeTeam.id}/image" alt="" onerror="this.style.display='none'">` : ''}
@@ -757,6 +786,32 @@
                 </div>
                 <div class="mb-status">${time}</div>
                 <div class="mb-league">${league}</div>
+            </div>`;
+        }).join('');
+    }
+
+    // Upcoming: CBF format (dates, no scores)
+    function renderUpcomingGames(games) {
+        const container = document.getElementById('matchBarScroll');
+        if (games.length === 0) {
+            container.innerHTML = '<div style="padding:20px 30px;color:#8896A6;font-size:13px;white-space:nowrap">Nenhum jogo programado</div>';
+            return;
+        }
+        container.innerHTML = games.map(g => {
+            const dt = g.timestamp ? new Date(g.timestamp * 1000) : null;
+            const time = dt ? dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) : g.time || '';
+            const dateStr = dt ? dt.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'}) : g.date || '';
+            const championship = g.championship || '';
+            return `<div class="mb-game">
+                <div class="mb-teams-line">
+                    ${g.homeId ? `<img src="/img/team/${g.homeId}/image" alt="" onerror="this.style.display='none'">` : ''}
+                    <span>${g.home || '?'}</span>
+                    <span class="mb-vs">x</span>
+                    <span>${g.away || '?'}</span>
+                    ${g.awayId ? `<img src="/img/team/${g.awayId}/image" alt="" onerror="this.style.display='none'">` : ''}
+                </div>
+                <div class="mb-status">${dateStr} ${time}</div>
+                <div class="mb-league">${championship}</div>
             </div>`;
         }).join('');
     }
