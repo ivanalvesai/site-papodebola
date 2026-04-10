@@ -109,10 +109,10 @@ const App = {
             this.renderHighlights(homeData.highlights || []);
             this.renderNews(homeData.news || []);
             this.renderTransfers(homeData.transfers || []);
-            this.renderTopMatches(homeData.topMatches || []);
+            // Top matches now handled by match bar in index.html
         } else {
             // Fallback: show loading messages
-            const containers = ['highlightsGrid', 'newsGrid', 'transfersList', 'topMatchesScroll'];
+            const containers = ['highlightsGrid', 'newsGrid', 'transfersList'];
             containers.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.innerHTML = '<div class="no-matches"><p>Conteúdo será carregado em breve</p></div>';

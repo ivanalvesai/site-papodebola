@@ -37,7 +37,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=19">
+    <link rel="stylesheet" href="css/style.css?v=20">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -202,12 +202,7 @@
     <!-- Main Content -->
     <main class="main-content">
         <div class="container">
-            <!-- Top Matches Bar -->
-            <section class="top-matches-bar" id="topMatchesBar">
-                <div class="top-matches-scroll" id="topMatchesScroll">
-                    <div class="loading-state"><div class="spinner"></div></div>
-                </div>
-            </section>
+            <!-- Top Matches removed - now in Match Bar tabs above -->
 
             <div class="content-grid">
                 <!-- Left Column - News & Content -->
@@ -704,10 +699,10 @@
         <button class="cookie-accept" onclick="document.getElementById('cookieBanner').style.display='none';localStorage.setItem('pdb_cookies','1')">Aceitar</button>
     </div>
 
-    <script src="js/config.js?v=19"></script>
-    <script src="js/api.js?v=19"></script>
-    <script src="js/admin.js?v=19"></script>
-    <script src="js/app.js?v=19"></script>
+    <script src="js/config.js?v=20"></script>
+    <script src="js/api.js?v=20"></script>
+    <script src="js/admin.js?v=20"></script>
+    <script src="js/app.js?v=20"></script>
     <script>
     // === MATCH BAR ===
     let matchBarData = { live: [], upcoming: [], finished: [] };
@@ -765,27 +760,37 @@
             const dt = e.startTimestamp ? new Date(e.startTimestamp * 1000) : null;
             const time = dt ? dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) : '';
             const league = e.tournament?.uniqueTournament?.name || e.tournament?.name || '';
-            const homeWin = hasScore && e.homeScore.current > e.awayScore.current;
-            const awayWin = hasScore && e.awayScore.current > e.homeScore.current;
 
-            let statusHtml = '';
-            if (isLive) statusHtml = `<div class="mb-live-badge"><span class="live-dot" style="width:5px;height:5px;margin-right:2px"></span> ${translateStatus(e.status?.description) || 'AO VIVO'}</div>`;
-            else if (isFinished) statusHtml = `<div class="mb-time">Encerrado</div>`;
-            else statusHtml = `<div class="mb-time">${time}</div>`;
+            // Score or time display
+            let scoreHtml = '';
+            if (hasScore) {
+                scoreHtml = `<span class="mb-score-inline">${e.homeScore.current} - ${e.awayScore.current}</span>`;
+            } else {
+                scoreHtml = `<span class="mb-vs">${time}</span>`;
+            }
+
+            // Status text
+            let statusText = '';
+            let statusClass = 'mb-status';
+            if (isLive) {
+                statusText = translateStatus(e.status?.description) || 'AO VIVO';
+                statusClass = 'mb-status is-live-text';
+            } else if (isFinished) {
+                statusText = 'Encerrado';
+            } else {
+                statusText = time;
+            }
 
             return `<div class="mb-game ${isLive ? 'is-live' : ''}">
-                <div class="mb-league">${league}</div>
-                <div class="mb-team-row">
+                <div class="mb-teams-line">
                     ${e.homeTeam?.id ? `<img src="/img/team/${e.homeTeam.id}/image" alt="" onerror="this.style.display='none'">` : ''}
-                    <span class="mb-team-name">${e.homeTeam?.name || '?'}</span>
-                    ${hasScore ? `<span class="mb-score ${homeWin ? 'winner' : ''}">${e.homeScore.current}</span>` : ''}
-                </div>
-                <div class="mb-team-row">
+                    <span>${e.homeTeam?.shortName || e.homeTeam?.name || '?'}</span>
+                    ${scoreHtml}
+                    <span>${e.awayTeam?.shortName || e.awayTeam?.name || '?'}</span>
                     ${e.awayTeam?.id ? `<img src="/img/team/${e.awayTeam.id}/image" alt="" onerror="this.style.display='none'">` : ''}
-                    <span class="mb-team-name">${e.awayTeam?.name || '?'}</span>
-                    ${hasScore ? `<span class="mb-score ${awayWin ? 'winner' : ''}">${e.awayScore.current}</span>` : ''}
                 </div>
-                ${statusHtml}
+                <div class="${statusClass}">${isLive ? '<span class="live-dot" style="width:5px;height:5px;margin-right:3px"></span>' : ''}${statusText}</div>
+                <div class="mb-league">${league}</div>
             </div>`;
         }).join('');
     }

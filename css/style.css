@@ -1831,76 +1831,69 @@ h1, h2, h3, h4 {
 
 .mb-game {
     flex-shrink: 0;
-    width: 180px;
-    padding: 10px 14px;
+    min-width: 200px;
+    padding: 10px 16px;
     border-right: 1px solid var(--border-light);
     cursor: pointer;
     transition: background 0.15s;
+    text-align: center;
 }
 
 .mb-game:hover { background: var(--bg-body); }
-
 .mb-game:last-child { border-right: none; }
-
 .mb-game.is-live { background: #FEF2F2; }
 
-.mb-league {
-    font-size: 9px;
-    font-weight: 600;
-    color: var(--green);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 6px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.mb-team-row {
+.mb-teams-line {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    margin-bottom: 3px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
+    white-space: nowrap;
 }
 
-.mb-team-row img {
-    width: 16px;
-    height: 16px;
+.mb-teams-line img {
+    width: 18px;
+    height: 18px;
     object-fit: contain;
     flex-shrink: 0;
 }
 
-.mb-team-name {
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 12px;
-}
-
-.mb-score {
+.mb-teams-line .mb-score-inline {
     font-weight: 700;
-    font-size: 13px;
-    min-width: 14px;
-    text-align: right;
+    font-size: 14px;
+    color: var(--text-primary);
+    margin: 0 2px;
 }
 
-.mb-score.winner { color: var(--green); }
+.mb-teams-line .mb-vs {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin: 0 2px;
+}
 
-.mb-time {
+.mb-status {
     font-size: 10px;
     color: var(--text-muted);
-    text-align: center;
     margin-top: 4px;
 }
 
-.mb-live-badge {
-    font-size: 9px;
-    font-weight: 700;
+.mb-status.is-live-text {
     color: var(--red);
+    font-weight: 700;
+}
+
+.mb-league {
+    font-size: 9px;
+    color: var(--green);
+    font-weight: 600;
     text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .mb-nav {
