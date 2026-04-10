@@ -85,16 +85,28 @@ if [ "$HOME_SIZE" -lt 20 ] || [ $((HOUR % 3)) -eq 0 ]; then
     log "OK: home ($(stat -c%s $HOME_FILE 2>/dev/null || echo 0) bytes)"
 fi
 
-# 7. Articles - fetch, rewrite with Claude, publish to WordPress
-# Runs at 8h and 15h (2x/day) = ~5 articles/day (1 per feed, 7 feeds, alternating)
-if [ "$HOUR" -eq 8 ] || [ "$HOUR" -eq 15 ] || [ ! -f "$CACHE_DIR/articles.json" ]; then
-    log "Building articles..."
+# 7. Articles - 1 article per scheduled slot, 10 slots/day in peak hours
+# Horários de pico (BR): 7:00, 8:30, 10:00, 11:30, 13:00, 14:30, 16:00, 18:00, 20:00, 21:30
+# Each slot publishes 1 article. Cron runs every 30 min, so we match HOUR:MIN
+CURRENT_TIME="${HOUR}:$(date +%M)"
+PUBLISH_SLOTS="7:00 8:30 10:00 11:30 13:00 14:30 16:00 18:00 20:00 21:30"
+SHOULD_PUBLISH=false
+for slot in $PUBLISH_SLOTS; do
+    if [ "$HOUR" -eq "$(echo $slot | cut -d: -f1)" ] && [ "$(date +%M)" -lt "30" ] && [ "$(echo $slot | cut -d: -f2)" = "00" ]; then
+        SHOULD_PUBLISH=true
+    elif [ "$HOUR" -eq "$(echo $slot | cut -d: -f1)" ] && [ "$(date +%M)" -ge "30" ] && [ "$(echo $slot | cut -d: -f2)" = "30" ]; then
+        SHOULD_PUBLISH=true
+    fi
+done
+
+if [ "$SHOULD_PUBLISH" = true ] || [ ! -f "$CACHE_DIR/articles.json" ]; then
+    log "Publishing article (slot: $HOUR:$(date +%M))..."
     export ANTHROPIC_API_KEY=$(grep ANTHROPIC_API_KEY /home/ivan/automacao-site/.env 2>/dev/null | cut -d= -f2)
     export HUGGINGFACE_TOKEN=$(grep "^HUGGINGFACE_TOKEN=" /home/ivan/automacao-site/.env 2>/dev/null | cut -d= -f2)
     export HUGGINGFACE_TOKEN_2=$(grep "^HUGGINGFACE_TOKEN_2=" /home/ivan/automacao-site/.env 2>/dev/null | cut -d= -f2)
     export HUGGINGFACE_TOKEN_3=$(grep "^HUGGINGFACE_TOKEN_3=" /home/ivan/automacao-site/.env 2>/dev/null | cut -d= -f2)
-    node "$CACHE_DIR/build-articles.js" >> "$LOG_FILE" 2>&1
-    log "OK: articles generated"
+    MAX_ARTICLES=1 node "$CACHE_DIR/build-articles.js" >> "$LOG_FILE" 2>&1
+    log "OK: article published"
 fi
 
 # 7b. Sync WordPress posts to front-end cache (every 30 min)

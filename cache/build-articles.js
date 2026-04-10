@@ -880,10 +880,33 @@ async function main() {
         todaySports.push(SPORT_ROTATION[(startIndex + i) % SPORT_ROTATION.length]);
     }
 
+    // How many articles to publish this run (1 per cron slot, 10 slots/day)
+    const maxThisRun = parseInt(process.env.MAX_ARTICLES || '10');
+
     console.log(`Today's sports: ${todaySports.map(s => s.name).join(', ')}`);
-    console.log('Schedule: 5 futebol + 1 de cada esporte acima = 10 max\n');
+    console.log(`Max articles this run: ${maxThisRun}`);
+    console.log('Schedule: 5 futebol + 1 de cada esporte = 10/day\n');
+
+    // Track daily counts from articles.json
+    const today = new Date().toISOString().split('T')[0];
+    const todayArticles = existingArticles.filter(a => a.pubDate?.startsWith(today));
+    const todayFootball = todayArticles.filter(a => {
+        const cat = (a.category || '').toLowerCase();
+        return cat.includes('futebol') || cat.includes('brasileir') || cat.includes('copa') || cat.includes('libertadores') || cat.includes('champions') || cat.includes('premier') || cat.includes('liga') || cat.includes('seleção') || cat.includes('mercado');
+    }).length;
+    const todaySportArticles = todayArticles.length - todayFootball;
+
+    console.log(`Already today: ${todayFootball} futebol + ${todaySportArticles} esportes = ${todayArticles.length} total`);
+
+    if (todayArticles.length >= 10) {
+        console.log('Daily limit (10) reached. Skipping.');
+        return;
+    }
 
     const newArticles = [];
+    const needFootball = Math.max(0, 5 - todayFootball);
+    const needSport = Math.max(0, 5 - todaySportArticles);
+    let published = 0;
 
     // Helper: process a single article
     async function processOneArticle(item, feed) {
@@ -934,54 +957,60 @@ async function main() {
         existingTitles.add(item.title);
     }
 
-    // === PHASE 1: Football articles (max 5) ===
-    let footballCount = 0;
-    console.log('=== FUTEBOL (max 5) ===');
-    for (const feed of FOOTBALL_FEEDS) {
-        if (footballCount >= 5) break;
-        console.log(`\nFetching: ${feed.source}...`);
-        const xml = await fetchURL(feed.url);
-        if (!xml || !xml.includes('<item>')) { console.log('  No data'); continue; }
-        const items = parseRSS(xml);
-        console.log(`  Found ${items.length} articles`);
+    // Decide what to publish: alternate football / sport
+    // Odd slots (1,3,5,7,9) = football, Even slots (2,4,6,8,10) = sport
+    const slotNumber = todayArticles.length + 1; // 1-10
+    const isFootballSlot = slotNumber % 2 === 1 && needFootball > 0;
+    const isSportSlot = slotNumber % 2 === 0 && needSport > 0;
+    // If one type is full, use the other
+    const publishFootball = isFootballSlot || (!isSportSlot && needFootball > 0);
+    const publishSport = isSportSlot || (!isFootballSlot && needSport > 0);
 
-        for (const item of items) {
-            if (footballCount >= 5) break;
-            if (existingTitles.has(item.title)) continue;
-            if (!item.title || item.fullText.length < 100) continue;
-            await processOneArticle(item, feed);
-            footballCount++;
-            break; // Max 1 per feed
-        }
-    }
-    console.log(`\nFutebol: ${footballCount} artigos`);
-
-    // === PHASE 2: 5 different sports (1 article each) ===
-    let sportCount = 0;
-    console.log('\n=== OUTROS ESPORTES (1 de cada, 5 esportes) ===');
-    for (const sport of todaySports) {
-        console.log(`\n--- ${sport.name} ---`);
-        let found = false;
-        for (const feed of sport.feeds) {
-            if (found) break;
-            console.log(`  Fetching: ${feed.source}...`);
+    if (publishFootball && needFootball > 0 && published < maxThisRun) {
+        console.log(`=== SLOT ${slotNumber}: FUTEBOL (${needFootball} restantes) ===`);
+        for (const feed of FOOTBALL_FEEDS) {
+            if (published >= maxThisRun) break;
             const xml = await fetchURL(feed.url);
-            if (!xml || !xml.includes('<item>')) { console.log('  No data'); continue; }
+            if (!xml || !xml.includes('<item>')) continue;
             const items = parseRSS(xml);
 
             for (const item of items) {
+                if (published >= maxThisRun) break;
                 if (existingTitles.has(item.title)) continue;
                 if (!item.title || item.fullText.length < 100) continue;
                 await processOneArticle(item, feed);
-                sportCount++;
-                found = true;
+                published++;
                 break;
             }
+            if (published > 0) break;
         }
-        if (!found) console.log(`  No new articles for ${sport.name}`);
     }
-    console.log(`\nEsportes: ${sportCount} artigos`);
-    console.log(`Total: ${footballCount + sportCount} artigos`);
+
+    if (publishSport && needSport > 0 && published < maxThisRun) {
+        // Pick the sport for this slot
+        const sportIndex = Math.floor(todaySportArticles) % todaySports.length;
+        const sport = todaySports[sportIndex];
+        console.log(`=== SLOT ${slotNumber}: ${sport.name.toUpperCase()} ===`);
+
+        for (const feed of sport.feeds) {
+            if (published >= maxThisRun) break;
+            const xml = await fetchURL(feed.url);
+            if (!xml || !xml.includes('<item>')) continue;
+            const items = parseRSS(xml);
+
+            for (const item of items) {
+                if (published >= maxThisRun) break;
+                if (existingTitles.has(item.title)) continue;
+                if (!item.title || item.fullText.length < 100) continue;
+                await processOneArticle(item, feed);
+                published++;
+                break;
+            }
+            if (published > 0) break;
+        }
+    }
+
+    console.log(`\nPublished this run: ${published}`);
 
     // === Save and sync ===
     // Merge and save articles DB (keep last 100)
