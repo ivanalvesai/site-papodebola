@@ -1,8 +1,10 @@
 #!/bin/bash
 # =====================================================
 # PAPO DE BOLA - Cache Updater
-# AllSportsApi Pro - roda via cron a cada 30 minutos
-# Futebol: 08h-23h (30 em 30 min) | Esportes: 08h, 14h, 20h
+# AllSportsApi Pro (10.000 req/mês)
+# Roda via cron a cada 30 minutos
+#
+# Consumo estimado: ~331 req/dia (~9.930/mês)
 # =====================================================
 
 CACHE_DIR="/home/ivan/site-papodebola/cache"
@@ -20,6 +22,7 @@ TMONTH=$(date -d "+1 day" +%-m)
 TYEAR=$(date -d "+1 day" +%Y)
 
 HOUR=$(date +%-H)
+MIN=$(date +%-M)
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"
@@ -54,58 +57,59 @@ fetch() {
 }
 
 # =====================================================
-log "=== Update started (hora: $HOUR) ==="
+log "=== Update started (hora: $HOUR:$MIN) ==="
 
 # =====================================================
-# FUTEBOL - só das 08h às 23h (4 req a cada 30 min)
+# FUTEBOL - 08h-23h, a cada 30 min (3 req: today + tomorrow + standings)
+# AO VIVO desativado (matches/live) — reativar quando necessário
 # =====================================================
 if [ "$HOUR" -ge 8 ] && [ "$HOUR" -le 23 ]; then
-    # 1. Live matches
-    fetch "matches/live" "$CACHE_DIR/live.json"
+    # DESATIVADO: Ao Vivo (reativar futuramente)
+    # fetch "matches/live" "$CACHE_DIR/live.json"
 
-    # 2. Today's matches
+    # 1. Today's matches (jogos do dia, sem placar ao vivo)
     fetch "matches/${DAY}/${MONTH}/${YEAR}" "$CACHE_DIR/today.json"
 
-    # 3. Tomorrow's matches
+    # 2. Tomorrow's matches
     fetch "matches/${TDAY}/${TMONTH}/${TYEAR}" "$CACHE_DIR/tomorrow.json"
 
-    # 4. Brasileirão standings
+    # 3. Brasileirão standings
     fetch "tournament/325/season/87678/standings/total" "$CACHE_DIR/standings_brasileirao.json"
 else
-    log "Fora do horário de futebol (08h-23h), pulando..."
+    log "Fora do horário ativo (08h-23h), pulando..."
 fi
 
-# 5. Top scorers (every 6 hours, only during active hours)
-SCORERS_FILE="$CACHE_DIR/scorers_brasileirao.json"
-SCORERS_SIZE=$(stat -c%s "$SCORERS_FILE" 2>/dev/null || echo "0")
-if [ "$HOUR" -ge 8 ] && [ "$HOUR" -le 23 ]; then
-    if [ "$SCORERS_SIZE" -lt 20 ] || [ $((HOUR % 6)) -eq 0 ]; then
-        log "Fetching top scorers..."
-        node "$CACHE_DIR/build-scorers.js" >> "$LOG_FILE" 2>&1
-        log "OK: scorers ($(stat -c%s $SCORERS_FILE 2>/dev/null || echo 0) bytes)"
-    fi
+# =====================================================
+# ARTILHEIROS - 1x/dia às 08h (10 req)
+# =====================================================
+if [ "$HOUR" -eq 8 ] && [ "$MIN" -lt 30 ]; then
+    log "Fetching top scorers (08h)..."
+    node "$CACHE_DIR/build-scorers.js" >> "$LOG_FILE" 2>&1
+    SCORERS_FILE="$CACHE_DIR/scorers_brasileirao.json"
+    log "OK: scorers ($(stat -c%s $SCORERS_FILE 2>/dev/null || echo 0) bytes)"
 fi
 
-# 6. Homepage content - highlights, transfers, news (every 3 hours, 08h-23h)
-HOME_FILE="$CACHE_DIR/home.json"
-HOME_SIZE=$(stat -c%s "$HOME_FILE" 2>/dev/null || echo "0")
-if [ "$HOUR" -ge 8 ] && [ "$HOUR" -le 23 ]; then
-    if [ "$HOME_SIZE" -lt 20 ] || [ $((HOUR % 3)) -eq 0 ]; then
-        log "Building homepage content..."
-        node "$CACHE_DIR/build-home.js" >> "$LOG_FILE" 2>&1
-        log "OK: home ($(stat -c%s $HOME_FILE 2>/dev/null || echo 0) bytes)"
-    fi
+# =====================================================
+# HOMEPAGE - 1x/dia às 14h (15 req)
+# =====================================================
+if [ "$HOUR" -eq 14 ] && [ "$MIN" -lt 30 ]; then
+    log "Building homepage content (14h)..."
+    node "$CACHE_DIR/build-home.js" >> "$LOG_FILE" 2>&1
+    HOME_FILE="$CACHE_DIR/home.json"
+    log "OK: home ($(stat -c%s $HOME_FILE 2>/dev/null || echo 0) bytes)"
 fi
 
-# 7. Articles - 1 article per scheduled slot, 10 slots/day in peak hours
-# Horários de pico (BR): 7:00, 8:30, 10:00, 11:30, 13:00, 14:30, 16:00, 18:00, 20:00, 21:30
-CURRENT_TIME="${HOUR}:$(date +%M)"
+# =====================================================
+# ARTIGOS - 1 por slot, 10 slots/dia em horários de pico
+# =====================================================
 PUBLISH_SLOTS="7:00 8:30 10:00 11:30 13:00 14:30 16:00 18:00 20:00 21:30"
 SHOULD_PUBLISH=false
 for slot in $PUBLISH_SLOTS; do
-    if [ "$HOUR" -eq "$(echo $slot | cut -d: -f1)" ] && [ "$(date +%M)" -lt "30" ] && [ "$(echo $slot | cut -d: -f2)" = "00" ]; then
+    SLOT_H=$(echo $slot | cut -d: -f1)
+    SLOT_M=$(echo $slot | cut -d: -f2)
+    if [ "$HOUR" -eq "$SLOT_H" ] && [ "$MIN" -lt 30 ] && [ "$SLOT_M" = "00" ]; then
         SHOULD_PUBLISH=true
-    elif [ "$HOUR" -eq "$(echo $slot | cut -d: -f1)" ] && [ "$(date +%M)" -ge "30" ] && [ "$(echo $slot | cut -d: -f2)" = "30" ]; then
+    elif [ "$HOUR" -eq "$SLOT_H" ] && [ "$MIN" -ge 30 ] && [ "$SLOT_M" = "30" ]; then
         SHOULD_PUBLISH=true
     fi
 done
@@ -120,32 +124,29 @@ if [ "$SHOULD_PUBLISH" = true ] || [ ! -f "$CACHE_DIR/articles.json" ]; then
     log "OK: article published"
 fi
 
-# 7b. Sync WordPress posts to front-end cache (every 30 min, always)
+# WordPress sync + SEO (every 30 min, sem custo de API)
 log "Syncing WordPress..."
 node "$CACHE_DIR/sync-wordpress.js" >> "$LOG_FILE" 2>&1
 log "OK: wordpress synced"
 
-# 7c. Apply COMPLETE SEO to new posts without Rank Math meta (every 30 min, always)
 docker cp "$CACHE_DIR/apply-seo-complete.php" wordpress-papodebola-wordpress-1:/tmp/ 2>/dev/null
 docker exec wordpress-papodebola-wordpress-1 wp eval-file /tmp/apply-seo-complete.php --allow-root >> "$LOG_FILE" 2>&1
 log "OK: SEO applied to new posts"
 
 # =====================================================
-# ESPORTES - apenas às 08h, 14h e 20h
+# ESPORTES - 1x/dia às 16h (~45 req)
 # =====================================================
-if [ "$HOUR" -eq 8 ] || [ "$HOUR" -eq 14 ] || [ "$HOUR" -eq 20 ]; then
-    if [ "$(date +%M)" -lt "30" ]; then
-        log "Building sports cache (08h/14h/20h)..."
-        node "$CACHE_DIR/build-sports.js" >> "$LOG_FILE" 2>&1
-        log "OK: sports cached"
-    fi
+if [ "$HOUR" -eq 16 ] && [ "$MIN" -lt 30 ]; then
+    log "Building sports cache (16h)..."
+    node "$CACHE_DIR/build-sports.js" >> "$LOG_FILE" 2>&1
+    log "OK: sports cached"
 fi
 
-# 9. Championship data (every 3 hours, 08h-23h)
-CHAMP_FILE="$CACHE_DIR/champ_325.json"
-CHAMP_SIZE=$(stat -c%s "$CHAMP_FILE" 2>/dev/null || echo "0")
+# =====================================================
+# CAMPEONATOS - cada 3h, 08h-23h (~28 req)
+# =====================================================
 if [ "$HOUR" -ge 8 ] && [ "$HOUR" -le 23 ]; then
-    if [ "$CHAMP_SIZE" -lt 20 ] || [ $((HOUR % 3)) -eq 0 ]; then
+    if [ $((HOUR % 3)) -eq 0 ] && [ "$MIN" -lt 30 ]; then
         log "Building championship cache..."
         node "$CACHE_DIR/build-championship.js" >> "$LOG_FILE" 2>&1
         log "OK: championships cached"

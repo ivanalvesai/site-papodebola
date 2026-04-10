@@ -73,8 +73,9 @@ document.addEventListener('DOMContentLoaded', function() {
             + '<li><a href="' + p + 'pages/esporte.html?s=nfl">NFL</a></li>'
             + '</ul></div></div></li>'
             + '<li class="nav-item"><a href="' + p + 'pages/noticias.html" class="nav-link">Notícias</a></li>'
-            + '<li class="nav-item"><a href="' + p + 'pages/agenda.html" class="nav-link">Agenda</a></li>'
-            + '<li class="nav-item"><a href="' + p + 'pages/ao-vivo.html" class="nav-link live-link"><span class="live-dot"></span> AO VIVO</a></li>';
+            + '<li class="nav-item"><a href="' + p + 'pages/agenda.html" class="nav-link">Agenda</a></li>';
+            // DESATIVADO: Ao Vivo (reativar futuramente)
+            // + '<li class="nav-item"><a href="' + p + 'pages/ao-vivo.html" class="nav-link live-link"><span class="live-dot"></span> AO VIVO</a></li>';
 
         // Menu button click
         var menuBtn = document.getElementById('navMenuBtn');
@@ -112,7 +113,6 @@ document.addEventListener('DOMContentLoaded', function() {
             + '<div class="teams-section"><div class="teams-section-list" style="display:block">'
             + '<a href="' + p + 'index.html" class="teams-item" style="font-weight:600">Início</a>'
             + '<a href="' + p + 'pages/noticias.html" class="teams-item" style="font-weight:600">Notícias</a>'
-            + '<a href="' + p + 'pages/ao-vivo.html" class="teams-item" style="font-weight:600;color:#E8312A">Ao Vivo</a>'
             + '<a href="' + p + 'pages/agenda.html" class="teams-item" style="font-weight:600">Agenda</a>'
             + '<a href="' + p + 'pages/campeonato.html?id=325&name=Brasileirão Série A" class="teams-item" style="font-weight:600">Brasileirão</a>'
             + '<a href="' + p + 'pages/campeonato.html?id=7&name=Champions League" class="teams-item" style="font-weight:600">Champions League</a>'
